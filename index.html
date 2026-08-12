@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="description" content="Emogigs AI - Your personal AI Life OS">
+  <title>Emogigs AI</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #0b1020;
+      color: #ffffff;
+      min-height: 100vh;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 520px;
+      min-height: 100vh;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 22px 18px 14px;
+      border-bottom: 1px solid #202840;
+      background: #0b1020;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .brand {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    .brand span {
+      color: #6ea8ff;
+    }
+
+    .subtitle {
+      margin-top: 5px;
+      color: #9aa6bd;
+      font-size: 13px;
+    }
+
+    main {
+      flex: 1;
+      padding: 20px 16px 100px;
+    }
+
+    .welcome {
+      margin-bottom: 22px;
+    }
+
+    .welcome h1 {
+      font-size: 28px;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    .welcome p {
+      color: #9aa6bd;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .ai-card {
+      background: #121a2d;
+      border: 1px solid #25304a;
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 20px;
+    }
+
+    .ai-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .ai-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #1d3159;
+      font-size: 20px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 110px;
+      resize: vertical;
+      border: 1px solid #2a3652;
+      border-radius: 14px;
+      background: #0b1020;
+      color: #ffffff;
+      padding: 14px;
+      outline: none;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    textarea:focus {
+      border-color: #6ea8ff;
+    }
+
+    .ask-btn {
+      width: 100%;
+      margin-top: 12px;
+      padding: 14px;
+      border: none;
+      border-radius: 13px;
+      background: #6ea8ff;
+      color: #07101f;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .ask-btn:active {
+      transform: scale(0.99);
+    }
+
+    .response {
+      display: none;
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 13px;
+      background: #0b1020;
+      border: 1px solid #26324b;
+      color: #d9e1f2;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      margin: 24px 0 12px;
+    }
+
+    .tools {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .tool {
+      padding: 16px;
+      border-radius: 16px;
+      background: #121a2d;
+      border: 1px solid #25304a;
+      cursor: pointer;
+    }
+
+    .tool-icon {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    .tool h3 {
+      font-size: 15px;
+      margin-bottom: 5px;
+    }
+
+    .tool p {
+      color: #8f9bb2;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 520px;
+      height: 70px;
+      background: #0f1628;
+      border-top: 1px solid #202840;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 20;
+    }
+
+    .nav-item {
+      background: none;
+      border: none;
+      color: #7f8ba3;
+      font-size: 11px;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .nav-item.active {
+      color: #6ea8ff;
+    }
+
+    .nav-icon {
+      display: block;
+      font-size: 21px;
+      margin-bottom: 4px;
+    }
+
+    @media (min-width: 521px) {
+      nav {
+        border-radius: 18px 18px 0 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app">
+
+    <header>
+      <div class="brand">Emogigs <span>AI</span></div>
+      <div class="subtitle">Your personal AI Life OS</div>
+    </header>
+
+    <main>
+
+      <section class="welcome">
+        <h1>Your AI, your next move.</h1>
+        <p>
+          Learn, plan, create and discover opportunities with one intelligent assistant.
+        </p>
+      </section>
+
+      <section class="ai-card">
+        <div class="ai-title">
+          <div class="ai-icon">✦</div>
+          <div>Ask Emogigs AI</div>
+        </div>
+
+        <textarea
+          id="userInput"
+          placeholder="Tell me what you want to learn, build or achieve..."
+        ></textarea>
+
+        <button class="ask-btn" onclick="askEmogigs()">
+          Ask AI
+        </button>
+
+        <div id="response" class="response"></div>
+      </section>
+
+      <h2 class="section-title">Quick Tools</h2>
+
+      <section class="tools">
+
+        <div class="tool" onclick="setPrompt('Create a learning plan for me')">
+          <div class="tool-icon">📚</div>
+          <h3>Learn</h3>
+          <p>Build a simple learning path.</p>
+        </div>
+
+        <div class="tool" onclick="setPrompt('Help me find a remote work path')">
+          <div class="tool-icon">💼</div>
+          <h3>Work</h3>
+          <p>Explore skills and work opportunities.</p>
+        </div>
+
+        <div class="tool" onclick="setPrompt('Help me create a personal plan for today')">
+          <div class="tool-icon">🎯</div>
+          <h3>Plan</h3>
+          <p>Organize your goals and tasks.</p>
+        </div>
+
+        <div class="tool" onclick="setPrompt('Help me improve my skills and career')">
+          <div class="tool-icon">🚀</div>
+          <h3>Grow</h3>
+          <p>Improve your skills step by step.</p>
+        </div>
+
+      </section>
+
+    </main>
+
+    <nav>
+      <button class="nav-item active">
+        <span class="nav-icon">⌂</span>
+        Home
+      </button>
+
+      <button class="nav-item">
+        <span class="nav-icon">✦</span>
+        AI
+      </button>
+
+      <button class="nav-item">
+        <span class="nav-icon">◈</span>
+        Work
+      </button>
+
+      <button class="nav-item">
+        <span class="nav-icon">☻</span>
+        Profile
+      </button>
+    </nav>
+
+  </div>
+
+  <script>
+    function setPrompt(text) {
+      const input = document.getElementById("userInput");
+      input.value = text;
+      input.focus();
+    }
+
+    function askEmogigs() {
+      const input = document.getElementById("userInput");
+      const response = document.getElementById("response");
+      const text = input.value.trim();
+
+      if (!text) {
+        response.style.display = "block";
+        response.textContent = "Please tell me what you need help with.";
+        return;
+      }
+
+      response.style.display = "block";
+      response.textContent =
+        "Emogigs AI is ready. The AI engine will be connected in the next development stage.";
+    }
+  </script>
+
+</body>
+</html>
