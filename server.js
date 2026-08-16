@@ -3,14 +3,13 @@ const fs = require("fs");
 const path = require("path");
 
 const PORT = process.env.PORT || 3000;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 const server = http.createServer((req, res) => {
-  // CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  // OPTIONS request
   if (req.method === "OPTIONS") {
     res.writeHead(204);
     res.end();
@@ -41,7 +40,7 @@ const server = http.createServer((req, res) => {
       body += chunk.toString();
     });
 
-    req.on("end", () => {
+    req.on("end", async () => {
       try {
         const data = JSON.parse(body);
         const message = data.message;
@@ -60,24 +59,76 @@ const server = http.createServer((req, res) => {
           return;
         }
 
+        if (!OPENAI_API_KEY) {
+          res.writeHead(500, {
+            "Content-Type": "application/json"
+          });
+
+          res.end(
+            JSON.stringify({
+              error: "OPENAI_API_KEY is not configured."
+            })
+          );
+
+          return;
+        }
+
+        const response = await fetch(
+          "https://api.openai.com/v1/responses",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${OPENAI_API_KEY}`
+            },
+            body: JSON.stringify({
+              model: "gpt-4.1-mini",
+              input: message
+            })
+          }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          res.writeHead(response.status, {
+            "Content-Type": "application/json"
+          });
+
+          res.end(
+            JSON.stringify({
+              error:
+                result.error?.message ||
+                "OpenAI API request failed."
+            })
+          );
+
+          return;
+        }
+
+        const reply =
+          result.output_text ||
+          "I couldn't generate a response.";
+
         res.writeHead(200, {
           "Content-Type": "application/json"
         });
 
         res.end(
           JSON.stringify({
-            reply:
-              "Your AI backend is connected. AI engine configuration is the next step."
+            reply
           })
         );
       } catch (error) {
-        res.writeHead(400, {
+        console.error(error);
+
+        res.writeHead(500, {
           "Content-Type": "application/json"
         });
 
         res.end(
           JSON.stringify({
-            error: "Invalid request."
+            error: "Server error."
           })
         );
       }
@@ -87,7 +138,10 @@ const server = http.createServer((req, res) => {
   }
 
   // Serve index.html
-  if (req.method === "GET" && (req.url === "/" || req.url === "/index.html")) {
+  if (
+    req.method === "GET" &&
+    (req.url === "/" || req.url === "/index.html")
+  ) {
     const filePath = path.join(__dirname, "index.html");
 
     fs.readFile(filePath, (err, data) => {
