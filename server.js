@@ -33,6 +33,7 @@ const server = http.createServer((req, res) => {
   }
 
   // AI API
+console.log("CHAT REQUEST RECEIVED:", req.method, req.url);
   if (req.method === "POST" && req.url === "/api/chat") {
     let body = "";
 
