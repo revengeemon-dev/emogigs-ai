@@ -73,23 +73,26 @@ console.log("CHAT REQUEST RECEIVED:", req.method, req.url);
 
           return;
         }
+console.log("OPENAI REQUEST STARTING");
 
-        const response = await fetch(
-          "https://api.openai.com/v1/responses",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${OPENAI_API_KEY}`
-            },
-            body: JSON.stringify({
-              model: "gpt-4.1-mini",
-              input: message
-            })
-          }
-        );
+const response = await fetch(
+  "https://api.openai.com/v1/responses",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${OPENAI_API_KEY}`
+    },
+    body: JSON.stringify({
+      model: "gpt-4.1-mini",
+      input: message
+    })
+  }
+);
 
-        const result = await response.json();
+const result = await response.json();
+
+console.log("OPENAI RESPONSE:", response.status, JSON.stringify(result));
 
         if (!response.ok) {
           res.writeHead(response.status, {
