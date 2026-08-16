@@ -340,9 +340,31 @@
       }
 
       response.style.display = "block";
-      response.textContent =
-        "Emogigs AI is ready. The AI engine will be connected in the next development stage.";
-    }
+response.textContent = "Thinking...";
+
+try {
+  const res = await fetch("/api/chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      message: text
+    })
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error || "Something went wrong.");
+  }
+
+  response.textContent = data.reply || "No response received.";
+} catch (error) {
+  console.error(error);
+  response.textContent =
+    "Sorry, I couldn't connect to the AI right now.";
+}
   </script>
 
 </body>
