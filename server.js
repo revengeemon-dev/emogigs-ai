@@ -84,7 +84,7 @@ const response = await fetch(
       "Authorization": `Bearer ${GROQ_API_KEY}`
     },
     body: JSON.stringify({
-      model: "gpt-4.1-mini",
+      model: "openai/gpt-oss-20b",
       input: message
     })
   }
