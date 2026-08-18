@@ -76,12 +76,12 @@ console.log("CHAT REQUEST RECEIVED:", req.method, req.url);
 console.log("OPENAI REQUEST STARTING");
 
 const response = await fetch(
-  "https://api.openai.com/v1/responses",
+  "https://api.groq.com/openai/v1/responses",
   {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${OPENAI_API_KEY}`
+      "Authorization": `Bearer ${GROQ_API_KEY}`
     },
     body: JSON.stringify({
       model: "gpt-4.1-mini",
