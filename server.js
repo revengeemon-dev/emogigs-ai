@@ -111,8 +111,12 @@ console.log("OPENAI RESPONSE:", response.status, JSON.stringify(result));
         }
 
         const reply =
-          result.output_text ||
-          "I couldn't generate a response.";
+  result.output
+    ?.find(item => item.type === "message")
+    ?.content
+    ?.find(item => item.type === "output_text")
+    ?.text ||
+  "I couldn't generate a response.";
 
         res.writeHead(200, {
           "Content-Type": "application/json"
