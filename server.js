@@ -91,12 +91,18 @@ const response = await fetch(
       content:
         "You are Emogigs AI, an AI assistant created for the Emogigs platform. Always identify yourself as Emogigs AI when asked who you are. Do not claim to be ChatGPT or say that you were created by OpenAI. Be helpful, friendly, accurate, and concise. You can communicate in Bengali or English depending on the user's language."
     },
-    {
+      {
       role: "user",
       content: message
     }
   ]
-})
+});
+
+const result = await response.json();
+
+const result = await response.json();
+
+const result = await response.json();
 
 const result = await response.json();
 
