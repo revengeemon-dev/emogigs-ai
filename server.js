@@ -33,7 +33,8 @@ const server = http.createServer((req, res) => {
   }
 
   // AI API
-console.log("CHAT REQUEST RECEIVED:", req.method, req.url);
+  console.log("CHAT REQUEST RECEIVED:", req.method, req.url);
+
   if (req.method === "POST" && req.url === "/api/chat") {
     let body = "";
 
@@ -73,40 +74,41 @@ console.log("CHAT REQUEST RECEIVED:", req.method, req.url);
 
           return;
         }
-console.log("OPENAI REQUEST STARTING");
 
-const response = await fetch(
-  "https://api.groq.com/openai/v1/responses",
-  {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${GROQ_API_KEY}`
-    },
-   body: JSON.stringify({
-  model: "openai/gpt-oss-20b",
-  input: [
-    {
-      role: "system",
-      content:
-        "You are Emogigs AI, an AI assistant created for the Emogigs platform. Always identify yourself as Emogigs AI when asked who you are. Do not claim to be ChatGPT or say that you were created by OpenAI. Be helpful, friendly, accurate, and concise. You can communicate in Bengali or English depending on the user's language."
-    },
-      {
-      role: "user",
-      content: message
-    }
-  ]
-});
+        console.log("GROQ REQUEST STARTING");
 
-const result = await response.json();
+        const response = await fetch(
+          "https://api.groq.com/openai/v1/responses",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${GROQ_API_KEY}`
+            },
+            body: JSON.stringify({
+              model: "openai/gpt-oss-20b",
+              input: [
+                {
+                  role: "system",
+                  content:
+                    "You are Emogigs AI, an AI assistant created for the Emogigs platform. Always identify yourself as Emogigs AI when asked who you are. Do not claim to be ChatGPT or say that you were created by OpenAI. Be helpful, friendly, accurate, and concise. You can communicate in Bengali or English depending on the user's language."
+                },
+                {
+                  role: "user",
+                  content: message
+                }
+              ]
+            })
+          }
+        );
 
-const result = await response.json();
+        const result = await response.json();
 
-const result = await response.json();
-
-const result = await response.json();
-
-console.log("OPENAI RESPONSE:", response.status, JSON.stringify(result));
+        console.log(
+          "GROQ RESPONSE:",
+          response.status,
+          JSON.stringify(result)
+        );
 
         if (!response.ok) {
           res.writeHead(response.status, {
@@ -117,7 +119,7 @@ console.log("OPENAI RESPONSE:", response.status, JSON.stringify(result));
             JSON.stringify({
               error:
                 result.error?.message ||
-                "OpenAI API request failed."
+                "Groq API request failed."
             })
           );
 
@@ -125,12 +127,12 @@ console.log("OPENAI RESPONSE:", response.status, JSON.stringify(result));
         }
 
         const reply =
-  result.output
-    ?.find(item => item.type === "message")
-    ?.content
-    ?.find(item => item.type === "output_text")
-    ?.text ||
-  "I couldn't generate a response.";
+          result.output
+            ?.find(item => item.type === "message")
+            ?.content
+            ?.find(item => item.type === "output_text")
+            ?.text ||
+          "I couldn't generate a response.";
 
         res.writeHead(200, {
           "Content-Type": "application/json"
@@ -142,7 +144,7 @@ console.log("OPENAI RESPONSE:", response.status, JSON.stringify(result));
           })
         );
       } catch (error) {
-        console.error(error);
+        console.error("SERVER ERROR:", error);
 
         res.writeHead(500, {
           "Content-Type": "application/json"
