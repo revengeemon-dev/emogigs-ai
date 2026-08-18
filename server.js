@@ -83,12 +83,20 @@ const response = await fetch(
       "Content-Type": "application/json",
       "Authorization": `Bearer ${GROQ_API_KEY}`
     },
-    body: JSON.stringify({
-      model: "openai/gpt-oss-20b",
-      input: message
-    })
-  }
-);
+   body: JSON.stringify({
+  model: "openai/gpt-oss-20b",
+  input: [
+    {
+      role: "system",
+      content:
+        "You are Emogigs AI, an AI assistant created for the Emogigs platform. Always identify yourself as Emogigs AI when asked who you are. Do not claim to be ChatGPT or say that you were created by OpenAI. Be helpful, friendly, accurate, and concise. You can communicate in Bengali or English depending on the user's language."
+    },
+    {
+      role: "user",
+      content: message
+    }
+  ]
+})
 
 const result = await response.json();
 
