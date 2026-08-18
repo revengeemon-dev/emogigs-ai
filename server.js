@@ -60,14 +60,14 @@ console.log("CHAT REQUEST RECEIVED:", req.method, req.url);
           return;
         }
 
-        if (!OPENAI_API_KEY) {
+        if (!GROQ_API_KEY) {
           res.writeHead(500, {
             "Content-Type": "application/json"
           });
 
           res.end(
             JSON.stringify({
-              error: "OPENAI_API_KEY is not configured."
+              error: "GROQ_API_KEY is not configured."
             })
           );
 
