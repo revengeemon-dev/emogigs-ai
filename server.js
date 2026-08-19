@@ -167,10 +167,10 @@ const server = http.createServer((req, res) => {
   }
 
   // Serve index.html
-  if (
-    req.method === "GET" &&
-    (req.url === "/" || req.url === "/index.html")
-  ) {
+if (
+  (req.method === "GET" || req.method === "HEAD") &&
+  (req.url === "/" || req.url === "/index.html")
+) {
     const filePath = path.join(__dirname, "index.html");
 
     fs.readFile(filePath, (err, data) => {
