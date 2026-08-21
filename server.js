@@ -10,13 +10,16 @@ const server = http.createServer((req, res) => {
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
+  // OPTIONS
   if (req.method === "OPTIONS") {
     res.writeHead(204);
     res.end();
     return;
   }
 
-  // Health check
+  // =========================
+  // HEALTH CHECK
+  // =========================
   if (req.method === "GET" && req.url === "/api/health") {
     res.writeHead(200, {
       "Content-Type": "application/json"
@@ -32,8 +35,10 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // AI API
-  console.log("CHAT REQUEST RECEIVED:", req.method, req.url);
+  // =========================
+  // AI CHAT API
+  // =========================
+  console.log("REQUEST:", req.method, req.url);
 
   if (req.method === "POST" && req.url === "/api/chat") {
     let body = "";
@@ -47,7 +52,7 @@ const server = http.createServer((req, res) => {
         const data = JSON.parse(body);
         const message = data.message;
 
-        if (!message) {
+        if (!message || !message.trim()) {
           res.writeHead(400, {
             "Content-Type": "application/json"
           });
@@ -62,6 +67,8 @@ const server = http.createServer((req, res) => {
         }
 
         if (!GROQ_API_KEY) {
+          console.error("GROQ_API_KEY is missing.");
+
           res.writeHead(500, {
             "Content-Type": "application/json"
           });
@@ -77,7 +84,7 @@ const server = http.createServer((req, res) => {
 
         console.log("GROQ REQUEST STARTING");
 
-        const response = await fetch(
+        const groqResponse = await fetch(
           "https://api.groq.com/openai/v1/responses",
           {
             method: "POST",
@@ -107,16 +114,16 @@ const server = http.createServer((req, res) => {
           }
         );
 
-        const result = await response.json();
+        const result = await groqResponse.json();
 
         console.log(
           "GROQ RESPONSE:",
-          response.status,
+          groqResponse.status,
           JSON.stringify(result)
         );
 
-        if (!response.ok) {
-          res.writeHead(response.status, {
+        if (!groqResponse.ok) {
+          res.writeHead(groqResponse.status, {
             "Content-Type": "application/json"
           });
 
@@ -145,9 +152,10 @@ const server = http.createServer((req, res) => {
 
         res.end(
           JSON.stringify({
-            reply
+            reply: reply
           })
         );
+
       } catch (error) {
         console.error("SERVER ERROR:", error);
 
@@ -166,15 +174,19 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // Serve index.html
-if (
-  (req.method === "GET" || req.method === "HEAD") &&
-  (req.url === "/" || req.url === "/index.html")
-) {
+  // =========================
+  // SERVE INDEX.HTML
+  // =========================
+  if (
+    (req.method === "GET" || req.method === "HEAD") &&
+    (req.url === "/" || req.url === "/index.html")
+  ) {
     const filePath = path.join(__dirname, "index.html");
 
     fs.readFile(filePath, (err, data) => {
       if (err) {
+        console.error("INDEX ERROR:", err);
+
         res.writeHead(500, {
           "Content-Type": "text/plain"
         });
@@ -193,7 +205,41 @@ if (
     return;
   }
 
-  // Not found
+  // =========================
+  // SERVE SCRIPT.JS
+  // =========================
+  if (
+    (req.method === "GET" || req.method === "HEAD") &&
+    req.url === "/script.js"
+  ) {
+    const filePath = path.join(__dirname, "script.js");
+
+    fs.readFile(filePath, (err, data) => {
+      if (err) {
+        console.error("SCRIPT.JS ERROR:", err);
+
+        res.writeHead(404, {
+          "Content-Type": "text/plain"
+        });
+
+        res.end("script.js not found.");
+        return;
+      }
+
+      res.writeHead(200, {
+        "Content-Type": "application/javascript; charset=utf-8",
+        "Cache-Control": "no-cache"
+      });
+
+      res.end(data);
+    });
+
+    return;
+  }
+
+  // =========================
+  // NOT FOUND
+  // =========================
   res.writeHead(404, {
     "Content-Type": "application/json"
   });
@@ -205,6 +251,11 @@ if (
   );
 });
 
+// =========================
+// START SERVER
+// =========================
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`Emogigs AI server running on port ${PORT}`);
+  console.log(
+    `Emogigs AI server running on port ${PORT}`
+  );
 });
