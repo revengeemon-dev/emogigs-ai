@@ -12,9 +12,12 @@ function setPrompt(text) {
 async function askEmogigs() {
   const input = document.getElementById("userInput");
   const response = document.getElementById("response");
-  const button = document.querySelector(".ask-btn");
+  const button = document.getElementById("askButton");
 
-  if (!input || !response) return;
+  if (!input || !response) {
+    console.error("Emogigs AI: Required elements not found.");
+    return;
+  }
 
   const text = input.value.trim();
 
@@ -56,10 +59,6 @@ async function askEmogigs() {
     response.textContent =
       data.reply || "No response received.";
 
-    /*
-      Keep the user's input available so they can
-      continue asking questions without refreshing.
-    */
     input.focus();
 
   } catch (error) {
@@ -77,14 +76,21 @@ async function askEmogigs() {
   }
 }
 
-/*
-  Press Enter to send.
-  Shift + Enter creates a new line.
-*/
 document.addEventListener("DOMContentLoaded", () => {
   const input = document.getElementById("userInput");
+  const button = document.getElementById("askButton");
 
-  if (!input) return;
+  if (!input) {
+    console.error("Emogigs AI: userInput not found.");
+    return;
+  }
+
+  if (!button) {
+    console.error("Emogigs AI: askButton not found.");
+    return;
+  }
+
+  button.addEventListener("click", askEmogigs);
 
   input.addEventListener("keydown", event => {
     if (event.key === "Enter" && !event.shiftKey) {
@@ -92,4 +98,6 @@ document.addEventListener("DOMContentLoaded", () => {
       askEmogigs();
     }
   });
+
+  console.log("Emogigs AI frontend loaded successfully.");
 });
