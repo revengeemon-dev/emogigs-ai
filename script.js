@@ -3,7 +3,10 @@ let isSending = false;
 function setPrompt(text) {
   const input = document.getElementById("userInput");
 
-  if (!input) return;
+  if (!input) {
+    console.error("Emogigs AI: userInput not found.");
+    return;
+  }
 
   input.value = text;
   input.focus();
@@ -24,10 +27,13 @@ async function askEmogigs() {
   if (!text) {
     response.style.display = "block";
     response.textContent = "Please tell me what you need help with.";
+    input.focus();
     return;
   }
 
-  if (isSending) return;
+  if (isSending) {
+    return;
+  }
 
   isSending = true;
 
@@ -40,6 +46,8 @@ async function askEmogigs() {
   }
 
   try {
+    console.log("Emogigs AI: Sending request...");
+
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: {
@@ -50,15 +58,22 @@ async function askEmogigs() {
       })
     });
 
+    console.log("Emogigs AI: Server response:", res.status);
+
     const data = await res.json();
 
+    console.log("Emogigs AI: Response data:", data);
+
     if (!res.ok) {
-      throw new Error(data.error || "Server error");
+      throw new Error(
+        data.error || "Server returned an error."
+      );
     }
 
     response.textContent =
       data.reply || "No response received.";
 
+    input.value = "";
     input.focus();
 
   } catch (error) {
@@ -99,5 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  console.log("Emogigs AI frontend loaded successfully.");
+  console.log(
+    "Emogigs AI frontend loaded successfully."
+  );
 });
