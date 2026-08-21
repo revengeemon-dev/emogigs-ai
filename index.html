@@ -321,53 +321,7 @@
 
   </div>
 
-    <script>
-  function setPrompt(text) {
-    const input = document.getElementById("userInput");
-    input.value = text;
-    input.focus();
-  }
-
-  async function askEmogigs() {
-    const input = document.getElementById("userInput");
-    const response = document.getElementById("response");
-    const text = input.value.trim();
-
-    if (!text) {
-      response.style.display = "block";
-      response.textContent = "Please tell me what you need help with.";
-      return;
-    }
-
-    response.style.display = "block";
-    response.textContent = "Thinking...";
-
-    try {
-      const res = await fetch("https://emogigs-ai.onrender.com/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          message: text
-        })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Server error");
-      }
-
-      response.textContent = data.reply || "No response received.";
-
-    } catch (error) {
-      console.error("AI ERROR:", error);
-      response.textContent =
-        "Sorry, I couldn't connect to the AI right now.";
-    }
-  }
-</script>
+ <script src="script.js"></script>
 
 </body>
 </html>
