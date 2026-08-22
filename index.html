@@ -226,6 +226,180 @@
         border-radius: 18px 18px 0 0;
       }
     }
+/* ================================
+   EMOGIGS AI - PROFESSIONAL CHAT UI
+   Step 15B
+================================ */
+
+.response {
+  display: none;
+  margin-top: 18px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: #d9e1f2;
+  line-height: 1.6;
+  font-size: 14px;
+  max-height: 58vh;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+.response::-webkit-scrollbar {
+  width: 5px;
+}
+
+.response::-webkit-scrollbar-thumb {
+  background: #2a3652;
+  border-radius: 10px;
+}
+
+.response > div {
+  animation: messageAppear 0.25s ease;
+}
+
+@keyframes messageAppear {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chat-user {
+  display: flex;
+  justify-content: flex-end;
+  margin: 14px 0;
+}
+
+.chat-user-bubble {
+  max-width: 88%;
+  padding: 12px 15px;
+  border-radius: 18px 18px 5px 18px;
+  background: #1d3159;
+  color: #ffffff;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.chat-ai {
+  display: flex;
+  justify-content: flex-start;
+  margin: 14px 0;
+}
+
+.chat-ai-container {
+  max-width: 94%;
+  width: 100%;
+}
+
+.chat-ai-bubble {
+  padding: 14px 15px;
+  border-radius: 18px 18px 18px 5px;
+  background: #121a2d;
+  border: 1px solid #25304a;
+  color: #d9e1f2;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.chat-name {
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #6ea8ff;
+}
+
+.chat-ai-name {
+  color: #ffffff;
+}
+
+.chat-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.chat-action-btn {
+  padding: 7px 10px;
+  border: 1px solid #25304a;
+  border-radius: 9px;
+  background: #0f1628;
+  color: #aeb9ce;
+  font-size: 12px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.chat-action-btn:hover {
+  background: #1d3159;
+  color: #ffffff;
+}
+
+.chat-action-btn:active {
+  transform: scale(0.96);
+}
+
+.chat-thinking {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 12px 15px;
+  color: #9aa6bd;
+  font-size: 13px;
+}
+
+.chat-thinking span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #6ea8ff;
+  animation: thinkingDot 1.2s infinite ease-in-out;
+}
+
+.chat-thinking span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.chat-thinking span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes thinkingDot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+@media (max-width: 520px) {
+  .chat-user-bubble {
+    max-width: 92%;
+  }
+
+  .chat-ai-container {
+    max-width: 96%;
+  }
+
+  .chat-action-btn {
+    font-size: 11px;
+    padding: 6px 8px;
+  }
+}
   </style>
 </head>
 
