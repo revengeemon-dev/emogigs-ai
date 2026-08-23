@@ -7,6 +7,345 @@
   <meta name="description" content="Emogigs AI - Your personal AI Life OS">
   <title>Emogigs AI</title>
 
+/* =========================================================
+   EMOGIGS AI — NEXT LEVEL CHAT UI
+   STEP 16A
+   ========================================================= */
+
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 18px;
+}
+
+/* Individual message */
+.chat-message {
+  display: flex;
+  width: 100%;
+  animation: messageIn 0.25s ease;
+}
+
+@keyframes messageIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* User message */
+.chat-message.user {
+  justify-content: flex-end;
+}
+
+.user-bubble {
+  max-width: 86%;
+  background: #6ea8ff;
+  color: #07101f;
+  padding: 12px 15px;
+  border-radius: 18px 18px 5px 18px;
+  font-size: 14px;
+  line-height: 1.55;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+/* AI message */
+.chat-message.ai {
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.ai-avatar {
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  background: #1d3159;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  margin-top: 2px;
+}
+
+.ai-message-wrapper {
+  max-width: calc(100% - 44px);
+}
+
+.ai-bubble {
+  background: #0b1020;
+  border: 1px solid #26324b;
+  color: #d9e1f2;
+  padding: 13px 15px;
+  border-radius: 5px 18px 18px 18px;
+  font-size: 14px;
+  line-height: 1.65;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+/* AI action buttons */
+.message-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 7px;
+  padding-left: 2px;
+}
+
+.message-action {
+  width: 34px;
+  height: 32px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: #7f8ba3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.message-action:hover {
+  background: #18233a;
+  color: #ffffff;
+}
+
+.message-action:active {
+  transform: scale(0.92);
+}
+
+.message-action.active {
+  color: #6ea8ff;
+}
+
+/* Thinking animation */
+.thinking-bubble {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 42px;
+}
+
+.thinking-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #6ea8ff;
+  animation: thinking 1.2s infinite ease-in-out;
+}
+
+.thinking-dot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.thinking-dot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes thinking {
+  0%, 60%, 100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+}
+
+/* Chat composer */
+.chat-composer {
+  position: sticky;
+  bottom: 82px;
+  z-index: 15;
+  margin-top: 18px;
+  padding: 8px;
+  border-radius: 18px;
+  background: rgba(15, 22, 40, 0.96);
+  border: 1px solid #25304a;
+  backdrop-filter: blur(12px);
+}
+
+.chat-input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.chat-input {
+  flex: 1;
+  min-height: 44px;
+  max-height: 130px;
+  resize: none;
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  padding: 11px 10px;
+  outline: none;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.chat-input::placeholder {
+  color: #6f7b92;
+}
+
+/* Send button */
+.send-button {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 13px;
+  background: #6ea8ff;
+  color: #07101f;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s ease;
+}
+
+.send-button:active {
+  transform: scale(0.92);
+}
+
+.send-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Empty chat state */
+.chat-empty {
+  text-align: center;
+  padding: 20px 10px 8px;
+  color: #8f9bb2;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.chat-empty-icon {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 10px;
+  border-radius: 16px;
+  background: #1d3159;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+/* Copy notification */
+.copy-notice {
+  position: fixed;
+  left: 50%;
+  bottom: 92px;
+  transform: translateX(-50%);
+  background: #18233a;
+  border: 1px solid #2b3957;
+  color: #ffffff;
+  padding: 9px 14px;
+  border-radius: 10px;
+  font-size: 12px;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.copy-notice.show {
+  opacity: 1;
+}
+
+/* Mobile optimization */
+@media (max-width: 520px) {
+
+  .chat-container {
+    gap: 15px;
+  }
+
+  .user-bubble {
+    max-width: 88%;
+    font-size: 14px;
+  }
+
+  .ai-message-wrapper {
+    max-width: calc(100% - 43px);
+  }
+
+  .ai-bubble {
+    font-size: 14px;
+  }
+
+  .message-action {
+    width: 32px;
+    height: 30px;
+    font-size: 15px;
+  }
+
+  .chat-composer {
+    bottom: 76px;
+    border-radius: 16px;
+  }
+}
+
+/* Tablet and desktop */
+@media (min-width: 700px) {
+
+  .app {
+    max-width: 760px;
+  }
+
+  main {
+    padding-left: 28px;
+    padding-right: 28px;
+  }
+
+  .user-bubble {
+    max-width: 72%;
+  }
+
+  .ai-message-wrapper {
+    max-width: 78%;
+  }
+
+  .ai-bubble {
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 1100px) {
+
+  .app {
+    max-width: 900px;
+  }
+
+  main {
+    padding-left: 45px;
+    padding-right: 45px;
+  }
+
+  .user-bubble {
+    max-width: 65%;
+  }
+
+  .ai-message-wrapper {
+    max-width: 72%;
+  }
+}
   <style>
     * {
       box-sizing: border-box;
