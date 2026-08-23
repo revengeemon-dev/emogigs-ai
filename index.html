@@ -2,32 +2,37 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-  >
-
-  <meta name="theme-color" content="#090817">
-
-  <meta
-    name="description"
-    content="Emogigs AI - Your personal AI Life OS"
-  >
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b0820">
+  <meta name="description" content="Emogigs AI - Your personal AI Life OS">
   <title>Emogigs AI</title>
 
   <style>
-
     /* =====================================================
-       EMOGIGS AI — STEP 16B
-       PREMIUM AI LIFE OS UI
-       ===================================================== */
+       EMOGIGS AI — STEP 17
+       PROFESSIONAL APP SHELL
+    ===================================================== */
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+    }
+
+    :root {
+      --bg: #080619;
+      --bg-2: #0d0924;
+      --panel: #11102b;
+      --panel-2: #171338;
+      --border: #28204b;
+      --purple: #8b5cf6;
+      --purple-2: #a855f7;
+      --purple-soft: #21164b;
+      --text: #ffffff;
+      --muted: #9b96b5;
+      --muted-2: #77718f;
+      --danger: #f87171;
+      --success: #34d399;
     }
 
     html,
@@ -38,26 +43,30 @@
 
     body {
       font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
         Arial,
-        Helvetica,
         sans-serif;
 
       background:
         radial-gradient(
-          circle at top,
-          #21134a 0%,
-          #0d0b20 38%,
-          #070711 100%
-        );
+          circle at 20% 0%,
+          rgba(139, 92, 246, 0.14),
+          transparent 30%
+        ),
+        var(--bg);
 
-      color: #ffffff;
+      color: var(--text);
       min-height: 100vh;
       overflow-x: hidden;
     }
 
     button,
-    textarea {
-      font-family: inherit;
+    textarea,
+    input {
+      font: inherit;
     }
 
     button {
@@ -66,513 +75,658 @@
 
     /* =====================================================
        APP
-       ===================================================== */
+    ===================================================== */
 
     .app {
       width: 100%;
-      max-width: 520px;
+      max-width: 1180px;
       min-height: 100vh;
       margin: 0 auto;
-
-      display: flex;
-      flex-direction: column;
-
       position: relative;
     }
 
     /* =====================================================
-       HEADER
-       ===================================================== */
+       TOP HEADER
+    ===================================================== */
 
-    .top-header {
-      position: sticky;
-      top: 0;
+    .topbar {
+      height: 72px;
+      padding: 0 20px;
 
-      z-index: 50;
-
-      padding:
-        calc(14px + env(safe-area-inset-top))
-        17px
-        13px;
-
-      background: rgba(9, 8, 23, 0.94);
-
-      border-bottom:
-        1px solid rgba(155, 104, 255, 0.14);
-
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-    }
-
-    .header-inner {
       display: flex;
       align-items: center;
       justify-content: space-between;
+
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+
+      background: rgba(8, 6, 25, 0.82);
+
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+
+      position: sticky;
+      top: 0;
+      z-index: 50;
     }
 
     .brand-area {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 11px;
     }
 
     .brand-logo {
       width: 40px;
       height: 40px;
 
-      border-radius: 13px;
-
       display: flex;
       align-items: center;
       justify-content: center;
 
-      font-size: 20px;
+      border-radius: 13px;
 
       background:
         linear-gradient(
           135deg,
-          #8b4dff,
-          #5e25d6
+          #8b5cf6,
+          #6d28d9
         );
 
       box-shadow:
-        0 7px 25px rgba(116, 61, 255, 0.35);
+        0 8px 25px rgba(139,92,246,0.3);
+
+      font-size: 19px;
     }
 
     .brand-name {
       font-size: 17px;
-      font-weight: 700;
-      letter-spacing: -0.2px;
+      font-weight: 750;
+      letter-spacing: -0.3px;
     }
 
     .brand-subtitle {
       margin-top: 2px;
-
       font-size: 10px;
-
-      color: #9d98b6;
+      color: var(--muted);
     }
 
     .online-dot {
       display: inline-block;
-
       width: 6px;
       height: 6px;
-
-      border-radius: 50%;
-
-      background: #49e68b;
-
       margin-right: 4px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 8px rgba(52,211,153,.6);
+    }
 
-      box-shadow:
-        0 0 8px rgba(73, 230, 139, 0.7);
+    .header-action {
+      width: 40px;
+      height: 40px;
+
+      border: 1px solid var(--border);
+      border-radius: 12px;
+
+      background: var(--panel);
+      color: white;
+
+      cursor: pointer;
     }
 
     /* =====================================================
        MAIN
-       ===================================================== */
+    ===================================================== */
 
     main {
-      flex: 1;
-
-      padding:
-        22px
-        15px
-        125px;
+      padding: 24px 18px 110px;
     }
 
-    /* =====================================================
-       HERO
-       ===================================================== */
-
-    .hero {
-      margin-bottom: 22px;
+    .screen {
+      display: none;
+      animation: screenIn .25s ease;
     }
 
-    .hero-badge {
-      display: inline-flex;
-
-      align-items: center;
-
-      padding: 7px 11px;
-
-      border-radius: 20px;
-
-      background:
-        rgba(123, 69, 255, 0.12);
-
-      border:
-        1px solid rgba(151, 103, 255, 0.22);
-
-      color: #bda5ff;
-
-      font-size: 10px;
-
-      margin-bottom: 14px;
+    .screen.active {
+      display: block;
     }
 
-    .hero h1 {
-      font-size: 27px;
-
-      line-height: 1.2;
-
-      letter-spacing: -0.7px;
-
-      margin-bottom: 9px;
-    }
-
-    .hero h1 span {
-      color: #a77aff;
-    }
-
-    .hero p {
-      color: #aaa4bd;
-
-      font-size: 12px;
-
-      line-height: 1.65;
-
-      max-width: 390px;
-    }
-
-    /* =====================================================
-       AI CARD
-       ===================================================== */
-
-    .ai-card {
-      background:
-        linear-gradient(
-          145deg,
-          rgba(38, 23, 70, 0.96),
-          rgba(17, 14, 37, 0.98)
-        );
-
-      border:
-        1px solid rgba(143, 92, 255, 0.24);
-
-      border-radius: 22px;
-
-      overflow: hidden;
-
-      box-shadow:
-        0 18px 50px rgba(0, 0, 0, 0.25);
-
-      margin-bottom: 25px;
-    }
-
-    /* =====================================================
-       CHAT HEADER
-       ===================================================== */
-
-    .chat-header {
-      display: flex;
-
-      align-items: center;
-
-      gap: 10px;
-
-      padding: 15px 16px;
-
-      border-bottom:
-        1px solid rgba(157, 103, 255, 0.12);
-    }
-
-    .chat-avatar {
-      width: 37px;
-      height: 37px;
-
-      flex: 0 0 37px;
-
-      border-radius: 12px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      font-size: 18px;
-
-      background:
-        linear-gradient(
-          135deg,
-          #8d4dff,
-          #5b24d5
-        );
-
-      box-shadow:
-        0 5px 20px rgba(110, 60, 255, 0.3);
-    }
-
-    .chat-title {
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .chat-status {
-      margin-top: 3px;
-
-      font-size: 9px;
-
-      color: #8e89a6;
-    }
-
-    /* =====================================================
-       CHAT BODY
-       ===================================================== */
-
-    .chat-body {
-      display: flex;
-
-      flex-direction: column;
-
-      gap: 15px;
-
-      padding: 15px;
-
-      max-height: 58vh;
-
-      overflow-y: auto;
-
-      scroll-behavior: smooth;
-    }
-
-    .chat-body::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    .chat-body::-webkit-scrollbar-thumb {
-      background: #392b5d;
-      border-radius: 10px;
-    }
-
-    /* =====================================================
-       EMPTY STATE
-       ===================================================== */
-
-    .chat-empty {
-      text-align: center;
-
-      padding: 30px 12px 25px;
-
-      color: #9891ad;
-    }
-
-    .chat-empty-icon {
-      width: 52px;
-      height: 52px;
-
-      margin: 0 auto 11px;
-
-      border-radius: 17px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      font-size: 23px;
-
-      background:
-        linear-gradient(
-          135deg,
-          #352064,
-          #1b1634
-        );
-
-      color: #b996ff;
-    }
-
-    .chat-empty h3 {
-      color: #ffffff;
-
-      font-size: 14px;
-
-      margin-bottom: 6px;
-    }
-
-    .chat-empty p {
-      font-size: 11px;
-
-      line-height: 1.6;
-    }
-
-    /* =====================================================
-       MESSAGE
-       ===================================================== */
-
-    .message {
-      display: flex;
-
-      width: 100%;
-
-      animation:
-        messageIn 0.25s ease;
-    }
-
-    @keyframes messageIn {
-
+    @keyframes screenIn {
       from {
         opacity: 0;
-        transform: translateY(8px);
+        transform: translateY(7px);
       }
 
       to {
         opacity: 1;
         transform: translateY(0);
       }
-
-    }
-
-    .message.user {
-      justify-content: flex-end;
-    }
-
-    .message.ai {
-      justify-content: flex-start;
-
-      align-items: flex-start;
-
-      gap: 8px;
     }
 
     /* =====================================================
-       USER MESSAGE
-       ===================================================== */
+       HOME
+    ===================================================== */
 
-    .user-bubble {
-      max-width: 84%;
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
 
-      padding: 11px 14px;
+      padding: 7px 11px;
+      margin-bottom: 17px;
 
-      border-radius:
-        17px
-        17px
-        5px
-        17px;
+      border: 1px solid #35246a;
+      border-radius: 999px;
+
+      background: rgba(139,92,246,.09);
+
+      color: #c4a8ff;
+      font-size: 11px;
+      font-weight: 650;
+    }
+
+    .hero h1 {
+      font-size: clamp(29px, 7vw, 48px);
+      line-height: 1.08;
+      letter-spacing: -1.6px;
+      max-width: 720px;
+    }
+
+    .hero h1 span {
+      color: #a78bfa;
+    }
+
+    .hero p {
+      max-width: 650px;
+      margin-top: 13px;
+
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    /* =====================================================
+       AI SEARCH CARD
+    ===================================================== */
+
+    .home-ai-card {
+      margin-top: 26px;
+      padding: 16px;
+
+      border: 1px solid #342765;
+      border-radius: 23px;
 
       background:
         linear-gradient(
-          135deg,
-          #7741e9,
-          #6531d0
+          145deg,
+          rgba(31,20,67,.96),
+          rgba(16,13,40,.98)
         );
 
-      color: #ffffff;
-
-      font-size: 13px;
-
-      line-height: 1.55;
-
-      white-space: pre-wrap;
-
-      word-break: break-word;
-
       box-shadow:
-        0 7px 20px rgba(93, 42, 210, 0.22);
+        0 18px 60px rgba(0,0,0,.22);
     }
 
-    /* =====================================================
-       AI MESSAGE
-       ===================================================== */
+    .ai-card-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 13px;
+    }
 
-    .ai-message-avatar {
-      width: 31px;
-      height: 31px;
-
-      flex: 0 0 31px;
-
-      border-radius: 10px;
+    .ai-small-avatar {
+      width: 38px;
+      height: 38px;
 
       display: flex;
       align-items: center;
       justify-content: center;
 
+      border-radius: 12px;
+      background: linear-gradient(135deg,#8b5cf6,#6d28d9);
+    }
+
+    .ai-card-name {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .ai-card-desc {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .home-input-row {
+      display: flex;
+      gap: 9px;
+      align-items: flex-end;
+
+      padding: 8px;
+
+      border-radius: 17px;
+
+      background: #09071a;
+      border: 1px solid #2c2350;
+    }
+
+    .home-input {
+      flex: 1;
+
+      min-height: 47px;
+      max-height: 130px;
+
+      resize: none;
+      border: none;
+      outline: none;
+
+      background: transparent;
+      color: white;
+
+      padding: 11px 9px;
+
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .home-input::placeholder {
+      color: #69627f;
+    }
+
+    .primary-send {
+      flex: 0 0 48px;
+      width: 48px;
+      height: 48px;
+
+      border: none;
+      border-radius: 14px;
+
+      background: linear-gradient(
+        135deg,
+        #a855f7,
+        #7c3aed
+      );
+
+      color: white;
+      font-size: 18px;
+
+      cursor: pointer;
+
+      box-shadow:
+        0 7px 20px rgba(124,58,237,.3);
+    }
+
+    .primary-send:active {
+      transform: scale(.94);
+    }
+
+    /* =====================================================
+       SECTION
+    ===================================================== */
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      margin: 28px 0 13px;
+    }
+
+    .section-head h2 {
+      font-size: 18px;
+      letter-spacing: -.4px;
+    }
+
+    .section-link {
+      color: #a78bfa;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    /* =====================================================
+       QUICK TOOLS
+    ===================================================== */
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 11px;
+    }
+
+    .tool-card {
+      min-height: 145px;
+
+      padding: 16px;
+
+      border: 1px solid var(--border);
+      border-radius: 17px;
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(22,18,52,.98),
+          rgba(13,11,34,.98)
+        );
+
+      cursor: pointer;
+
+      transition:
+        transform .18s ease,
+        border-color .18s ease;
+    }
+
+    .tool-card:active {
+      transform: scale(.97);
+    }
+
+    .tool-card:hover {
+      border-color: #49348a;
+    }
+
+    .tool-icon {
+      width: 40px;
+      height: 40px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 12px;
+
+      background: #21164b;
+
+      font-size: 20px;
+
+      margin-bottom: 12px;
+    }
+
+    .tool-card h3 {
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+
+    .tool-card p {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    /* =====================================================
+       ASSISTANT CARD
+    ===================================================== */
+
+    .assistant-card {
+      margin-top: 14px;
+
+      padding: 17px;
+
+      border-radius: 18px;
+      border: 1px solid #342765;
+
+      background:
+        linear-gradient(
+          120deg,
+          #211448,
+          #120d2e
+        );
+
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .assistant-robot {
+      width: 52px;
+      height: 52px;
+
+      flex: 0 0 52px;
+
+      border-radius: 16px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      background:
+        radial-gradient(
+          circle at 35% 30%,
+          #c4b5fd,
+          #7c3aed
+        );
+
+      font-size: 27px;
+    }
+
+    .assistant-card h3 {
+      font-size: 14px;
+    }
+
+    .assistant-card p {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    /* =====================================================
+       RECENT CHAT
+    ===================================================== */
+
+    .recent-list {
+      border: 1px solid var(--border);
+      border-radius: 17px;
+      overflow: hidden;
+    }
+
+    .recent-item {
+      width: 100%;
+
+      padding: 13px;
+
+      display: flex;
+      align-items: center;
+      gap: 11px;
+
+      border: none;
+      border-bottom: 1px solid rgba(255,255,255,.05);
+
+      background: #11102b;
+      color: white;
+
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .recent-item:last-child {
+      border-bottom: none;
+    }
+
+    .recent-icon {
+      width: 35px;
+      height: 35px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 10px;
+      background: #241650;
+
       font-size: 15px;
+    }
+
+    .recent-title {
+      flex: 1;
+      min-width: 0;
+
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .recent-time {
+      color: var(--muted-2);
+      font-size: 10px;
+    }
+
+    /* =====================================================
+       CHAT SCREEN
+    ===================================================== */
+
+    .chat-screen {
+      min-height: calc(100vh - 180px);
+    }
+
+    .chat-header {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+
+      padding-bottom: 15px;
+
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+
+    .chat-back {
+      width: 38px;
+      height: 38px;
+
+      border: 1px solid var(--border);
+      border-radius: 11px;
+
+      background: var(--panel);
+      color: white;
+
+      cursor: pointer;
+    }
+
+    .chat-avatar {
+      width: 39px;
+      height: 39px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 12px;
+      background: linear-gradient(135deg,#8b5cf6,#6d28d9);
+    }
+
+    .chat-header-info {
+      flex: 1;
+    }
+
+    .chat-header-name {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .chat-status {
+      margin-top: 2px;
+      color: var(--success);
+      font-size: 10px;
+    }
+
+    .chat-menu {
+      width: 35px;
+      height: 35px;
+
+      border: none;
+      background: transparent;
+      color: white;
+
+      font-size: 20px;
+    }
+
+    .chat-messages {
+      padding: 18px 0 155px;
+    }
+
+    .chat-message {
+      display: flex;
+      width: 100%;
+      margin-bottom: 18px;
+    }
+
+    .chat-message.user {
+      justify-content: flex-end;
+    }
+
+    .user-bubble {
+      max-width: 82%;
+
+      padding: 12px 15px;
+
+      border-radius: 18px 18px 5px 18px;
 
       background:
         linear-gradient(
           135deg,
-          #392066,
-          #24133e
+          #7c3aed,
+          #8b5cf6
         );
 
-      color: #c7aaff;
+      color: white;
 
-      margin-top: 2px;
+      font-size: 14px;
+      line-height: 1.6;
+
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+
+      box-shadow:
+        0 7px 20px rgba(124,58,237,.16);
     }
 
-    .ai-message-wrapper {
-      max-width: calc(100% - 39px);
+    .chat-message.ai {
+      justify-content: flex-start;
+      align-items: flex-start;
+      gap: 9px;
+    }
+
+    .message-ai-avatar {
+      width: 33px;
+      height: 33px;
+
+      flex: 0 0 33px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 10px;
+
+      background: #251653;
+
+      font-size: 14px;
+    }
+
+    .ai-message-wrap {
+      max-width: 84%;
     }
 
     .ai-bubble {
-      background:
-        rgba(9, 8, 24, 0.78);
+      padding: 13px 15px;
 
-      border:
-        1px solid rgba(147, 100, 255, 0.18);
+      border-radius: 5px 18px 18px 18px;
 
-      border-radius:
-        5px
-        17px
-        17px
-        17px;
+      background: #14122e;
+      border: 1px solid #2b2450;
 
-      padding: 13px 14px;
+      color: #eeeafd;
 
-      color: #e5e1ef;
-
-      font-size: 13px;
-
+      font-size: 14px;
       line-height: 1.7;
 
-      white-space: normal;
-
-      word-break: break-word;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
     }
-
-    .ai-bubble p {
-      margin-bottom: 10px;
-    }
-
-    .ai-bubble p:last-child {
-      margin-bottom: 0;
-    }
-
-    .ai-bubble ul {
-      margin:
-        8px
-        0
-        8px
-        18px;
-    }
-
-    .ai-bubble li {
-      margin-bottom: 5px;
-    }
-
-    .ai-bubble strong {
-      color: #ffffff;
-    }
-
-    .ai-label {
-      color: #ae8aff;
-
-      font-size: 10px;
-
-      font-weight: 700;
-
-      margin-bottom: 6px;
-    }
-
-    /* =====================================================
-       MESSAGE ACTIONS
-       ===================================================== */
 
     .message-actions {
       display: flex;
-
       gap: 3px;
-
       margin-top: 6px;
     }
 
@@ -581,486 +735,605 @@
       height: 28px;
 
       border: none;
-
       border-radius: 8px;
 
       background: transparent;
-
-      color: #77718c;
-
-      font-size: 14px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      color: #77718f;
 
       cursor: pointer;
     }
 
-    .message-action:hover,
-    .message-action:active {
-      background: #211735;
-      color: #b894ff;
+    .message-action:hover {
+      background: #1c173c;
+      color: white;
     }
 
     /* =====================================================
        THINKING
-       ===================================================== */
+    ===================================================== */
 
     .thinking {
       display: flex;
-
       align-items: center;
-
       gap: 5px;
 
-      min-height: 20px;
+      min-height: 35px;
     }
 
-    .thinking-dot {
-      width: 6px;
-      height: 6px;
+    .thinking span {
+      width: 7px;
+      height: 7px;
 
       border-radius: 50%;
 
-      background: #9b69ff;
+      background: #a78bfa;
 
-      animation:
-        thinking 1.2s infinite ease-in-out;
+      animation: thinking 1.2s infinite;
     }
 
-    .thinking-dot:nth-child(2) {
-      animation-delay: 0.15s;
+    .thinking span:nth-child(2) {
+      animation-delay: .15s;
     }
 
-    .thinking-dot:nth-child(3) {
-      animation-delay: 0.3s;
+    .thinking span:nth-child(3) {
+      animation-delay: .30s;
     }
 
     @keyframes thinking {
-
-      0%,
-      60%,
-      100% {
-        opacity: 0.25;
+      0%, 60%, 100% {
+        opacity: .3;
         transform: translateY(0);
       }
 
       30% {
         opacity: 1;
-        transform: translateY(-3px);
+        transform: translateY(-4px);
       }
-
     }
 
     /* =====================================================
-       COMPOSER — ALWAYS AT BOTTOM
-       ===================================================== */
+       CHAT COMPOSER
+    ===================================================== */
 
-    .composer {
-      position: sticky;
+    .chat-composer {
+      position: fixed;
 
-      bottom: 74px;
+      left: 50%;
+      bottom: 76px;
 
-      z-index: 30;
+      transform: translateX(-50%);
 
-      padding: 9px;
+      width: min(100% - 24px, 760px);
 
-      margin:
-        0
-        12px
-        12px;
+      padding: 8px;
 
-      border-radius: 17px;
+      border-radius: 18px;
 
-      background:
-        rgba(26, 18, 48, 0.97);
+      background: rgba(19,16,44,.94);
+      border: 1px solid #342a5c;
 
-      border:
-        1px solid rgba(145, 93, 255, 0.22);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+
+      z-index: 40;
 
       box-shadow:
-        0 10px 30px rgba(0, 0, 0, 0.3);
-
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
+        0 -8px 30px rgba(0,0,0,.2);
     }
 
     .composer-row {
       display: flex;
-
       align-items: flex-end;
-
       gap: 7px;
     }
 
-    .chat-input {
+    .composer-input {
       flex: 1;
 
-      width: 100%;
-
       min-height: 43px;
-
-      max-height: 110px;
+      max-height: 120px;
 
       resize: none;
 
       border: none;
-
       outline: none;
 
       background: transparent;
 
-      color: #ffffff;
+      color: white;
 
-      padding:
-        11px
-        9px;
+      padding: 10px;
 
-      font-size: 13px;
-
+      font-size: 14px;
       line-height: 1.5;
     }
 
-    .chat-input::placeholder {
-      color: #716b84;
+    .composer-input::placeholder {
+      color: #6f6887;
     }
 
-    .send-button {
-      width: 43px;
-      height: 43px;
+    .composer-send {
+      width: 44px;
+      height: 44px;
 
-      flex: 0 0 43px;
+      flex: 0 0 44px;
 
       border: none;
-
       border-radius: 13px;
+
+      background: linear-gradient(
+        135deg,
+        #a855f7,
+        #7c3aed
+      );
+
+      color: white;
+      cursor: pointer;
+    }
+
+    /* =====================================================
+       HISTORY
+    ===================================================== */
+
+    .page-title {
+      font-size: 27px;
+      letter-spacing: -.8px;
+    }
+
+    .page-subtitle {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .history-list {
+      margin-top: 22px;
+
+      border: 1px solid var(--border);
+      border-radius: 18px;
+
+      overflow: hidden;
+    }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      padding: 15px;
+
+      background: #11102b;
+      border-bottom: 1px solid rgba(255,255,255,.05);
+
+      cursor: pointer;
+    }
+
+    .history-item:last-child {
+      border-bottom: none;
+    }
+
+    .history-icon {
+      width: 40px;
+      height: 40px;
+
+      flex: 0 0 40px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 12px;
+
+      background: #251653;
+    }
+
+    .history-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .history-title {
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .history-preview {
+      margin-top: 4px;
+
+      color: var(--muted);
+
+      font-size: 10px;
+
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .history-delete {
+      border: none;
+      background: transparent;
+      color: #77718f;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    /* =====================================================
+       TEMPLATES
+    ===================================================== */
+
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+
+      margin-top: 22px;
+    }
+
+    .template-card {
+      min-height: 135px;
+
+      padding: 16px;
+
+      border: 1px solid var(--border);
+      border-radius: 17px;
+
+      background: #11102b;
+
+      cursor: pointer;
+    }
+
+    .template-card:active {
+      transform: scale(.97);
+    }
+
+    .template-card-icon {
+      font-size: 24px;
+      margin-bottom: 12px;
+    }
+
+    .template-card h3 {
+      font-size: 13px;
+    }
+
+    .template-card p {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.5;
+    }
+
+    /* =====================================================
+       PROFILE
+    ===================================================== */
+
+    .profile-card {
+      margin-top: 22px;
+
+      padding: 20px;
+
+      text-align: center;
+
+      border: 1px solid var(--border);
+      border-radius: 20px;
+
+      background: #11102b;
+    }
+
+    .profile-avatar {
+      width: 72px;
+      height: 72px;
+
+      margin: 0 auto 12px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 22px;
 
       background:
         linear-gradient(
           135deg,
-          #914fff,
-          #6c32dc
+          #8b5cf6,
+          #6d28d9
         );
 
-      color: #ffffff;
+      font-size: 30px;
+    }
 
+    .profile-card h2 {
       font-size: 18px;
+    }
 
-      cursor: pointer;
+    .profile-card p {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .settings-list {
+      margin-top: 18px;
+
+      border: 1px solid var(--border);
+      border-radius: 18px;
+
+      overflow: hidden;
+    }
+
+    .setting-item {
+      width: 100%;
+
+      padding: 15px;
+
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      border: none;
+      border-bottom: 1px solid rgba(255,255,255,.05);
+
+      background: #11102b;
+      color: white;
+
+      text-align: left;
+    }
+
+    .setting-item:last-child {
+      border-bottom: none;
+    }
+
+    .setting-icon {
+      width: 35px;
+      height: 35px;
 
       display: flex;
       align-items: center;
       justify-content: center;
 
-      box-shadow:
-        0 6px 18px rgba(111, 49, 220, 0.3);
+      border-radius: 10px;
+
+      background: #21164b;
     }
 
-    .send-button:active {
-      transform: scale(0.93);
+    .setting-info {
+      flex: 1;
     }
 
-    .send-button:disabled {
-      opacity: 0.5;
-      transform: none;
+    .setting-name {
+      font-size: 12px;
     }
 
-    /* =====================================================
-       QUICK TOOLS
-       ===================================================== */
-
-    .section-heading {
-      display: flex;
-
-      align-items: center;
-
-      justify-content: space-between;
-
-      margin:
-        5px
-        2px
-        12px;
-    }
-
-    .section-heading h2 {
-      font-size: 17px;
-    }
-
-    .section-heading span {
-      color: #a678ff;
-
-      font-size: 11px;
-    }
-
-    .tools {
-      display: grid;
-
-      grid-template-columns:
-        repeat(2, 1fr);
-
-      gap: 10px;
-    }
-
-    .tool {
-      padding: 15px;
-
-      min-height: 118px;
-
-      border-radius: 17px;
-
-      background:
-        linear-gradient(
-          145deg,
-          rgba(31, 23, 57, 0.95),
-          rgba(18, 15, 36, 0.95)
-        );
-
-      border:
-        1px solid rgba(137, 94, 232, 0.15);
-
-      cursor: pointer;
-
-      transition:
-        transform 0.2s ease,
-        border-color 0.2s ease;
-    }
-
-    .tool:active {
-      transform: scale(0.97);
-    }
-
-    .tool-icon {
-      font-size: 23px;
-
-      margin-bottom: 10px;
-    }
-
-    .tool h3 {
-      font-size: 13px;
-
-      margin-bottom: 5px;
-    }
-
-    .tool p {
-      color: #8d879e;
-
-      font-size: 10px;
-
-      line-height: 1.5;
+    .setting-description {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 9px;
     }
 
     /* =====================================================
-       BOTTOM NAV
-       ===================================================== */
+       EMPTY
+    ===================================================== */
+
+    .empty-state {
+      padding: 50px 20px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .empty-icon {
+      font-size: 35px;
+      margin-bottom: 12px;
+    }
+
+    /* =====================================================
+       BOTTOM NAVIGATION
+    ===================================================== */
 
     .bottom-nav {
       position: fixed;
 
-      bottom: 0;
       left: 50%;
+      bottom: 0;
 
-      transform:
-        translateX(-50%);
+      transform: translateX(-50%);
 
-      width: 100%;
+      width: min(100%, 760px);
+      height: 67px;
 
-      max-width: 520px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
 
-      height: 70px;
+      background: rgba(13,10,31,.97);
 
-      padding-bottom:
-        env(safe-area-inset-bottom);
-
-      background:
-        rgba(10, 8, 22, 0.97);
-
-      border-top:
-        1px solid rgba(144, 95, 255, 0.14);
-
-      display: flex;
-
-      align-items: center;
-
-      justify-content: space-around;
-
-      z-index: 100;
+      border-top: 1px solid rgba(255,255,255,.08);
 
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
+
+      z-index: 60;
     }
 
-    .nav-item {
-      width: 25%;
-
-      height: 100%;
-
+    .nav-btn {
       border: none;
-
       background: transparent;
 
-      color: #706a80;
-
-      font-size: 10px;
+      color: #706a87;
 
       cursor: pointer;
 
+      font-size: 9px;
+    }
+
+    .nav-btn-icon {
+      display: block;
+
+      width: 30px;
+      height: 30px;
+
+      margin: 0 auto 2px;
+
       display: flex;
-
-      flex-direction: column;
-
       align-items: center;
-
       justify-content: center;
-
-      gap: 4px;
-    }
-
-    .nav-icon {
-      font-size: 19px;
-    }
-
-    .nav-item.active {
-      color: #a873ff;
-    }
-
-    /* =====================================================
-       COPY NOTICE
-       ===================================================== */
-
-    .copy-notice {
-      position: fixed;
-
-      left: 50%;
-
-      bottom: 90px;
-
-      transform:
-        translateX(-50%)
-        translateY(10px);
-
-      padding:
-        8px
-        13px;
 
       border-radius: 10px;
 
-      background: #24173e;
+      font-size: 17px;
+    }
 
-      border:
-        1px solid #59398c;
+    .nav-btn.active {
+      color: #a78bfa;
+    }
 
-      color: #ffffff;
+    .nav-btn.active .nav-btn-icon {
+      background: #251653;
+    }
+
+    /* =====================================================
+       TOAST
+    ===================================================== */
+
+    .toast {
+      position: fixed;
+
+      left: 50%;
+      bottom: 84px;
+
+      transform: translateX(-50%) translateY(10px);
+
+      padding: 9px 14px;
+
+      border-radius: 10px;
+
+      background: #211b3e;
+      border: 1px solid #3b2c68;
+
+      color: white;
 
       font-size: 11px;
 
       opacity: 0;
-
       pointer-events: none;
 
-      transition:
-        opacity 0.2s ease,
-        transform 0.2s ease;
+      transition: .2s ease;
 
-      z-index: 200;
+      z-index: 100;
     }
 
-    .copy-notice.show {
+    .toast.show {
       opacity: 1;
-
-      transform:
-        translateX(-50%)
-        translateY(0);
+      transform: translateX(-50%) translateY(0);
     }
 
     /* =====================================================
-       TABLET / DESKTOP
-       ===================================================== */
+       RESPONSIVE
+    ===================================================== */
 
     @media (min-width: 700px) {
 
-      .app {
-        max-width: 760px;
+      main {
+        padding-left: 30px;
+        padding-right: 30px;
       }
 
+      .tools-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      .template-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (min-width: 1000px) {
+
       main {
-        padding-left: 28px;
-        padding-right: 28px;
+        padding-left: 55px;
+        padding-right: 55px;
       }
 
       .bottom-nav {
-        max-width: 760px;
+        border-radius: 18px 18px 0 0;
       }
-
-      .chat-body {
-        max-height: 62vh;
-      }
-
     }
 
-    @media (min-width: 1100px) {
+    @media (max-width: 520px) {
 
-      .app {
-        max-width: 900px;
-      }
-
-      .bottom-nav {
-        max-width: 900px;
+      .topbar {
+        height: 64px;
+        padding: 0 15px;
       }
 
       main {
-        padding-left: 45px;
-        padding-right: 45px;
+        padding: 21px 14px 105px;
       }
 
-    }
+      .user-bubble {
+        max-width: 88%;
+      }
 
+      .ai-message-wrap {
+        max-width: calc(100% - 42px);
+      }
+
+      .chat-composer {
+        width: calc(100% - 18px);
+      }
+    }
   </style>
 </head>
 
 <body>
 
-  <div class="app">
+<div class="app">
 
-    <!-- ================= HEADER ================= -->
+  <!-- ===================================================
+       TOP BAR
+  ==================================================== -->
 
-    <header class="top-header">
+  <header class="topbar">
 
-      <div class="header-inner">
+    <div class="brand-area">
 
-        <div class="brand-area">
+      <div class="brand-logo">✦</div>
 
-          <div class="brand-logo">
-            ✦
-          </div>
-
-          <div>
-
-            <div class="brand-name">
-              Emogigs <span style="color:#a678ff;">AI</span>
-            </div>
-
-            <div class="brand-subtitle">
-              <span class="online-dot"></span>
-              Your AI Life OS
-            </div>
-
-          </div>
-
+      <div>
+        <div class="brand-name">
+          Emogigs <span style="color:#a78bfa;">AI</span>
         </div>
 
+        <div class="brand-subtitle">
+          <span class="online-dot"></span>
+          AI Life OS online
+        </div>
       </div>
 
-    </header>
+    </div>
+
+    <button
+      class="header-action"
+      id="headerNewChat"
+      aria-label="New chat"
+    >
+      ＋
+    </button>
+
+  </header>
 
 
-    <!-- ================= MAIN ================= -->
+  <main>
 
-    <main>
+    <!-- =================================================
+         HOME
+    ================================================== -->
 
-      <!-- HERO -->
+    <section
+      id="homeScreen"
+      class="screen active"
+    >
 
-      <section class="hero">
+      <div class="hero">
 
         <div class="hero-badge">
           ✦ Personal AI Life OS
@@ -1072,277 +1345,551 @@
         </h1>
 
         <p>
-          Learn, plan, create, grow and discover opportunities
-          with one intelligent assistant.
+          Learn, plan, create, grow and discover
+          opportunities with one intelligent assistant.
         </p>
-
-      </section>
-
-
-      <!-- ================= AI CHAT ================= -->
-
-      <section class="ai-card">
-
-        <!-- CHAT HEADER -->
-
-        <div class="chat-header">
-
-          <div class="chat-avatar">
-            ✦
-          </div>
-
-          <div>
-
-            <div class="chat-title">
-              Emogigs AI
-            </div>
-
-            <div class="chat-status">
-              Your intelligent personal assistant
-            </div>
-
-          </div>
-
-        </div>
-
-
-        <!-- CHAT MESSAGES -->
-
-        <div
-          id="chatHistory"
-          class="chat-body"
-        >
-
-          <div
-            id="chatEmpty"
-            class="chat-empty"
-          >
-
-            <div class="chat-empty-icon">
-              ✦
-            </div>
-
-            <h3>
-              How can I help you today?
-            </h3>
-
-            <p>
-              Ask me anything about learning,
-              work, planning, skills or your next goal.
-            </p>
-
-          </div>
-
-        </div>
-
-
-        <!-- ================= COMPOSER ================= -->
-
-        <div class="composer">
-
-          <div class="composer-row">
-
-            <textarea
-              id="userInput"
-              class="chat-input"
-              rows="1"
-              placeholder="Type your message..."
-              aria-label="Message Emogigs AI"
-            ></textarea>
-
-            <button
-              id="askButton"
-              class="send-button"
-              type="button"
-              aria-label="Send message"
-              title="Send"
-            >
-              ➤
-            </button>
-
-          </div>
-
-        </div>
-
-      </section>
-
-
-      <!-- ================= QUICK TOOLS ================= -->
-
-      <div class="section-heading">
-
-        <h2>
-          Quick Tools
-        </h2>
-
-        <span>
-          Explore
-        </span>
 
       </div>
 
 
-      <section class="tools">
+      <div class="home-ai-card">
 
-        <div
-          class="tool"
-          onclick="setPrompt('Create a learning plan for me')"
-        >
+        <div class="ai-card-top">
 
-          <div class="tool-icon">
-            📚
+          <div class="ai-small-avatar">
+            ✦
           </div>
 
-          <h3>
-            Learn
-          </h3>
+          <div>
+            <div class="ai-card-name">
+              Emogigs AI
+            </div>
 
-          <p>
-            Build new skills step by step.
-          </p>
+            <div class="ai-card-desc">
+              Your intelligent personal assistant
+            </div>
+          </div>
 
         </div>
 
 
-        <div
-          class="tool"
-          onclick="setPrompt('Help me find a remote work path')"
-        >
+        <div class="home-input-row">
 
-          <div class="tool-icon">
-            💼
-          </div>
+          <textarea
+            id="homeInput"
+            class="home-input"
+            rows="1"
+            placeholder="What do you want to learn, build or achieve?"
+          ></textarea>
 
-          <h3>
-            Work
-          </h3>
-
-          <p>
-            Find skills and work opportunities.
-          </p>
-
-        </div>
-
-
-        <div
-          class="tool"
-          onclick="setPrompt('Help me create a personal plan for today')"
-        >
-
-          <div class="tool-icon">
-            🎯
-          </div>
-
-          <h3>
-            Plan
-          </h3>
-
-          <p>
-            Organize goals and daily tasks.
-          </p>
+          <button
+            id="homeSend"
+            class="primary-send"
+          >
+            ➜
+          </button>
 
         </div>
 
+      </div>
 
-        <div
-          class="tool"
-          onclick="setPrompt('Help me improve my skills and career')"
+
+      <div class="section-head">
+
+        <h2>Quick Tools</h2>
+
+        <button
+          class="section-link"
+          data-screen="templatesScreen"
         >
+          View all
+        </button>
 
-          <div class="tool-icon">
-            🚀
-          </div>
+      </div>
 
-          <h3>
-            Grow
-          </h3>
 
-          <p>
-            Improve yourself every day.
-          </p>
+      <div class="tools-grid">
 
+        <button
+          class="tool-card"
+          data-template="Create a personalized learning plan for me"
+        >
+          <div class="tool-icon">📚</div>
+          <h3>Learn</h3>
+          <p>Build new skills step by step.</p>
+        </button>
+
+
+        <button
+          class="tool-card"
+          data-template="Help me find a realistic remote work and freelancing path"
+        >
+          <div class="tool-icon">💼</div>
+          <h3>Work</h3>
+          <p>Find skills, jobs and opportunities.</p>
+        </button>
+
+
+        <button
+          class="tool-card"
+          data-template="Create a practical plan for my day"
+        >
+          <div class="tool-icon">🎯</div>
+          <h3>Plan</h3>
+          <p>Organize goals and daily tasks.</p>
+        </button>
+
+
+        <button
+          class="tool-card"
+          data-template="Help me improve myself and my career step by step"
+        >
+          <div class="tool-icon">🚀</div>
+          <h3>Grow</h3>
+          <p>Improve yourself every day.</p>
+        </button>
+
+      </div>
+
+
+      <div class="assistant-card">
+
+        <div class="assistant-robot">
+          🤖
         </div>
 
-      </section>
+        <div>
+          <h3>Your AI Assistant</h3>
 
-    </main>
+          <p>
+            Powered by advanced AI to help you
+            learn, work, plan, create and grow.
+          </p>
+        </div>
 
-
-    <!-- ================= BOTTOM NAV ================= -->
-
-    <nav class="bottom-nav">
-
-      <button
-        class="nav-item active"
-        type="button"
-      >
-
-        <span class="nav-icon">
-          ⌂
-        </span>
-
-        Home
-
-      </button>
+      </div>
 
 
-      <button
-        class="nav-item"
-        type="button"
-      >
+      <div class="section-head">
 
-        <span class="nav-icon">
-          ◉
-        </span>
+        <h2>Recent Chats</h2>
 
-        Chats
+        <button
+          class="section-link"
+          data-screen="historyScreen"
+        >
+          View all
+        </button>
 
-      </button>
-
-
-      <button
-        class="nav-item"
-        type="button"
-      >
-
-        <span class="nav-icon">
-          ✦
-        </span>
-
-        Tools
-
-      </button>
+      </div>
 
 
-      <button
-        class="nav-item"
-        type="button"
-      >
+      <div
+        id="recentChats"
+        class="recent-list"
+      ></div>
 
-        <span class="nav-icon">
-          ◯
-        </span>
-
-        Profile
-
-      </button>
-
-    </nav>
+    </section>
 
 
-    <!-- COPY NOTICE -->
+    <!-- =================================================
+         CHAT
+    ================================================== -->
 
-    <div
-      id="copyNotice"
-      class="copy-notice"
+    <section
+      id="chatScreen"
+      class="screen chat-screen"
     >
-      Copied
-    </div>
 
-  </div>
+      <div class="chat-header">
+
+        <button
+          class="chat-back"
+          id="chatBack"
+        >
+          ←
+        </button>
+
+        <div class="chat-avatar">
+          ✦
+        </div>
+
+        <div class="chat-header-info">
+
+          <div class="chat-header-name">
+            Emogigs AI
+          </div>
+
+          <div class="chat-status">
+            ● Online
+          </div>
+
+        </div>
+
+        <button class="chat-menu">
+          ⋯
+        </button>
+
+      </div>
 
 
-  <script src="/script.js"></script>
+      <div
+        id="chatMessages"
+        class="chat-messages"
+      ></div>
+
+
+      <div class="chat-composer">
+
+        <div class="composer-row">
+
+          <textarea
+            id="chatInput"
+            class="composer-input"
+            rows="1"
+            placeholder="Type your message..."
+          ></textarea>
+
+          <button
+            id="chatSend"
+            class="composer-send"
+          >
+            ➜
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================
+         HISTORY
+    ================================================== -->
+
+    <section
+      id="historyScreen"
+      class="screen"
+    >
+
+      <h1 class="page-title">
+        Chat History
+      </h1>
+
+      <p class="page-subtitle">
+        Continue your previous conversations.
+      </p>
+
+      <div
+        id="historyList"
+        class="history-list"
+      ></div>
+
+    </section>
+
+
+    <!-- =================================================
+         TEMPLATES
+    ================================================== -->
+
+    <section
+      id="templatesScreen"
+      class="screen"
+    >
+
+      <h1 class="page-title">
+        New Chat & Templates
+      </h1>
+
+      <p class="page-subtitle">
+        Start with a ready-made AI workflow.
+      </p>
+
+      <div class="template-grid">
+
+        <button
+          class="template-card"
+          data-template="Create a 30-day learning roadmap for me"
+        >
+          <div class="template-card-icon">📚</div>
+          <h3>Learning Roadmap</h3>
+          <p>Build a structured learning journey.</p>
+        </button>
+
+
+        <button
+          class="template-card"
+          data-template="Help me create a freelancing career plan"
+        >
+          <div class="template-card-icon">💼</div>
+          <h3>Freelancing</h3>
+          <p>Plan your path toward online work.</p>
+        </button>
+
+
+        <button
+          class="template-card"
+          data-template="Help me create a career development plan"
+        >
+          <div class="template-card-icon">🚀</div>
+          <h3>Career Growth</h3>
+          <p>Improve skills and career direction.</p>
+        </button>
+
+
+        <button
+          class="template-card"
+          data-template="Create a productive daily plan for me"
+        >
+          <div class="template-card-icon">🎯</div>
+          <h3>Daily Planner</h3>
+          <p>Turn your goals into actionable tasks.</p>
+        </button>
+
+
+        <button
+          class="template-card"
+          data-template="Help me generate creative ideas for a project"
+        >
+          <div class="template-card-icon">💡</div>
+          <h3>Creative Ideas</h3>
+          <p>Brainstorm and develop new concepts.</p>
+        </button>
+
+
+        <button
+          class="template-card"
+          data-template="Help me solve a programming problem step by step"
+        >
+          <div class="template-card-icon">💻</div>
+          <h3>Coding</h3>
+          <p>Understand and build technical solutions.</p>
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================
+         PROFILE
+    ================================================== -->
+
+    <section
+      id="profileScreen"
+      class="screen"
+    >
+
+      <h1 class="page-title">
+        Profile & Settings
+      </h1>
+
+      <p class="page-subtitle">
+        Customize your Emogigs AI experience.
+      </p>
+
+
+      <div class="profile-card">
+
+        <div class="profile-avatar">
+          👤
+        </div>
+
+        <h2>Emogigs User</h2>
+
+        <p>
+          Personal AI Life OS
+        </p>
+
+      </div>
+
+
+      <div class="settings-list">
+
+        <button class="setting-item">
+
+          <div class="setting-icon">
+            🧠
+          </div>
+
+          <div class="setting-info">
+
+            <div class="setting-name">
+              AI Memory
+            </div>
+
+            <div class="setting-description">
+              Manage how Emogigs remembers your conversations.
+            </div>
+
+          </div>
+
+          <span>›</span>
+
+        </button>
+
+
+        <button class="setting-item">
+
+          <div class="setting-icon">
+            🎨
+          </div>
+
+          <div class="setting-info">
+
+            <div class="setting-name">
+              Appearance
+            </div>
+
+            <div class="setting-description">
+              Customize the look of your AI.
+            </div>
+
+          </div>
+
+          <span>›</span>
+
+        </button>
+
+
+        <button class="setting-item">
+
+          <div class="setting-icon">
+            🌐
+          </div>
+
+          <div class="setting-info">
+
+            <div class="setting-name">
+              Language
+            </div>
+
+            <div class="setting-description">
+              Choose your preferred language.
+            </div>
+
+          </div>
+
+          <span>›</span>
+
+        </button>
+
+
+        <button class="setting-item">
+
+          <div class="setting-icon">
+            🔒
+          </div>
+
+          <div class="setting-info">
+
+            <div class="setting-name">
+              Privacy
+            </div>
+
+            <div class="setting-description">
+              Manage your privacy preferences.
+            </div>
+
+          </div>
+
+          <span>›</span>
+
+        </button>
+
+
+        <button class="setting-item">
+
+          <div class="setting-icon">
+            ℹ️
+          </div>
+
+          <div class="setting-info">
+
+            <div class="setting-name">
+              About Emogigs AI
+            </div>
+
+            <div class="setting-description">
+              Your personal AI Life OS.
+            </div>
+
+          </div>
+
+          <span>›</span>
+
+        </button>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- ===================================================
+       BOTTOM NAV
+  ==================================================== -->
+
+  <nav class="bottom-nav">
+
+    <button
+      class="nav-btn active"
+      data-screen="homeScreen"
+    >
+      <span class="nav-btn-icon">⌂</span>
+      Home
+    </button>
+
+
+    <button
+      class="nav-btn"
+      data-screen="chatScreen"
+    >
+      <span class="nav-btn-icon">◌</span>
+      Chats
+    </button>
+
+
+    <button
+      class="nav-btn"
+      data-screen="templatesScreen"
+    >
+      <span class="nav-btn-icon">✦</span>
+      New Chat
+    </button>
+
+
+    <button
+      class="nav-btn"
+      data-screen="historyScreen"
+    >
+      <span class="nav-btn-icon">◫</span>
+      History
+    </button>
+
+
+    <button
+      class="nav-btn"
+      data-screen="profileScreen"
+    >
+      <span class="nav-btn-icon">♙</span>
+      Profile
+    </button>
+
+  </nav>
+
+
+  <div
+    id="toast"
+    class="toast"
+  ></div>
+
+</div>
+
+
+<script src="/script.js"></script>
 
 </body>
 </html>
