@@ -1,18 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
 
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
   >
 
-  <meta
-    name="theme-color"
-    content="#070712"
-  >
+  <meta name="theme-color" content="#090817">
 
   <meta
     name="description"
@@ -23,58 +19,40 @@
 
   <style>
 
+    /* =====================================================
+       EMOGIGS AI — STEP 16B
+       PREMIUM AI LIFE OS UI
+       ===================================================== */
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
 
-    :root {
-      --bg: #070712;
-      --surface: #0e0e1d;
-      --surface-2: #141326;
-      --surface-3: #1b1831;
-
-      --border: rgba(255,255,255,0.09);
-
-      --text: #ffffff;
-      --muted: #9291a8;
-
-      --primary: #8b5cf6;
-      --primary-2: #6ea8ff;
-
-      --user: linear-gradient(
-        135deg,
-        #7c3aed,
-        #4f46e5
-      );
-
-      --ai: #111021;
-    }
-
-    html {
-      scroll-behavior: smooth;
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
     }
 
     body {
       font-family:
-        Inter,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
         Arial,
+        Helvetica,
         sans-serif;
 
       background:
         radial-gradient(
-          circle at 50% -10%,
-          rgba(139,92,246,0.18),
-          transparent 38%
-        ),
-        var(--bg);
+          circle at top,
+          #21134a 0%,
+          #0d0b20 38%,
+          #070711 100%
+        );
 
-      color: var(--text);
+      color: #ffffff;
       min-height: 100vh;
+      overflow-x: hidden;
     }
 
     button,
@@ -86,48 +64,47 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* =========================
+    /* =====================================================
        APP
-    ========================= */
+       ===================================================== */
 
     .app {
       width: 100%;
-      min-height: 100vh;
       max-width: 520px;
-      margin: auto;
+      min-height: 100vh;
+      margin: 0 auto;
+
+      display: flex;
+      flex-direction: column;
 
       position: relative;
-
-      background:
-        linear-gradient(
-          180deg,
-          rgba(255,255,255,0.015),
-          transparent
-        );
     }
 
-    /* =========================
-       TOP BAR
-    ========================= */
+    /* =====================================================
+       HEADER
+       ===================================================== */
 
-    header {
+    .top-header {
       position: sticky;
       top: 0;
 
       z-index: 50;
 
-      padding: 16px 18px;
+      padding:
+        calc(14px + env(safe-area-inset-top))
+        17px
+        13px;
 
-      background:
-        rgba(7,7,18,0.82);
-
-      backdrop-filter: blur(18px);
+      background: rgba(9, 8, 23, 0.94);
 
       border-bottom:
-        1px solid var(--border);
+        1px solid rgba(155, 104, 255, 0.14);
+
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
     }
 
-    .topbar {
+    .header-inner {
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -140,189 +117,172 @@
     }
 
     .brand-logo {
-      width: 38px;
-      height: 38px;
+      width: 40px;
+      height: 40px;
 
-      border-radius: 12px;
+      border-radius: 13px;
 
       display: flex;
       align-items: center;
       justify-content: center;
 
+      font-size: 20px;
+
       background:
         linear-gradient(
           135deg,
-          #8b5cf6,
-          #4f46e5
+          #8b4dff,
+          #5e25d6
         );
 
       box-shadow:
-        0 0 25px rgba(139,92,246,0.35);
-
-      font-size: 18px;
+        0 7px 25px rgba(116, 61, 255, 0.35);
     }
 
-    .brand {
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing: -0.3px;
+    .brand-name {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
     }
 
-    .brand span {
-      color: #a78bfa;
+    .brand-subtitle {
+      margin-top: 2px;
+
+      font-size: 10px;
+
+      color: #9d98b6;
     }
 
-    .status {
-      display: flex;
-      align-items: center;
-      gap: 6px;
+    .online-dot {
+      display: inline-block;
 
-      color: #8f8da4;
-      font-size: 11px;
-    }
-
-    .status-dot {
-      width: 7px;
-      height: 7px;
+      width: 6px;
+      height: 6px;
 
       border-radius: 50%;
 
-      background: #22c55e;
+      background: #49e68b;
+
+      margin-right: 4px;
 
       box-shadow:
-        0 0 10px rgba(34,197,94,0.7);
+        0 0 8px rgba(73, 230, 139, 0.7);
     }
 
-    /* =========================
+    /* =====================================================
        MAIN
-    ========================= */
+       ===================================================== */
 
     main {
-      padding: 24px 16px 110px;
+      flex: 1;
+
+      padding:
+        22px
+        15px
+        125px;
     }
 
-    /* =========================
+    /* =====================================================
        HERO
-    ========================= */
+       ===================================================== */
 
     .hero {
-      margin-bottom: 24px;
+      margin-bottom: 22px;
     }
 
     .hero-badge {
       display: inline-flex;
+
       align-items: center;
-      gap: 7px;
 
       padding: 7px 11px;
 
-      border-radius: 999px;
+      border-radius: 20px;
 
       background:
-        rgba(139,92,246,0.10);
+        rgba(123, 69, 255, 0.12);
 
       border:
-        1px solid rgba(139,92,246,0.25);
+        1px solid rgba(151, 103, 255, 0.22);
 
-      color: #bca7ff;
+      color: #bda5ff;
 
-      font-size: 11px;
-      font-weight: 600;
+      font-size: 10px;
 
-      margin-bottom: 13px;
+      margin-bottom: 14px;
     }
 
     .hero h1 {
-      font-size: 30px;
-      line-height: 1.15;
+      font-size: 27px;
 
-      letter-spacing: -0.8px;
+      line-height: 1.2;
+
+      letter-spacing: -0.7px;
 
       margin-bottom: 9px;
     }
 
     .hero h1 span {
-      background:
-        linear-gradient(
-          90deg,
-          #a78bfa,
-          #6ea8ff
-        );
-
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: #a77aff;
     }
 
     .hero p {
-      color: var(--muted);
+      color: #aaa4bd;
 
-      font-size: 13px;
-      line-height: 1.6;
+      font-size: 12px;
+
+      line-height: 1.65;
 
       max-width: 390px;
     }
 
-    /* =========================
+    /* =====================================================
        AI CARD
-    ========================= */
+       ===================================================== */
 
     .ai-card {
-      position: relative;
-
       background:
         linear-gradient(
           145deg,
-          rgba(139,92,246,0.09),
-          rgba(17,16,33,0.96)
+          rgba(38, 23, 70, 0.96),
+          rgba(17, 14, 37, 0.98)
         );
 
       border:
-        1px solid rgba(139,92,246,0.22);
+        1px solid rgba(143, 92, 255, 0.24);
 
-      border-radius: 24px;
+      border-radius: 22px;
 
-      padding: 15px;
-
-      margin-bottom: 24px;
+      overflow: hidden;
 
       box-shadow:
-        0 20px 50px rgba(0,0,0,0.28);
+        0 18px 50px rgba(0, 0, 0, 0.25);
+
+      margin-bottom: 25px;
     }
 
-    .ai-card::before {
-      content: "";
+    /* =====================================================
+       CHAT HEADER
+       ===================================================== */
 
-      position: absolute;
-
-      width: 100px;
-      height: 100px;
-
-      top: -35px;
-      right: -30px;
-
-      background:
-        rgba(139,92,246,0.16);
-
-      filter: blur(35px);
-
-      border-radius: 50%;
-
-      pointer-events: none;
-    }
-
-    .ai-title {
+    .chat-header {
       display: flex;
+
       align-items: center;
+
       gap: 10px;
 
-      margin-bottom: 14px;
+      padding: 15px 16px;
+
+      border-bottom:
+        1px solid rgba(157, 103, 255, 0.12);
     }
 
-    .ai-icon {
-      width: 38px;
-      height: 38px;
+    .chat-avatar {
+      width: 37px;
+      height: 37px;
 
-      flex-shrink: 0;
+      flex: 0 0 37px;
 
       border-radius: 12px;
 
@@ -330,144 +290,119 @@
       align-items: center;
       justify-content: center;
 
+      font-size: 18px;
+
       background:
         linear-gradient(
           135deg,
-          #8b5cf6,
-          #4f46e5
+          #8d4dff,
+          #5b24d5
         );
 
       box-shadow:
-        0 0 20px rgba(139,92,246,0.25);
-
-      font-size: 18px;
+        0 5px 20px rgba(110, 60, 255, 0.3);
     }
 
-    .ai-title-text {
-      font-size: 14px;
+    .chat-title {
+      font-size: 13px;
       font-weight: 700;
     }
 
-    .ai-title-sub {
-      color: #77758c;
-      font-size: 10px;
-      margin-top: 2px;
+    .chat-status {
+      margin-top: 3px;
+
+      font-size: 9px;
+
+      color: #8e89a6;
     }
 
-    /* =========================
-       INPUT
-    ========================= */
+    /* =====================================================
+       CHAT BODY
+       ===================================================== */
 
-    .input-shell {
-      background:
-        rgba(5,5,15,0.75);
+    .chat-body {
+      display: flex;
 
-      border:
-        1px solid rgba(255,255,255,0.08);
+      flex-direction: column;
+
+      gap: 15px;
+
+      padding: 15px;
+
+      max-height: 58vh;
+
+      overflow-y: auto;
+
+      scroll-behavior: smooth;
+    }
+
+    .chat-body::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .chat-body::-webkit-scrollbar-thumb {
+      background: #392b5d;
+      border-radius: 10px;
+    }
+
+    /* =====================================================
+       EMPTY STATE
+       ===================================================== */
+
+    .chat-empty {
+      text-align: center;
+
+      padding: 30px 12px 25px;
+
+      color: #9891ad;
+    }
+
+    .chat-empty-icon {
+      width: 52px;
+      height: 52px;
+
+      margin: 0 auto 11px;
 
       border-radius: 17px;
 
-      padding: 10px;
-
-      transition: 0.2s ease;
-    }
-
-    .input-shell:focus-within {
-      border-color:
-        rgba(139,92,246,0.55);
-
-      box-shadow:
-        0 0 0 3px
-        rgba(139,92,246,0.08);
-    }
-
-    #userInput {
-      width: 100%;
-
-      min-height: 74px;
-      max-height: 160px;
-
-      resize: none;
-
-      border: none;
-      outline: none;
-
-      background: transparent;
-
-      color: white;
-
-      padding: 6px;
-
-      font-size: 13px;
-      line-height: 1.55;
-    }
-
-    #userInput::placeholder {
-      color: #66657a;
-    }
-
-    .input-bottom {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
 
-      margin-top: 4px;
-    }
-
-    .input-hint {
-      color: #5f5d73;
-      font-size: 10px;
-    }
-
-    .ask-btn {
-      border: none;
-
-      min-width: 76px;
-      height: 36px;
-
-      padding: 0 14px;
-
-      border-radius: 11px;
+      font-size: 23px;
 
       background:
         linear-gradient(
           135deg,
-          #8b5cf6,
-          #6366f1
+          #352064,
+          #1b1634
         );
 
-      color: white;
-
-      font-size: 12px;
-      font-weight: 700;
-
-      cursor: pointer;
-
-      box-shadow:
-        0 8px 20px
-        rgba(99,102,241,0.25);
-
-      transition: 0.2s ease;
+      color: #b996ff;
     }
 
-    .ask-btn:active {
-      transform: scale(0.96);
+    .chat-empty h3 {
+      color: #ffffff;
+
+      font-size: 14px;
+
+      margin-bottom: 6px;
     }
 
-    .ask-btn:disabled {
-      opacity: 0.5;
+    .chat-empty p {
+      font-size: 11px;
+
+      line-height: 1.6;
     }
 
-    /* =========================
-       CHAT
-    ========================= */
+    /* =====================================================
+       MESSAGE
+       ===================================================== */
 
-    #chatHistory {
-      margin-top: 15px;
-    }
+    .message {
+      display: flex;
 
-    .chat-message {
-      margin: 13px 0;
+      width: 100%;
 
       animation:
         messageIn 0.25s ease;
@@ -477,7 +412,7 @@
 
       from {
         opacity: 0;
-        transform: translateY(7px);
+        transform: translateY(8px);
       }
 
       to {
@@ -487,79 +422,375 @@
 
     }
 
-    .user-message {
-      display: flex;
+    .message.user {
       justify-content: flex-end;
     }
 
-    .ai-message {
-      display: flex;
+    .message.ai {
       justify-content: flex-start;
+
+      align-items: flex-start;
+
+      gap: 8px;
     }
 
-    .message-label {
-      display: none;
-    }
+    /* =====================================================
+       USER MESSAGE
+       ===================================================== */
 
-    .message-text {
-      max-width: 92%;
+    .user-bubble {
+      max-width: 84%;
 
-      padding: 12px 14px;
+      padding: 11px 14px;
 
-      border-radius: 17px;
+      border-radius:
+        17px
+        17px
+        5px
+        17px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #7741e9,
+          #6531d0
+        );
+
+      color: #ffffff;
 
       font-size: 13px;
 
-      line-height: 1.6;
+      line-height: 1.55;
 
       white-space: pre-wrap;
 
       word-break: break-word;
-    }
-
-    .user-message .message-text {
-      background: var(--user);
-
-      color: white;
-
-      border-bottom-right-radius: 5px;
 
       box-shadow:
-        0 8px 25px
-        rgba(79,70,229,0.18);
+        0 7px 20px rgba(93, 42, 210, 0.22);
     }
 
-    .ai-message .message-text {
-      background: var(--ai);
+    /* =====================================================
+       AI MESSAGE
+       ===================================================== */
 
-      border:
-        1px solid rgba(255,255,255,0.08);
+    .ai-message-avatar {
+      width: 31px;
+      height: 31px;
 
-      color: #dddbea;
+      flex: 0 0 31px;
 
-      border-bottom-left-radius: 5px;
-    }
+      border-radius: 10px;
 
-    /* =========================
-       QUICK ACTIONS
-    ========================= */
-
-    .section-head {
       display: flex;
       align-items: center;
+      justify-content: center;
+
+      font-size: 15px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #392066,
+          #24133e
+        );
+
+      color: #c7aaff;
+
+      margin-top: 2px;
+    }
+
+    .ai-message-wrapper {
+      max-width: calc(100% - 39px);
+    }
+
+    .ai-bubble {
+      background:
+        rgba(9, 8, 24, 0.78);
+
+      border:
+        1px solid rgba(147, 100, 255, 0.18);
+
+      border-radius:
+        5px
+        17px
+        17px
+        17px;
+
+      padding: 13px 14px;
+
+      color: #e5e1ef;
+
+      font-size: 13px;
+
+      line-height: 1.7;
+
+      white-space: normal;
+
+      word-break: break-word;
+    }
+
+    .ai-bubble p {
+      margin-bottom: 10px;
+    }
+
+    .ai-bubble p:last-child {
+      margin-bottom: 0;
+    }
+
+    .ai-bubble ul {
+      margin:
+        8px
+        0
+        8px
+        18px;
+    }
+
+    .ai-bubble li {
+      margin-bottom: 5px;
+    }
+
+    .ai-bubble strong {
+      color: #ffffff;
+    }
+
+    .ai-label {
+      color: #ae8aff;
+
+      font-size: 10px;
+
+      font-weight: 700;
+
+      margin-bottom: 6px;
+    }
+
+    /* =====================================================
+       MESSAGE ACTIONS
+       ===================================================== */
+
+    .message-actions {
+      display: flex;
+
+      gap: 3px;
+
+      margin-top: 6px;
+    }
+
+    .message-action {
+      width: 30px;
+      height: 28px;
+
+      border: none;
+
+      border-radius: 8px;
+
+      background: transparent;
+
+      color: #77718c;
+
+      font-size: 14px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      cursor: pointer;
+    }
+
+    .message-action:hover,
+    .message-action:active {
+      background: #211735;
+      color: #b894ff;
+    }
+
+    /* =====================================================
+       THINKING
+       ===================================================== */
+
+    .thinking {
+      display: flex;
+
+      align-items: center;
+
+      gap: 5px;
+
+      min-height: 20px;
+    }
+
+    .thinking-dot {
+      width: 6px;
+      height: 6px;
+
+      border-radius: 50%;
+
+      background: #9b69ff;
+
+      animation:
+        thinking 1.2s infinite ease-in-out;
+    }
+
+    .thinking-dot:nth-child(2) {
+      animation-delay: 0.15s;
+    }
+
+    .thinking-dot:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+
+    @keyframes thinking {
+
+      0%,
+      60%,
+      100% {
+        opacity: 0.25;
+        transform: translateY(0);
+      }
+
+      30% {
+        opacity: 1;
+        transform: translateY(-3px);
+      }
+
+    }
+
+    /* =====================================================
+       COMPOSER — ALWAYS AT BOTTOM
+       ===================================================== */
+
+    .composer {
+      position: sticky;
+
+      bottom: 74px;
+
+      z-index: 30;
+
+      padding: 9px;
+
+      margin:
+        0
+        12px
+        12px;
+
+      border-radius: 17px;
+
+      background:
+        rgba(26, 18, 48, 0.97);
+
+      border:
+        1px solid rgba(145, 93, 255, 0.22);
+
+      box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.3);
+
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+    }
+
+    .composer-row {
+      display: flex;
+
+      align-items: flex-end;
+
+      gap: 7px;
+    }
+
+    .chat-input {
+      flex: 1;
+
+      width: 100%;
+
+      min-height: 43px;
+
+      max-height: 110px;
+
+      resize: none;
+
+      border: none;
+
+      outline: none;
+
+      background: transparent;
+
+      color: #ffffff;
+
+      padding:
+        11px
+        9px;
+
+      font-size: 13px;
+
+      line-height: 1.5;
+    }
+
+    .chat-input::placeholder {
+      color: #716b84;
+    }
+
+    .send-button {
+      width: 43px;
+      height: 43px;
+
+      flex: 0 0 43px;
+
+      border: none;
+
+      border-radius: 13px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #914fff,
+          #6c32dc
+        );
+
+      color: #ffffff;
+
+      font-size: 18px;
+
+      cursor: pointer;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      box-shadow:
+        0 6px 18px rgba(111, 49, 220, 0.3);
+    }
+
+    .send-button:active {
+      transform: scale(0.93);
+    }
+
+    .send-button:disabled {
+      opacity: 0.5;
+      transform: none;
+    }
+
+    /* =====================================================
+       QUICK TOOLS
+       ===================================================== */
+
+    .section-heading {
+      display: flex;
+
+      align-items: center;
+
       justify-content: space-between;
 
-      margin-bottom: 12px;
+      margin:
+        5px
+        2px
+        12px;
     }
 
-    .section-head h2 {
+    .section-heading h2 {
       font-size: 17px;
-      letter-spacing: -0.2px;
     }
 
-    .section-head span {
-      color: #68667b;
-      font-size: 10px;
+    .section-heading span {
+      color: #a678ff;
+
+      font-size: 11px;
     }
 
     .tools {
@@ -572,23 +803,21 @@
     }
 
     .tool {
-      position: relative;
-
-      min-height: 125px;
-
       padding: 15px;
 
-      border-radius: 19px;
+      min-height: 118px;
+
+      border-radius: 17px;
 
       background:
         linear-gradient(
           145deg,
-          #111021,
-          #0c0c18
+          rgba(31, 23, 57, 0.95),
+          rgba(18, 15, 36, 0.95)
         );
 
       border:
-        1px solid rgba(255,255,255,0.07);
+        1px solid rgba(137, 94, 232, 0.15);
 
       cursor: pointer;
 
@@ -597,29 +826,14 @@
         border-color 0.2s ease;
     }
 
-    .tool:hover {
-      transform: translateY(-2px);
-
-      border-color:
-        rgba(139,92,246,0.35);
+    .tool:active {
+      transform: scale(0.97);
     }
 
     .tool-icon {
-      width: 37px;
-      height: 37px;
+      font-size: 23px;
 
-      border-radius: 12px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      background:
-        rgba(139,92,246,0.13);
-
-      margin-bottom: 12px;
-
-      font-size: 18px;
+      margin-bottom: 10px;
     }
 
     .tool h3 {
@@ -629,134 +843,157 @@
     }
 
     .tool p {
-      color: #77758b;
+      color: #8d879e;
 
       font-size: 10px;
 
-      line-height: 1.45;
+      line-height: 1.5;
     }
 
-    /* =========================
+    /* =====================================================
        BOTTOM NAV
-    ========================= */
+       ===================================================== */
 
-    nav {
+    .bottom-nav {
       position: fixed;
 
-      left: 50%;
       bottom: 0;
+      left: 50%;
 
       transform:
         translateX(-50%);
 
       width: 100%;
+
       max-width: 520px;
 
-      height: 68px;
+      height: 70px;
+
+      padding-bottom:
+        env(safe-area-inset-bottom);
+
+      background:
+        rgba(10, 8, 22, 0.97);
+
+      border-top:
+        1px solid rgba(144, 95, 255, 0.14);
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-around;
 
       z-index: 100;
 
-      display: flex;
-
-      align-items: center;
-      justify-content: space-around;
-
-      background:
-        rgba(9,9,20,0.90);
-
-      backdrop-filter:
-        blur(20px);
-
-      border-top:
-        1px solid rgba(255,255,255,0.07);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
     }
 
     .nav-item {
-      position: relative;
+      width: 25%;
 
-      width: 60px;
+      height: 100%;
 
       border: none;
-      background: none;
 
-      color: #66647a;
+      background: transparent;
 
-      font-size: 9px;
+      color: #706a80;
+
+      font-size: 10px;
 
       cursor: pointer;
 
-      text-align: center;
+      display: flex;
+
+      flex-direction: column;
+
+      align-items: center;
+
+      justify-content: center;
+
+      gap: 4px;
     }
 
     .nav-icon {
-      display: flex;
-
-      align-items: center;
-      justify-content: center;
-
-      width: 32px;
-      height: 32px;
-
-      margin:
-        0 auto 3px;
-
-      border-radius: 10px;
-
-      font-size: 17px;
+      font-size: 19px;
     }
 
     .nav-item.active {
-      color: #a78bfa;
+      color: #a873ff;
     }
 
-    .nav-item.active .nav-icon {
-      background:
-        rgba(139,92,246,0.14);
+    /* =====================================================
+       COPY NOTICE
+       ===================================================== */
+
+    .copy-notice {
+      position: fixed;
+
+      left: 50%;
+
+      bottom: 90px;
+
+      transform:
+        translateX(-50%)
+        translateY(10px);
+
+      padding:
+        8px
+        13px;
+
+      border-radius: 10px;
+
+      background: #24173e;
+
+      border:
+        1px solid #59398c;
+
+      color: #ffffff;
+
+      font-size: 11px;
+
+      opacity: 0;
+
+      pointer-events: none;
+
+      transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
+
+      z-index: 200;
     }
 
-    /* =========================
-       DESKTOP
-    ========================= */
+    .copy-notice.show {
+      opacity: 1;
+
+      transform:
+        translateX(-50%)
+        translateY(0);
+    }
+
+    /* =====================================================
+       TABLET / DESKTOP
+       ===================================================== */
 
     @media (min-width: 700px) {
 
       .app {
-        max-width: 900px;
-      }
-
-      header {
-        padding-left: 30px;
-        padding-right: 30px;
+        max-width: 760px;
       }
 
       main {
-        padding:
-          40px 30px 110px;
+        padding-left: 28px;
+        padding-right: 28px;
       }
 
-      .hero h1 {
-        font-size: 38px;
+      .bottom-nav {
+        max-width: 760px;
       }
 
-      .hero p {
-        font-size: 14px;
-      }
-
-      .ai-card {
-        padding: 20px;
-      }
-
-      .tools {
-        grid-template-columns:
-          repeat(4, 1fr);
-      }
-
-      .tool {
-        min-height: 140px;
-      }
-
-      nav {
-        max-width: 900px;
+      .chat-body {
+        max-height: 62vh;
       }
 
     }
@@ -764,12 +1001,11 @@
     @media (min-width: 1100px) {
 
       .app {
-        max-width: 1100px;
+        max-width: 900px;
       }
 
-      header {
-        padding-left: 45px;
-        padding-right: 45px;
+      .bottom-nav {
+        max-width: 900px;
       }
 
       main {
@@ -777,300 +1013,336 @@
         padding-right: 45px;
       }
 
-      nav {
-        max-width: 1100px;
-      }
-
     }
 
   </style>
-
 </head>
 
 <body>
 
-<div class="app">
+  <div class="app">
 
-  <!-- =========================
-       HEADER
-  ========================== -->
+    <!-- ================= HEADER ================= -->
 
-  <header>
+    <header class="top-header">
 
-    <div class="topbar">
+      <div class="header-inner">
 
-      <div class="brand-area">
+        <div class="brand-area">
 
-        <div class="brand-logo">
-          ✦
-        </div>
-
-        <div>
-
-          <div class="brand">
-            Emogigs <span>AI</span>
+          <div class="brand-logo">
+            ✦
           </div>
 
-          <div class="status">
-            <span class="status-dot"></span>
-            AI Life OS online
-          </div>
+          <div>
 
-        </div>
+            <div class="brand-name">
+              Emogigs <span style="color:#a678ff;">AI</span>
+            </div>
 
-      </div>
+            <div class="brand-subtitle">
+              <span class="online-dot"></span>
+              Your AI Life OS
+            </div>
 
-    </div>
-
-  </header>
-
-
-  <!-- =========================
-       MAIN
-  ========================== -->
-
-  <main>
-
-    <!-- HERO -->
-
-    <section class="hero">
-
-      <div class="hero-badge">
-        ✦ Personal AI Life OS
-      </div>
-
-      <h1>
-        Your AI.
-        <span>Your next move.</span>
-      </h1>
-
-      <p>
-        Learn, plan, create, grow and discover
-        opportunities with one intelligent assistant.
-      </p>
-
-    </section>
-
-
-    <!-- =========================
-         AI ASSISTANT
-    ========================== -->
-
-    <section class="ai-card">
-
-      <div class="ai-title">
-
-        <div class="ai-icon">
-          ✦
-        </div>
-
-        <div>
-
-          <div class="ai-title-text">
-            Emogigs AI
-          </div>
-
-          <div class="ai-title-sub">
-            Your intelligent personal assistant
           </div>
 
         </div>
 
       </div>
 
+    </header>
 
-      <div class="input-shell">
 
-        <textarea
-          id="userInput"
-          placeholder="What do you want to learn, build or achieve?"
-        ></textarea>
+    <!-- ================= MAIN ================= -->
 
-        <div class="input-bottom">
+    <main>
 
-          <div class="input-hint">
-            Enter to send • Shift + Enter for new line
+      <!-- HERO -->
+
+      <section class="hero">
+
+        <div class="hero-badge">
+          ✦ Personal AI Life OS
+        </div>
+
+        <h1>
+          Your AI.
+          <span>Your next move.</span>
+        </h1>
+
+        <p>
+          Learn, plan, create, grow and discover opportunities
+          with one intelligent assistant.
+        </p>
+
+      </section>
+
+
+      <!-- ================= AI CHAT ================= -->
+
+      <section class="ai-card">
+
+        <!-- CHAT HEADER -->
+
+        <div class="chat-header">
+
+          <div class="chat-avatar">
+            ✦
           </div>
 
-          <button
-            class="ask-btn"
-            id="askButton"
+          <div>
+
+            <div class="chat-title">
+              Emogigs AI
+            </div>
+
+            <div class="chat-status">
+              Your intelligent personal assistant
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- CHAT MESSAGES -->
+
+        <div
+          id="chatHistory"
+          class="chat-body"
+        >
+
+          <div
+            id="chatEmpty"
+            class="chat-empty"
           >
-            Ask AI
-          </button>
+
+            <div class="chat-empty-icon">
+              ✦
+            </div>
+
+            <h3>
+              How can I help you today?
+            </h3>
+
+            <p>
+              Ask me anything about learning,
+              work, planning, skills or your next goal.
+            </p>
+
+          </div>
 
         </div>
+
+
+        <!-- ================= COMPOSER ================= -->
+
+        <div class="composer">
+
+          <div class="composer-row">
+
+            <textarea
+              id="userInput"
+              class="chat-input"
+              rows="1"
+              placeholder="Type your message..."
+              aria-label="Message Emogigs AI"
+            ></textarea>
+
+            <button
+              id="askButton"
+              class="send-button"
+              type="button"
+              aria-label="Send message"
+              title="Send"
+            >
+              ➤
+            </button>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ================= QUICK TOOLS ================= -->
+
+      <div class="section-heading">
+
+        <h2>
+          Quick Tools
+        </h2>
+
+        <span>
+          Explore
+        </span>
 
       </div>
 
 
-      <div
-        id="chatHistory"
-        class="chat-history"
-      ></div>
+      <section class="tools">
 
-    </section>
+        <div
+          class="tool"
+          onclick="setPrompt('Create a learning plan for me')"
+        >
+
+          <div class="tool-icon">
+            📚
+          </div>
+
+          <h3>
+            Learn
+          </h3>
+
+          <p>
+            Build new skills step by step.
+          </p>
+
+        </div>
 
 
-    <!-- =========================
-         QUICK TOOLS
-    ========================== -->
+        <div
+          class="tool"
+          onclick="setPrompt('Help me find a remote work path')"
+        >
 
-    <div class="section-head">
+          <div class="tool-icon">
+            💼
+          </div>
 
-      <h2>
-        Your Life OS
-      </h2>
+          <h3>
+            Work
+          </h3>
 
-      <span>
-        Quick access
-      </span>
+          <p>
+            Find skills and work opportunities.
+          </p>
 
+        </div>
+
+
+        <div
+          class="tool"
+          onclick="setPrompt('Help me create a personal plan for today')"
+        >
+
+          <div class="tool-icon">
+            🎯
+          </div>
+
+          <h3>
+            Plan
+          </h3>
+
+          <p>
+            Organize goals and daily tasks.
+          </p>
+
+        </div>
+
+
+        <div
+          class="tool"
+          onclick="setPrompt('Help me improve my skills and career')"
+        >
+
+          <div class="tool-icon">
+            🚀
+          </div>
+
+          <h3>
+            Grow
+          </h3>
+
+          <p>
+            Improve yourself every day.
+          </p>
+
+        </div>
+
+      </section>
+
+    </main>
+
+
+    <!-- ================= BOTTOM NAV ================= -->
+
+    <nav class="bottom-nav">
+
+      <button
+        class="nav-item active"
+        type="button"
+      >
+
+        <span class="nav-icon">
+          ⌂
+        </span>
+
+        Home
+
+      </button>
+
+
+      <button
+        class="nav-item"
+        type="button"
+      >
+
+        <span class="nav-icon">
+          ◉
+        </span>
+
+        Chats
+
+      </button>
+
+
+      <button
+        class="nav-item"
+        type="button"
+      >
+
+        <span class="nav-icon">
+          ✦
+        </span>
+
+        Tools
+
+      </button>
+
+
+      <button
+        class="nav-item"
+        type="button"
+      >
+
+        <span class="nav-icon">
+          ◯
+        </span>
+
+        Profile
+
+      </button>
+
+    </nav>
+
+
+    <!-- COPY NOTICE -->
+
+    <div
+      id="copyNotice"
+      class="copy-notice"
+    >
+      Copied
     </div>
 
-
-    <section class="tools">
-
-      <div
-        class="tool"
-        onclick="setPrompt('Create a personalized learning plan for me')"
-      >
-
-        <div class="tool-icon">
-          📚
-        </div>
-
-        <h3>
-          Learn
-        </h3>
-
-        <p>
-          Build skills with a personalized learning path.
-        </p>
-
-      </div>
+  </div>
 
 
-      <div
-        class="tool"
-        onclick="setPrompt('Help me find a remote work path based on my skills')"
-      >
-
-        <div class="tool-icon">
-          💼
-        </div>
-
-        <h3>
-          Work
-        </h3>
-
-        <p>
-          Explore skills, jobs and remote opportunities.
-        </p>
-
-      </div>
-
-
-      <div
-        class="tool"
-        onclick="setPrompt('Create a practical plan for my goals today')"
-      >
-
-        <div class="tool-icon">
-          🎯
-        </div>
-
-        <h3>
-          Plan
-        </h3>
-
-        <p>
-          Turn goals into simple daily actions.
-        </p>
-
-      </div>
-
-
-      <div
-        class="tool"
-        onclick="setPrompt('Create a step by step plan to improve my skills and career')"
-      >
-
-        <div class="tool-icon">
-          🚀
-        </div>
-
-        <h3>
-          Grow
-        </h3>
-
-        <p>
-          Improve your skills and move toward your goals.
-        </p>
-
-      </div>
-
-    </section>
-
-  </main>
-
-
-  <!-- =========================
-       NAVIGATION
-  ========================== -->
-
-  <nav>
-
-    <button class="nav-item active">
-
-      <span class="nav-icon">
-        ⌂
-      </span>
-
-      Home
-
-    </button>
-
-
-    <button class="nav-item">
-
-      <span class="nav-icon">
-        ✦
-      </span>
-
-      AI
-
-    </button>
-
-
-    <button class="nav-item">
-
-      <span class="nav-icon">
-        ◈
-      </span>
-
-      Work
-
-    </button>
-
-
-    <button class="nav-item">
-
-      <span class="nav-icon">
-        ☻
-      </span>
-
-      Profile
-
-    </button>
-
-  </nav>
-
-</div>
-
-
-<script src="/script.js"></script>
+  <script src="/script.js"></script>
 
 </body>
-
 </html>
