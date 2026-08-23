@@ -1,293 +1,939 @@
+/* =========================================================
+   EMOGIGS AI — STEP 16B
+   NEXT LEVEL CONVERSATION ENGINE
+   ========================================================= */
+
 let isSending = false;
 
 const STORAGE_KEY = "emogigs_chat_history";
 
+/* =========================================================
+   1. CHAT HISTORY
+   ========================================================= */
+
 function getChatHistory() {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    const saved = localStorage.getItem(STORAGE_KEY);
+
+    if (!saved) {
+      return [];
+    }
+
+    const history = JSON.parse(saved);
+
+    return Array.isArray(history) ? history : [];
+
   } catch (error) {
-    console.error("Emogigs AI: Could not load chat history.", error);
+    console.error(
+      "Emogigs AI: Could not load chat history.",
+      error
+    );
+
     return [];
   }
 }
 
 function saveChatHistory(history) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(history)
+    );
+
   } catch (error) {
-    console.error("Emogigs AI: Could not save chat history.", error);
+    console.error(
+      "Emogigs AI: Could not save chat history.",
+      error
+    );
   }
 }
 
-function addMessage(role, content) {
-  const chatHistory = document.getElementById("chatHistory");
 
-  if (!chatHistory) {
-    console.error("Emogigs AI: chatHistory not found.");
-    return;
-  }
+/* =========================================================
+   2. SAFE TEXT
+   ========================================================= */
+
+function createTextElement(className, text) {
+  const element = document.createElement("div");
+
+  element.className = className;
+  element.textContent = text;
+
+  return element;
+}
+
+
+/* =========================================================
+   3. USER MESSAGE
+   ========================================================= */
+
+function createUserMessage(content) {
 
   const message = document.createElement("div");
 
   message.className =
-    role === "user"
-      ? "chat-message user-message"
-      : "chat-message ai-message";
+    "chat-message user";
 
-  const label = document.createElement("div");
-  label.className = "message-label";
-  label.textContent =
-    role === "user" ? "You" : "Emogigs AI";
+  const bubble =
+    document.createElement("div");
 
-  const text = document.createElement("div");
-  text.className = "message-text";
-  text.textContent = content;
+  bubble.className =
+    "user-bubble";
 
-  message.appendChild(label);
-  message.appendChild(text);
+  bubble.textContent =
+    content;
 
-  chatHistory.appendChild(message);
+  message.appendChild(bubble);
 
-  chatHistory.scrollTop = chatHistory.scrollHeight;
+  return message;
 }
 
-function renderChatHistory() {
-  const chatHistory = document.getElementById("chatHistory");
 
-  if (!chatHistory) {
-    console.error("Emogigs AI: chatHistory not found.");
+/* =========================================================
+   4. AI MESSAGE
+   ========================================================= */
+
+function createAIMessage(content) {
+
+  const message =
+    document.createElement("div");
+
+  message.className =
+    "chat-message ai";
+
+  /* AI avatar */
+
+  const avatar =
+    document.createElement("div");
+
+  avatar.className =
+    "ai-avatar";
+
+  avatar.textContent =
+    "✦";
+
+
+  /* Main wrapper */
+
+  const wrapper =
+    document.createElement("div");
+
+  wrapper.className =
+    "ai-message-wrapper";
+
+
+  /* AI bubble */
+
+  const bubble =
+    document.createElement("div");
+
+  bubble.className =
+    "ai-bubble";
+
+  bubble.textContent =
+    content;
+
+
+  /* Action buttons */
+
+  const actions =
+    document.createElement("div");
+
+  actions.className =
+    "message-actions";
+
+
+  /* Copy */
+
+  const copyButton =
+    document.createElement("button");
+
+  copyButton.className =
+    "message-action";
+
+  copyButton.type =
+    "button";
+
+  copyButton.title =
+    "Copy";
+
+  copyButton.textContent =
+    "📋";
+
+
+  copyButton.addEventListener(
+    "click",
+    async () => {
+
+      try {
+
+        await navigator.clipboard.writeText(
+          content
+        );
+
+        copyButton.textContent =
+          "✓";
+
+        setTimeout(() => {
+          copyButton.textContent =
+            "📋";
+        }, 1200);
+
+      } catch (error) {
+
+        console.error(
+          "Emogigs AI: Copy failed.",
+          error
+        );
+
+      }
+
+    }
+  );
+
+
+  actions.appendChild(
+    copyButton
+  );
+
+
+  wrapper.appendChild(
+    bubble
+  );
+
+  wrapper.appendChild(
+    actions
+  );
+
+
+  message.appendChild(
+    avatar
+  );
+
+  message.appendChild(
+    wrapper
+  );
+
+
+  return message;
+}
+
+
+/* =========================================================
+   5. THINKING MESSAGE
+   ========================================================= */
+
+function createThinkingMessage() {
+
+  const message =
+    document.createElement("div");
+
+  message.className =
+    "chat-message ai";
+
+  message.dataset.thinking =
+    "true";
+
+
+  const avatar =
+    document.createElement("div");
+
+  avatar.className =
+    "ai-avatar";
+
+  avatar.textContent =
+    "✦";
+
+
+  const wrapper =
+    document.createElement("div");
+
+  wrapper.className =
+    "ai-message-wrapper";
+
+
+  const bubble =
+    document.createElement("div");
+
+  bubble.className =
+    "ai-bubble thinking-bubble";
+
+
+  for (let i = 0; i < 3; i++) {
+
+    const dot =
+      document.createElement("span");
+
+    dot.className =
+      "thinking-dot";
+
+    bubble.appendChild(
+      dot
+    );
+  }
+
+
+  wrapper.appendChild(
+    bubble
+  );
+
+  message.appendChild(
+    avatar
+  );
+
+  message.appendChild(
+    wrapper
+  );
+
+
+  return message;
+}
+
+
+/* =========================================================
+   6. ADD MESSAGE TO CHAT
+   ========================================================= */
+
+function addMessage(role, content) {
+
+  const chatHistoryElement =
+    document.getElementById(
+      "chatHistory"
+    );
+
+  if (!chatHistoryElement) {
+
+    console.error(
+      "Emogigs AI: chatHistory not found."
+    );
+
+    return null;
+  }
+
+
+  let message;
+
+
+  if (role === "user") {
+
+    message =
+      createUserMessage(
+        content
+      );
+
+  } else {
+
+    message =
+      createAIMessage(
+        content
+      );
+  }
+
+
+  chatHistoryElement.appendChild(
+    message
+  );
+
+
+  scrollChatToBottom();
+
+
+  return message;
+}
+
+
+/* =========================================================
+   7. ADD THINKING
+   ========================================================= */
+
+function addThinkingMessage() {
+
+  const chatHistoryElement =
+    document.getElementById(
+      "chatHistory"
+    );
+
+  if (!chatHistoryElement) {
+    return null;
+  }
+
+
+  const message =
+    createThinkingMessage();
+
+
+  chatHistoryElement.appendChild(
+    message
+  );
+
+
+  scrollChatToBottom();
+
+
+  return message;
+}
+
+
+/* =========================================================
+   8. REMOVE THINKING
+   ========================================================= */
+
+function removeThinkingMessage() {
+
+  const chatHistoryElement =
+    document.getElementById(
+      "chatHistory"
+    );
+
+  if (!chatHistoryElement) {
     return;
   }
 
-  chatHistory.innerHTML = "";
 
-  const history = getChatHistory();
+  const thinkingMessage =
+    chatHistoryElement.querySelector(
+      '[data-thinking="true"]'
+    );
 
-  history.forEach(item => {
-    addMessage(item.role, item.content);
+
+  if (thinkingMessage) {
+
+    thinkingMessage.remove();
+
+  }
+}
+
+
+/* =========================================================
+   9. SCROLL CHAT
+   ========================================================= */
+
+function scrollChatToBottom() {
+
+  const chatHistoryElement =
+    document.getElementById(
+      "chatHistory"
+    );
+
+  if (!chatHistoryElement) {
+    return;
+  }
+
+
+  requestAnimationFrame(() => {
+
+    chatHistoryElement.scrollTop =
+      chatHistoryElement.scrollHeight;
+
+    window.scrollTo({
+      top: document.body.scrollHeight,
+      behavior: "smooth"
+    });
+
   });
 }
 
-function setPrompt(text) {
-  const input = document.getElementById("userInput");
 
-  if (!input) {
-    console.error("Emogigs AI: userInput not found.");
+/* =========================================================
+   10. RENDER SAVED HISTORY
+   ========================================================= */
+
+function renderChatHistory() {
+
+  const chatHistoryElement =
+    document.getElementById(
+      "chatHistory"
+    );
+
+  if (!chatHistoryElement) {
+
+    console.error(
+      "Emogigs AI: chatHistory not found."
+    );
+
     return;
   }
 
-  input.value = text;
-  input.focus();
+
+  chatHistoryElement.innerHTML =
+    "";
+
+
+  const history =
+    getChatHistory();
+
+
+  history.forEach(item => {
+
+    if (
+      !item ||
+      !item.role ||
+      !item.content
+    ) {
+      return;
+    }
+
+
+    if (
+      item.role === "user"
+    ) {
+
+      addMessage(
+        "user",
+        item.content
+      );
+
+    } else if (
+      item.role === "assistant"
+    ) {
+
+      addMessage(
+        "assistant",
+        item.content
+      );
+
+    }
+
+  });
+
+
+  if (history.length > 0) {
+
+    setTimeout(
+      scrollChatToBottom,
+      100
+    );
+
+  }
 }
 
-async function askEmogigs() {
-  const input = document.getElementById("userInput");
-  const button = document.getElementById("askButton");
+
+/* =========================================================
+   11. SET PROMPT
+   ========================================================= */
+
+function setPrompt(text) {
+
+  const input =
+    document.getElementById(
+      "userInput"
+    );
 
   if (!input) {
-    console.error("Emogigs AI: userInput not found.");
+
+    console.error(
+      "Emogigs AI: userInput not found."
+    );
+
     return;
   }
+
+
+  input.value =
+    text;
+
+  input.focus();
+
+
+  /* Put cursor at the end */
+
+  try {
+
+    input.selectionStart =
+      input.value.length;
+
+    input.selectionEnd =
+      input.value.length;
+
+  } catch (error) {
+    // Some browsers may not support selection
+  }
+}
+
+
+/* =========================================================
+   12. ASK EMOGIGS AI
+   ========================================================= */
+
+async function askEmogigs() {
+
+  const input =
+    document.getElementById(
+      "userInput"
+    );
+
+  const button =
+    document.getElementById(
+      "askButton"
+    );
+
+
+  if (!input) {
+
+    console.error(
+      "Emogigs AI: userInput not found."
+    );
+
+    return;
+  }
+
 
   if (!button) {
-    console.error("Emogigs AI: askButton not found.");
+
+    console.error(
+      "Emogigs AI: askButton not found."
+    );
+
     return;
   }
 
-  const text = input.value.trim();
+
+  const text =
+    input.value.trim();
+
 
   if (!text) {
+
     input.focus();
+
     return;
   }
+
 
   if (isSending) {
     return;
   }
 
-  isSending = true;
 
-  button.disabled = true;
-  button.textContent = "Thinking...";
+  isSending =
+    true;
 
-  // Show user's message immediately
-  addMessage("user", text);
 
-  const history = getChatHistory();
+  /* Disable button */
+
+  button.disabled =
+    true;
+
+  button.textContent =
+    "Thinking...";
+
+
+  /* =====================================================
+     SHOW USER MESSAGE IMMEDIATELY
+     ===================================================== */
+
+  addMessage(
+    "user",
+    text
+  );
+
+
+  /* =====================================================
+     SAVE USER MESSAGE
+     ===================================================== */
+
+  const history =
+    getChatHistory();
+
 
   history.push({
+
     role: "user",
+
     content: text
+
   });
 
-  saveChatHistory(history);
 
-  // Clear input for the next question
-  input.value = "";
+  saveChatHistory(
+    history
+  );
+
+
+  /* =====================================================
+     CLEAR INPUT
+     ===================================================== */
+
+  input.value =
+    "";
+
   input.focus();
 
-  // Temporary thinking message
-  addMessage("assistant", "Emogigs AI is thinking...");
+
+  /* =====================================================
+     SHOW THINKING
+     ===================================================== */
+
+  addThinkingMessage();
+
 
   try {
-    console.log("Emogigs AI: Sending request...");
 
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        message: text
-      })
-    });
+    console.log(
+      "Emogigs AI: Sending request..."
+    );
+
+
+    /* ===================================================
+       API REQUEST
+       =================================================== */
+
+    const res =
+      await fetch(
+        "/api/chat",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+            message: text
+          })
+        }
+      );
+
 
     console.log(
       "Emogigs AI: Server response:",
       res.status
     );
 
-    const data = await res.json();
+
+    let data;
+
+
+    try {
+
+      data =
+        await res.json();
+
+    } catch (jsonError) {
+
+      throw new Error(
+        "Invalid server response."
+      );
+
+    }
+
 
     console.log(
       "Emogigs AI: Response data:",
       data
     );
 
+
     if (!res.ok) {
+
       throw new Error(
-        data.error || "Server returned an error."
+        data.error ||
+        "Server returned an error."
       );
+
     }
+
 
     const reply =
-      data.reply || "No response received.";
+      data.reply ||
+      "No response received.";
 
-    // Remove temporary thinking message
-    const chatHistory =
-      document.getElementById("chatHistory");
 
-    if (chatHistory) {
-      const messages =
-        chatHistory.querySelectorAll(
-          ".ai-message"
-        );
+    /* ===================================================
+       REMOVE THINKING
+       =================================================== */
 
-      const lastMessage =
-        messages[messages.length - 1];
+    removeThinkingMessage();
 
-      if (
-        lastMessage &&
-        lastMessage.querySelector(".message-text")
-          ?.textContent ===
-          "Emogigs AI is thinking..."
-      ) {
-        lastMessage.remove();
-      }
-    }
 
-    // Add actual AI response
-    addMessage("assistant", reply);
+    /* ===================================================
+       SHOW AI RESPONSE
+       =================================================== */
 
-    // Save AI response
-    const updatedHistory = getChatHistory();
+    addMessage(
+      "assistant",
+      reply
+    );
+
+
+    /* ===================================================
+       SAVE AI RESPONSE
+       =================================================== */
+
+    const updatedHistory =
+      getChatHistory();
+
 
     updatedHistory.push({
+
       role: "assistant",
+
       content: reply
+
     });
 
-    saveChatHistory(updatedHistory);
+
+    saveChatHistory(
+      updatedHistory
+    );
+
 
   } catch (error) {
+
     console.error(
       "EMOGIGS AI ERROR:",
       error
     );
 
-    // Remove thinking message
-    const chatHistory =
-      document.getElementById("chatHistory");
 
-    if (chatHistory) {
-      const messages =
-        chatHistory.querySelectorAll(
-          ".ai-message"
-        );
+    /* Remove thinking */
 
-      const lastMessage =
-        messages[messages.length - 1];
+    removeThinkingMessage();
 
-      if (
-        lastMessage &&
-        lastMessage.querySelector(".message-text")
-          ?.textContent ===
-          "Emogigs AI is thinking..."
-      ) {
-        lastMessage.remove();
-      }
-    }
 
     const errorMessage =
       "Sorry, I couldn't connect to Emogigs AI right now.";
 
-    addMessage("assistant", errorMessage);
+
+    addMessage(
+      "assistant",
+      errorMessage
+    );
+
 
   } finally {
-    isSending = false;
 
-    button.disabled = false;
-    button.textContent = "Ask AI";
+    isSending =
+      false;
+
+
+    button.disabled =
+      false;
+
+    button.textContent =
+      "Ask AI";
+
 
     input.focus();
+
   }
 }
+
+
+/* =========================================================
+   13. ENTER KEY
+   ========================================================= */
+
+function setupInput() {
+
+  const input =
+    document.getElementById(
+      "userInput"
+    );
+
+
+  if (!input) {
+    return;
+  }
+
+
+  input.addEventListener(
+    "keydown",
+    event => {
+
+      if (
+        event.key === "Enter" &&
+        !event.shiftKey
+      ) {
+
+        event.preventDefault();
+
+        askEmogigs();
+
+      }
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   14. START EMOGIGS AI
+   ========================================================= */
 
 document.addEventListener(
   "DOMContentLoaded",
   () => {
+
     const input =
-      document.getElementById("userInput");
+      document.getElementById(
+        "userInput"
+      );
 
     const button =
-      document.getElementById("askButton");
+      document.getElementById(
+        "askButton"
+      );
+
+    const chatHistory =
+      document.getElementById(
+        "chatHistory"
+      );
+
 
     if (!input) {
+
       console.error(
         "Emogigs AI: userInput not found."
       );
+
       return;
     }
 
+
     if (!button) {
+
       console.error(
         "Emogigs AI: askButton not found."
       );
+
       return;
     }
+
+
+    if (!chatHistory) {
+
+      console.error(
+        "Emogigs AI: chatHistory not found."
+      );
+
+      return;
+    }
+
+
+    /* Button */
 
     button.addEventListener(
       "click",
       askEmogigs
     );
 
-    input.addEventListener(
-      "keydown",
-      event => {
-        if (
-          event.key === "Enter" &&
-          !event.shiftKey
-        ) {
-          event.preventDefault();
-          askEmogigs();
-        }
-      }
-    );
+
+    /* Keyboard */
+
+    setupInput();
+
+
+    /* Restore conversation */
 
     renderChatHistory();
 
+
     console.log(
-      "Emogigs AI frontend loaded successfully."
+      "Emogigs AI Step 16B loaded successfully."
     );
+
   }
 );
