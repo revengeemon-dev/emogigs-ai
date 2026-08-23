@@ -1,829 +1,1076 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0b1020">
-  <meta name="description" content="Emogigs AI - Your personal AI Life OS">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="theme-color"
+    content="#070712"
+  >
+
+  <meta
+    name="description"
+    content="Emogigs AI - Your personal AI Life OS"
+  >
+
   <title>Emogigs AI</title>
 
   <style>
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
 
+    :root {
+      --bg: #070712;
+      --surface: #0e0e1d;
+      --surface-2: #141326;
+      --surface-3: #1b1831;
+
+      --border: rgba(255,255,255,0.09);
+
+      --text: #ffffff;
+      --muted: #9291a8;
+
+      --primary: #8b5cf6;
+      --primary-2: #6ea8ff;
+
+      --user: linear-gradient(
+        135deg,
+        #7c3aed,
+        #4f46e5
+      );
+
+      --ai: #111021;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #0b1020;
-      color: #ffffff;
+      font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+      background:
+        radial-gradient(
+          circle at 50% -10%,
+          rgba(139,92,246,0.18),
+          transparent 38%
+        ),
+        var(--bg);
+
+      color: var(--text);
       min-height: 100vh;
     }
+
+    button,
+    textarea {
+      font-family: inherit;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* =========================
+       APP
+    ========================= */
 
     .app {
       width: 100%;
-      max-width: 520px;
       min-height: 100vh;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
+      max-width: 520px;
+      margin: auto;
+
+      position: relative;
+
+      background:
+        linear-gradient(
+          180deg,
+          rgba(255,255,255,0.015),
+          transparent
+        );
     }
 
+    /* =========================
+       TOP BAR
+    ========================= */
+
     header {
-      padding: 22px 18px 14px;
-      border-bottom: 1px solid #202840;
-      background: #0b1020;
       position: sticky;
       top: 0;
-      z-index: 10;
+
+      z-index: 50;
+
+      padding: 16px 18px;
+
+      background:
+        rgba(7,7,18,0.82);
+
+      backdrop-filter: blur(18px);
+
+      border-bottom:
+        1px solid var(--border);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+
+      border-radius: 12px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      background:
+        linear-gradient(
+          135deg,
+          #8b5cf6,
+          #4f46e5
+        );
+
+      box-shadow:
+        0 0 25px rgba(139,92,246,0.35);
+
+      font-size: 18px;
     }
 
     .brand {
-      font-size: 24px;
-      font-weight: 700;
-      letter-spacing: 0.3px;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
     }
 
     .brand span {
-      color: #6ea8ff;
+      color: #a78bfa;
     }
 
-    .subtitle {
-      margin-top: 5px;
-      color: #9aa6bd;
-      font-size: 13px;
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      color: #8f8da4;
+      font-size: 11px;
     }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+
+      border-radius: 50%;
+
+      background: #22c55e;
+
+      box-shadow:
+        0 0 10px rgba(34,197,94,0.7);
+    }
+
+    /* =========================
+       MAIN
+    ========================= */
 
     main {
-      flex: 1;
-      padding: 20px 16px 100px;
+      padding: 24px 16px 110px;
     }
 
-    .welcome {
-      margin-bottom: 22px;
+    /* =========================
+       HERO
+    ========================= */
+
+    .hero {
+      margin-bottom: 24px;
     }
 
-    .welcome h1 {
-      font-size: 28px;
-      line-height: 1.2;
-      margin-bottom: 8px;
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+
+      padding: 7px 11px;
+
+      border-radius: 999px;
+
+      background:
+        rgba(139,92,246,0.10);
+
+      border:
+        1px solid rgba(139,92,246,0.25);
+
+      color: #bca7ff;
+
+      font-size: 11px;
+      font-weight: 600;
+
+      margin-bottom: 13px;
     }
 
-    .welcome p {
-      color: #9aa6bd;
-      font-size: 14px;
-      line-height: 1.5;
+    .hero h1 {
+      font-size: 30px;
+      line-height: 1.15;
+
+      letter-spacing: -0.8px;
+
+      margin-bottom: 9px;
     }
+
+    .hero h1 span {
+      background:
+        linear-gradient(
+          90deg,
+          #a78bfa,
+          #6ea8ff
+        );
+
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      color: var(--muted);
+
+      font-size: 13px;
+      line-height: 1.6;
+
+      max-width: 390px;
+    }
+
+    /* =========================
+       AI CARD
+    ========================= */
 
     .ai-card {
-      background: #121a2d;
-      border: 1px solid #25304a;
-      border-radius: 18px;
-      padding: 18px;
-      margin-bottom: 20px;
+      position: relative;
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(139,92,246,0.09),
+          rgba(17,16,33,0.96)
+        );
+
+      border:
+        1px solid rgba(139,92,246,0.22);
+
+      border-radius: 24px;
+
+      padding: 15px;
+
+      margin-bottom: 24px;
+
+      box-shadow:
+        0 20px 50px rgba(0,0,0,0.28);
+    }
+
+    .ai-card::before {
+      content: "";
+
+      position: absolute;
+
+      width: 100px;
+      height: 100px;
+
+      top: -35px;
+      right: -30px;
+
+      background:
+        rgba(139,92,246,0.16);
+
+      filter: blur(35px);
+
+      border-radius: 50%;
+
+      pointer-events: none;
     }
 
     .ai-title {
       display: flex;
       align-items: center;
       gap: 10px;
+
       margin-bottom: 14px;
-      font-size: 17px;
-      font-weight: 700;
     }
 
     .ai-icon {
       width: 38px;
       height: 38px;
+
+      flex-shrink: 0;
+
       border-radius: 12px;
+
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #1d3159;
-      font-size: 20px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #8b5cf6,
+          #4f46e5
+        );
+
+      box-shadow:
+        0 0 20px rgba(139,92,246,0.25);
+
+      font-size: 18px;
     }
 
-    textarea {
+    .ai-title-text {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .ai-title-sub {
+      color: #77758c;
+      font-size: 10px;
+      margin-top: 2px;
+    }
+
+    /* =========================
+       INPUT
+    ========================= */
+
+    .input-shell {
+      background:
+        rgba(5,5,15,0.75);
+
+      border:
+        1px solid rgba(255,255,255,0.08);
+
+      border-radius: 17px;
+
+      padding: 10px;
+
+      transition: 0.2s ease;
+    }
+
+    .input-shell:focus-within {
+      border-color:
+        rgba(139,92,246,0.55);
+
+      box-shadow:
+        0 0 0 3px
+        rgba(139,92,246,0.08);
+    }
+
+    #userInput {
       width: 100%;
-      min-height: 110px;
-      resize: vertical;
-      border: 1px solid #2a3652;
-      border-radius: 14px;
-      background: #0b1020;
-      color: #ffffff;
-      padding: 14px;
+
+      min-height: 74px;
+      max-height: 160px;
+
+      resize: none;
+
+      border: none;
       outline: none;
-      font-size: 15px;
-      line-height: 1.5;
+
+      background: transparent;
+
+      color: white;
+
+      padding: 6px;
+
+      font-size: 13px;
+      line-height: 1.55;
     }
 
-    textarea:focus {
-      border-color: #6ea8ff;
+    #userInput::placeholder {
+      color: #66657a;
+    }
+
+    .input-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      margin-top: 4px;
+    }
+
+    .input-hint {
+      color: #5f5d73;
+      font-size: 10px;
     }
 
     .ask-btn {
-      width: 100%;
-      margin-top: 12px;
-      padding: 14px;
       border: none;
-      border-radius: 13px;
-      background: #6ea8ff;
-      color: #07101f;
-      font-size: 15px;
+
+      min-width: 76px;
+      height: 36px;
+
+      padding: 0 14px;
+
+      border-radius: 11px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #8b5cf6,
+          #6366f1
+        );
+
+      color: white;
+
+      font-size: 12px;
       font-weight: 700;
+
       cursor: pointer;
+
+      box-shadow:
+        0 8px 20px
+        rgba(99,102,241,0.25);
+
+      transition: 0.2s ease;
     }
 
     .ask-btn:active {
-      transform: scale(0.99);
+      transform: scale(0.96);
     }
 
-    .response {
+    .ask-btn:disabled {
+      opacity: 0.5;
+    }
+
+    /* =========================
+       CHAT
+    ========================= */
+
+    #chatHistory {
+      margin-top: 15px;
+    }
+
+    .chat-message {
+      margin: 13px 0;
+
+      animation:
+        messageIn 0.25s ease;
+    }
+
+    @keyframes messageIn {
+
+      from {
+        opacity: 0;
+        transform: translateY(7px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+    }
+
+    .user-message {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .ai-message {
+      display: flex;
+      justify-content: flex-start;
+    }
+
+    .message-label {
       display: none;
-      margin-top: 14px;
-      padding: 14px;
-      border-radius: 13px;
-      background: #0b1020;
-      border: 1px solid #26324b;
-      color: #d9e1f2;
-      line-height: 1.6;
-      font-size: 14px;
     }
 
-    .section-title {
-      font-size: 18px;
-      margin: 24px 0 12px;
+    .message-text {
+      max-width: 92%;
+
+      padding: 12px 14px;
+
+      border-radius: 17px;
+
+      font-size: 13px;
+
+      line-height: 1.6;
+
+      white-space: pre-wrap;
+
+      word-break: break-word;
+    }
+
+    .user-message .message-text {
+      background: var(--user);
+
+      color: white;
+
+      border-bottom-right-radius: 5px;
+
+      box-shadow:
+        0 8px 25px
+        rgba(79,70,229,0.18);
+    }
+
+    .ai-message .message-text {
+      background: var(--ai);
+
+      border:
+        1px solid rgba(255,255,255,0.08);
+
+      color: #dddbea;
+
+      border-bottom-left-radius: 5px;
+    }
+
+    /* =========================
+       QUICK ACTIONS
+    ========================= */
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      margin-bottom: 12px;
+    }
+
+    .section-head h2 {
+      font-size: 17px;
+      letter-spacing: -0.2px;
+    }
+
+    .section-head span {
+      color: #68667b;
+      font-size: 10px;
     }
 
     .tools {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
+
+      grid-template-columns:
+        repeat(2, 1fr);
+
+      gap: 10px;
     }
 
     .tool {
-      padding: 16px;
-      border-radius: 16px;
-      background: #121a2d;
-      border: 1px solid #25304a;
+      position: relative;
+
+      min-height: 125px;
+
+      padding: 15px;
+
+      border-radius: 19px;
+
+      background:
+        linear-gradient(
+          145deg,
+          #111021,
+          #0c0c18
+        );
+
+      border:
+        1px solid rgba(255,255,255,0.07);
+
       cursor: pointer;
+
+      transition:
+        transform 0.2s ease,
+        border-color 0.2s ease;
+    }
+
+    .tool:hover {
+      transform: translateY(-2px);
+
+      border-color:
+        rgba(139,92,246,0.35);
     }
 
     .tool-icon {
-      font-size: 24px;
-      margin-bottom: 10px;
+      width: 37px;
+      height: 37px;
+
+      border-radius: 12px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      background:
+        rgba(139,92,246,0.13);
+
+      margin-bottom: 12px;
+
+      font-size: 18px;
     }
 
     .tool h3 {
-      font-size: 15px;
+      font-size: 13px;
+
       margin-bottom: 5px;
     }
 
     .tool p {
-      color: #8f9bb2;
-      font-size: 12px;
-      line-height: 1.4;
+      color: #77758b;
+
+      font-size: 10px;
+
+      line-height: 1.45;
     }
+
+    /* =========================
+       BOTTOM NAV
+    ========================= */
 
     nav {
       position: fixed;
-      bottom: 0;
+
       left: 50%;
-      transform: translateX(-50%);
+      bottom: 0;
+
+      transform:
+        translateX(-50%);
+
       width: 100%;
       max-width: 520px;
-      height: 70px;
-      background: #0f1628;
-      border-top: 1px solid #202840;
+
+      height: 68px;
+
+      z-index: 100;
+
       display: flex;
-      justify-content: space-around;
+
       align-items: center;
-      z-index: 20;
+      justify-content: space-around;
+
+      background:
+        rgba(9,9,20,0.90);
+
+      backdrop-filter:
+        blur(20px);
+
+      border-top:
+        1px solid rgba(255,255,255,0.07);
     }
 
     .nav-item {
-      background: none;
+      position: relative;
+
+      width: 60px;
+
       border: none;
-      color: #7f8ba3;
-      font-size: 11px;
+      background: none;
+
+      color: #66647a;
+
+      font-size: 9px;
+
       cursor: pointer;
+
       text-align: center;
     }
 
-    .nav-item.active {
-      color: #6ea8ff;
-    }
-
     .nav-icon {
-      display: block;
-      font-size: 21px;
-      margin-bottom: 4px;
+      display: flex;
+
+      align-items: center;
+      justify-content: center;
+
+      width: 32px;
+      height: 32px;
+
+      margin:
+        0 auto 3px;
+
+      border-radius: 10px;
+
+      font-size: 17px;
     }
 
-    @media (min-width: 521px) {
-      nav {
-        border-radius: 18px 18px 0 0;
+    .nav-item.active {
+      color: #a78bfa;
+    }
+
+    .nav-item.active .nav-icon {
+      background:
+        rgba(139,92,246,0.14);
+    }
+
+    /* =========================
+       DESKTOP
+    ========================= */
+
+    @media (min-width: 700px) {
+
+      .app {
+        max-width: 900px;
       }
+
+      header {
+        padding-left: 30px;
+        padding-right: 30px;
+      }
+
+      main {
+        padding:
+          40px 30px 110px;
+      }
+
+      .hero h1 {
+        font-size: 38px;
+      }
+
+      .hero p {
+        font-size: 14px;
+      }
+
+      .ai-card {
+        padding: 20px;
+      }
+
+      .tools {
+        grid-template-columns:
+          repeat(4, 1fr);
+      }
+
+      .tool {
+        min-height: 140px;
+      }
+
+      nav {
+        max-width: 900px;
+      }
+
     }
-/* ================================
-   EMOGIGS AI - PROFESSIONAL CHAT UI
-   Step 15B
-================================ */
 
-.response {
-  display: none;
-  margin-top: 18px;
-  padding: 0;
-  background: transparent;
-  border: none;
-  color: #d9e1f2;
-  line-height: 1.6;
-  font-size: 14px;
-  max-height: 58vh;
-  overflow-y: auto;
-  scroll-behavior: smooth;
-}
+    @media (min-width: 1100px) {
 
-.response::-webkit-scrollbar {
-  width: 5px;
-}
+      .app {
+        max-width: 1100px;
+      }
 
-.response::-webkit-scrollbar-thumb {
-  background: #2a3652;
-  border-radius: 10px;
-}
+      header {
+        padding-left: 45px;
+        padding-right: 45px;
+      }
 
-.response > div {
-  animation: messageAppear 0.25s ease;
-}
+      main {
+        padding-left: 45px;
+        padding-right: 45px;
+      }
 
-@keyframes messageAppear {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
+      nav {
+        max-width: 1100px;
+      }
 
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+    }
 
-.chat-user {
-  display: flex;
-  justify-content: flex-end;
-  margin: 14px 0;
-}
-
-.chat-user-bubble {
-  max-width: 88%;
-  padding: 12px 15px;
-  border-radius: 18px 18px 5px 18px;
-  background: #1d3159;
-  color: #ffffff;
-  line-height: 1.55;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.chat-ai {
-  display: flex;
-  justify-content: flex-start;
-  margin: 14px 0;
-}
-
-.chat-ai-container {
-  max-width: 94%;
-  width: 100%;
-}
-
-.chat-ai-bubble {
-  padding: 14px 15px;
-  border-radius: 18px 18px 18px 5px;
-  background: #121a2d;
-  border: 1px solid #25304a;
-  color: #d9e1f2;
-  line-height: 1.65;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.chat-name {
-  font-size: 12px;
-  font-weight: 700;
-  margin-bottom: 6px;
-  color: #6ea8ff;
-}
-
-.chat-ai-name {
-  color: #ffffff;
-}
-
-.chat-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 8px;
-}
-
-.chat-action-btn {
-  padding: 7px 10px;
-  border: 1px solid #25304a;
-  border-radius: 9px;
-  background: #0f1628;
-  color: #aeb9ce;
-  font-size: 12px;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.chat-action-btn:hover {
-  background: #1d3159;
-  color: #ffffff;
-}
-
-.chat-action-btn:active {
-  transform: scale(0.96);
-}
-
-.chat-thinking {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 12px 15px;
-  color: #9aa6bd;
-  font-size: 13px;
-}
-
-.chat-thinking span {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #6ea8ff;
-  animation: thinkingDot 1.2s infinite ease-in-out;
-}
-
-.chat-thinking span:nth-child(2) {
-  animation-delay: 0.15s;
-}
-
-.chat-thinking span:nth-child(3) {
-  animation-delay: 0.3s;
-}
-
-@keyframes thinkingDot {
-  0%,
-  60%,
-  100% {
-    opacity: 0.3;
-    transform: translateY(0);
-  }
-
-  30% {
-    opacity: 1;
-    transform: translateY(-3px);
-  }
-}
-
-@media (max-width: 520px) {
-  .chat-user-bubble {
-    max-width: 92%;
-  }
-
-  .chat-ai-container {
-    max-width: 96%;
-  }
-
-  .chat-action-btn {
-    font-size: 11px;
-    padding: 6px 8px;
-  }
-}
-/* =========================================================
-   EMOGIGS AI — NEXT LEVEL CHAT UI
-   STEP 16A
-   ========================================================= */
-
-.chat-container {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  margin-top: 18px;
-}
-
-.chat-message {
-  display: flex;
-  width: 100%;
-  animation: messageIn 0.25s ease;
-}
-
-@keyframes messageIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.chat-message.user {
-  justify-content: flex-end;
-}
-
-.user-bubble {
-  max-width: 86%;
-  background: #6ea8ff;
-  color: #07101f;
-  padding: 12px 15px;
-  border-radius: 18px 18px 5px 18px;
-  font-size: 14px;
-  line-height: 1.55;
-  word-wrap: break-word;
-  white-space: pre-wrap;
-}
-
-.chat-message.ai {
-  justify-content: flex-start;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.ai-avatar {
-  flex: 0 0 34px;
-  width: 34px;
-  height: 34px;
-  border-radius: 11px;
-  background: #1d3159;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 17px;
-  margin-top: 2px;
-}
-
-.ai-message-wrapper {
-  max-width: calc(100% - 44px);
-}
-
-.ai-bubble {
-  background: #0b1020;
-  border: 1px solid #26324b;
-  color: #d9e1f2;
-  padding: 13px 15px;
-  border-radius: 5px 18px 18px 18px;
-  font-size: 14px;
-  line-height: 1.65;
-  word-wrap: break-word;
-  white-space: pre-wrap;
-}
-
-.message-actions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 7px;
-  padding-left: 2px;
-}
-
-.message-action {
-  width: 34px;
-  height: 32px;
-  border: none;
-  border-radius: 9px;
-  background: transparent;
-  color: #7f8ba3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.message-action:hover {
-  background: #18233a;
-  color: #ffffff;
-}
-
-.message-action:active {
-  transform: scale(0.92);
-}
-
-.message-action.active {
-  color: #6ea8ff;
-}
-
-.thinking-bubble {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  min-height: 42px;
-}
-
-.thinking-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #6ea8ff;
-  animation: thinking 1.2s infinite ease-in-out;
-}
-
-.thinking-dot:nth-child(2) {
-  animation-delay: 0.15s;
-}
-
-.thinking-dot:nth-child(3) {
-  animation-delay: 0.3s;
-}
-
-@keyframes thinking {
-  0%, 60%, 100% {
-    opacity: 0.3;
-    transform: translateY(0);
-  }
-
-  30% {
-    opacity: 1;
-    transform: translateY(-4px);
-  }
-}
-
-.chat-composer {
-  position: sticky;
-  bottom: 82px;
-  z-index: 15;
-  margin-top: 18px;
-  padding: 8px;
-  border-radius: 18px;
-  background: rgba(15, 22, 40, 0.96);
-  border: 1px solid #25304a;
-  backdrop-filter: blur(12px);
-}
-
-.chat-input-row {
-  display: flex;
-  align-items: flex-end;
-  gap: 8px;
-}
-
-.chat-input {
-  flex: 1;
-  min-height: 44px;
-  max-height: 130px;
-  resize: none;
-  border: none;
-  background: transparent;
-  color: #ffffff;
-  padding: 11px 10px;
-  outline: none;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.chat-input::placeholder {
-  color: #6f7b92;
-}
-
-.send-button {
-  flex: 0 0 44px;
-  width: 44px;
-  height: 44px;
-  border: none;
-  border-radius: 13px;
-  background: #6ea8ff;
-  color: #07101f;
-  font-size: 18px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: 0.2s ease;
-}
-
-.send-button:active {
-  transform: scale(0.92);
-}
-
-.send-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.chat-empty {
-  text-align: center;
-  padding: 20px 10px 8px;
-  color: #8f9bb2;
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.chat-empty-icon {
-  width: 52px;
-  height: 52px;
-  margin: 0 auto 10px;
-  border-radius: 16px;
-  background: #1d3159;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-}
-
-.copy-notice {
-  position: fixed;
-  left: 50%;
-  bottom: 92px;
-  transform: translateX(-50%);
-  background: #18233a;
-  border: 1px solid #2b3957;
-  color: #ffffff;
-  padding: 9px 14px;
-  border-radius: 10px;
-  font-size: 12px;
-  z-index: 100;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-}
-
-.copy-notice.show {
-  opacity: 1;
-}
-
-@media (max-width: 520px) {
-
-  .chat-container {
-    gap: 15px;
-  }
-
-  .user-bubble {
-    max-width: 88%;
-    font-size: 14px;
-  }
-
-  .ai-message-wrapper {
-    max-width: calc(100% - 43px);
-  }
-
-  .ai-bubble {
-    font-size: 14px;
-  }
-
-  .message-action {
-    width: 32px;
-    height: 30px;
-    font-size: 15px;
-  }
-
-  .chat-composer {
-    bottom: 76px;
-    border-radius: 16px;
-  }
-}
-
-@media (min-width: 700px) {
-
-  .app {
-    max-width: 760px;
-  }
-
-  main {
-    padding-left: 28px;
-    padding-right: 28px;
-  }
-
-  .user-bubble {
-    max-width: 72%;
-  }
-
-  .ai-message-wrapper {
-    max-width: 78%;
-  }
-
-  .ai-bubble {
-    font-size: 15px;
-  }
-}
-
-@media (min-width: 1100px) {
-
-  .app {
-    max-width: 900px;
-  }
-
-  main {
-    padding-left: 45px;
-    padding-right: 45px;
-  }
-
-  .user-bubble {
-    max-width: 65%;
-  }
-
-  .ai-message-wrapper {
-    max-width: 72%;
-  }
-}
   </style>
+
 </head>
 
 <body>
 
-  <div class="app">
+<div class="app">
 
-    <header>
-      <div class="brand">Emogigs <span>AI</span></div>
-      <div class="subtitle">Your personal AI Life OS</div>
-    </header>
+  <!-- =========================
+       HEADER
+  ========================== -->
 
-    <main>
+  <header>
 
-      <section class="welcome">
-        <h1>Your AI, your next move.</h1>
-        <p>
-          Learn, plan, create and discover opportunities with one intelligent assistant.
-        </p>
-      </section>
+    <div class="topbar">
 
-      <section class="ai-card">
-        <div class="ai-title">
-          <div class="ai-icon">✦</div>
-          <div>Ask Emogigs AI</div>
+      <div class="brand-area">
+
+        <div class="brand-logo">
+          ✦
         </div>
+
+        <div>
+
+          <div class="brand">
+            Emogigs <span>AI</span>
+          </div>
+
+          <div class="status">
+            <span class="status-dot"></span>
+            AI Life OS online
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </header>
+
+
+  <!-- =========================
+       MAIN
+  ========================== -->
+
+  <main>
+
+    <!-- HERO -->
+
+    <section class="hero">
+
+      <div class="hero-badge">
+        ✦ Personal AI Life OS
+      </div>
+
+      <h1>
+        Your AI.
+        <span>Your next move.</span>
+      </h1>
+
+      <p>
+        Learn, plan, create, grow and discover
+        opportunities with one intelligent assistant.
+      </p>
+
+    </section>
+
+
+    <!-- =========================
+         AI ASSISTANT
+    ========================== -->
+
+    <section class="ai-card">
+
+      <div class="ai-title">
+
+        <div class="ai-icon">
+          ✦
+        </div>
+
+        <div>
+
+          <div class="ai-title-text">
+            Emogigs AI
+          </div>
+
+          <div class="ai-title-sub">
+            Your intelligent personal assistant
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="input-shell">
 
         <textarea
           id="userInput"
-          placeholder="Tell me what you want to learn, build or achieve..."
+          placeholder="What do you want to learn, build or achieve?"
         ></textarea>
 
-        <button class="ask-btn" id="askButton">
-  Ask AI
-</button>
+        <div class="input-bottom">
 
-        <div id="chatHistory" class="chat-history"></div>
-      </section>
+          <div class="input-hint">
+            Enter to send • Shift + Enter for new line
+          </div>
 
-      <h2 class="section-title">Quick Tools</h2>
+          <button
+            class="ask-btn"
+            id="askButton"
+          >
+            Ask AI
+          </button>
 
-      <section class="tools">
-
-        <div class="tool" onclick="setPrompt('Create a learning plan for me')">
-          <div class="tool-icon">📚</div>
-          <h3>Learn</h3>
-          <p>Build a simple learning path.</p>
         </div>
 
-        <div class="tool" onclick="setPrompt('Help me find a remote work path')">
-          <div class="tool-icon">💼</div>
-          <h3>Work</h3>
-          <p>Explore skills and work opportunities.</p>
+      </div>
+
+
+      <div
+        id="chatHistory"
+        class="chat-history"
+      ></div>
+
+    </section>
+
+
+    <!-- =========================
+         QUICK TOOLS
+    ========================== -->
+
+    <div class="section-head">
+
+      <h2>
+        Your Life OS
+      </h2>
+
+      <span>
+        Quick access
+      </span>
+
+    </div>
+
+
+    <section class="tools">
+
+      <div
+        class="tool"
+        onclick="setPrompt('Create a personalized learning plan for me')"
+      >
+
+        <div class="tool-icon">
+          📚
         </div>
 
-        <div class="tool" onclick="setPrompt('Help me create a personal plan for today')">
-          <div class="tool-icon">🎯</div>
-          <h3>Plan</h3>
-          <p>Organize your goals and tasks.</p>
+        <h3>
+          Learn
+        </h3>
+
+        <p>
+          Build skills with a personalized learning path.
+        </p>
+
+      </div>
+
+
+      <div
+        class="tool"
+        onclick="setPrompt('Help me find a remote work path based on my skills')"
+      >
+
+        <div class="tool-icon">
+          💼
         </div>
 
-        <div class="tool" onclick="setPrompt('Help me improve my skills and career')">
-          <div class="tool-icon">🚀</div>
-          <h3>Grow</h3>
-          <p>Improve your skills step by step.</p>
+        <h3>
+          Work
+        </h3>
+
+        <p>
+          Explore skills, jobs and remote opportunities.
+        </p>
+
+      </div>
+
+
+      <div
+        class="tool"
+        onclick="setPrompt('Create a practical plan for my goals today')"
+      >
+
+        <div class="tool-icon">
+          🎯
         </div>
 
-      </section>
+        <h3>
+          Plan
+        </h3>
 
-    </main>
+        <p>
+          Turn goals into simple daily actions.
+        </p>
 
-    <nav>
-      <button class="nav-item active">
-        <span class="nav-icon">⌂</span>
-        Home
-      </button>
+      </div>
 
-      <button class="nav-item">
-        <span class="nav-icon">✦</span>
-        AI
-      </button>
 
-      <button class="nav-item">
-        <span class="nav-icon">◈</span>
-        Work
-      </button>
+      <div
+        class="tool"
+        onclick="setPrompt('Create a step by step plan to improve my skills and career')"
+      >
 
-      <button class="nav-item">
-        <span class="nav-icon">☻</span>
-        Profile
-      </button>
-    </nav>
+        <div class="tool-icon">
+          🚀
+        </div>
 
-  </div>
+        <h3>
+          Grow
+        </h3>
+
+        <p>
+          Improve your skills and move toward your goals.
+        </p>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- =========================
+       NAVIGATION
+  ========================== -->
+
+  <nav>
+
+    <button class="nav-item active">
+
+      <span class="nav-icon">
+        ⌂
+      </span>
+
+      Home
+
+    </button>
+
+
+    <button class="nav-item">
+
+      <span class="nav-icon">
+        ✦
+      </span>
+
+      AI
+
+    </button>
+
+
+    <button class="nav-item">
+
+      <span class="nav-icon">
+        ◈
+      </span>
+
+      Work
+
+    </button>
+
+
+    <button class="nav-item">
+
+      <span class="nav-icon">
+        ☻
+      </span>
+
+      Profile
+
+    </button>
+
+  </nav>
+
+</div>
+
 
 <script src="/script.js"></script>
 
 </body>
+
 </html>
