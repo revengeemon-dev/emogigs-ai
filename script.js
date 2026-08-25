@@ -2094,7 +2094,7 @@ function speakText(
 
 
 /* =========================================================
-   TOGGLE SPEECH
+   TOGGLE SPEECH — DIAGNOSTIC TEST
 ========================================================= */
 
 function toggleSpeech(
@@ -2102,20 +2102,141 @@ function toggleSpeech(
   button
 ) {
 
+  console.log(
+    "Emogigs AI: Voice button clicked."
+  );
+
+  console.log(
+    "Emogigs AI: Text to speak:",
+    text
+  );
+
+
   if (
-    currentSpeech
+    !("speechSynthesis" in window)
   ) {
 
-    stopSpeaking();
+    showToast(
+      "Speech engine is not available."
+    );
+
+    console.error(
+      "Emogigs AI: speechSynthesis NOT supported."
+    );
 
     return;
-
   }
 
 
-  speakText(
-    text,
-    button
+  /*
+    Stop previous speech
+  */
+
+  window.speechSynthesis.cancel();
+
+  currentSpeech = null;
+
+
+  /*
+    TEST PHRASE
+    This intentionally speaks a fixed sentence.
+  */
+
+  const testText =
+    "Hello. This is Emogigs AI voice test.";
+
+
+  const utterance =
+    new SpeechSynthesisUtterance(
+      testText
+    );
+
+
+  utterance.lang =
+    "en-US";
+
+
+  utterance.rate =
+    1;
+
+
+  utterance.pitch =
+    1;
+
+
+  utterance.volume =
+    1;
+
+
+  utterance.onstart =
+    () => {
+
+      console.log(
+        "Emogigs AI: TEST VOICE STARTED."
+      );
+
+      if (button) {
+
+        button.classList.add(
+          "speaking"
+        );
+
+      }
+
+    };
+
+
+  utterance.onend =
+    () => {
+
+      console.log(
+        "Emogigs AI: TEST VOICE FINISHED."
+      );
+
+      currentSpeech = null;
+
+      if (button) {
+
+        button.classList.remove(
+          "speaking"
+        );
+
+      }
+
+    };
+
+
+  utterance.onerror =
+    error => {
+
+      console.error(
+        "Emogigs AI: TEST VOICE ERROR:",
+        error
+      );
+
+      currentSpeech = null;
+
+      if (button) {
+
+        button.classList.remove(
+          "speaking"
+        );
+
+      }
+
+    };
+
+
+  currentSpeech =
+    utterance;
+
+
+  /*
+    START SPEECH DIRECTLY
+  */
+
+  window.speechSynthesis.speak(
+    utterance
   );
 
 }
