@@ -899,7 +899,11 @@ scrollChatToBottom();
 
 
     const errorMessage =
-      addConversationMessage(
+  "I'm sorry, I couldn't connect " +
+  "to Emogigs AI right now. " +
+  "Please try again in a moment.";
+
+addConversationMessage(
   "assistant",
   errorMessage
 );
@@ -908,28 +912,6 @@ renderCurrentChat();
 
 showToast(
   "Could not connect to Emogigs AI."
-);
-
-
-    addConversationMessage(
-  "assistant",
-  reply
-);
-
-
-/*
-  Render actual response
-*/
-
-renderCurrentChat();
-
-
-/*
-  Automatically speak AI response
-*/
-
-autoSpeakResponse(
-  reply
 );
 
 
