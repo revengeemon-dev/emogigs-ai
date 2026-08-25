@@ -2126,7 +2126,169 @@
 
 </div>
 
+<div
+  id="voiceSettingsPanel"
+  class="voice-settings-panel"
+>
 
+  <div class="voice-settings-title">
+    🎙️ Emogigs AI Voice
+  </div>
+
+
+  <div class="voice-setting-row">
+
+    <label
+      class="voice-setting-label"
+      for="voiceGender"
+    >
+      Voice style
+    </label>
+
+    <select
+      id="voiceGender"
+      class="voice-select"
+    >
+
+      <option value="natural">
+        🤖 Natural / Default
+      </option>
+
+      <option value="female">
+        👩 Female
+      </option>
+
+      <option value="male">
+        👨 Male
+      </option>
+
+    </select>
+
+  </div>
+
+
+  <div class="voice-setting-row">
+
+    <label
+      class="voice-setting-label"
+      for="voiceLanguage"
+    >
+      Language
+    </label>
+
+    <select
+      id="voiceLanguage"
+      class="voice-select"
+    >
+
+      <option value="auto">
+        🌐 Auto Detect
+      </option>
+
+      <option value="en-US">
+        🇺🇸 English (US)
+      </option>
+
+      <option value="en-GB">
+        🇬🇧 English (UK)
+      </option>
+
+      <option value="bn-BD">
+        🇧🇩 বাংলা (Bangladesh)
+      </option>
+
+      <option value="hi-IN">
+        🇮🇳 Hindi
+      </option>
+
+    </select>
+
+  </div>
+
+
+  <div class="voice-setting-row">
+
+    <label
+      class="voice-setting-label"
+      for="voiceRate"
+    >
+      Speaking speed
+    </label>
+
+    <input
+      id="voiceRate"
+      class="voice-range"
+      type="range"
+      min="0.7"
+      max="1.3"
+      step="0.05"
+      value="1"
+    >
+
+    <div
+      id="voiceRateValue"
+      class="voice-setting-value"
+    >
+      1.00×
+    </div>
+
+  </div>
+
+
+  <div class="voice-setting-row">
+
+    <label
+      class="voice-setting-label"
+      for="voiceAutoSpeak"
+    >
+      Auto voice response
+    </label>
+
+    <select
+      id="voiceAutoSpeak"
+      class="voice-select"
+    >
+
+      <option value="on">
+        🔊 Automatically speak AI responses
+      </option>
+
+      <option value="off">
+        🔇 Text only
+      </option>
+
+    </select>
+
+  </div>
+
+
+  <div class="voice-setting-row">
+
+    <label
+      class="voice-setting-label"
+      for="voiceConversation"
+    >
+      Voice conversation
+    </label>
+
+    <select
+      id="voiceConversation"
+      class="voice-select"
+    >
+
+      <option value="off">
+        🎤 Push to speak
+      </option>
+
+      <option value="on">
+        🗣️ Continuous conversation
+      </option>
+
+    </select>
+
+  </div>
+
+</div>
 <script src="/script.js"></script>
 
 </body>
