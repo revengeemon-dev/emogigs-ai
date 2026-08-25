@@ -1475,6 +1475,323 @@
 
   font-size: 10px;
 }
+/* =====================================================
+   EMOGIGS AI — STEP 18B
+   VOICE SYSTEM
+===================================================== */
+
+.voice-settings-panel {
+  display: none;
+
+  margin-top: 20px;
+  padding: 18px;
+
+  border: 1px solid #342765;
+  border-radius: 20px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(31,20,67,.98),
+      rgba(16,13,40,.98)
+    );
+
+  box-shadow:
+    0 18px 50px rgba(0,0,0,.22);
+}
+
+.voice-settings-panel.show {
+  display: block;
+}
+
+.voice-settings-title {
+  font-size: 15px;
+  font-weight: 750;
+
+  margin-bottom: 17px;
+
+  color: #ffffff;
+}
+
+.voice-setting-row {
+  margin-top: 15px;
+}
+
+.voice-setting-row:first-of-type {
+  margin-top: 0;
+}
+
+.voice-setting-label {
+  display: block;
+
+  margin-bottom: 7px;
+
+  color: #aaa4c1;
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.voice-select {
+  width: 100%;
+
+  min-height: 43px;
+
+  padding: 9px 12px;
+
+  border: 1px solid #342a5c;
+  border-radius: 12px;
+
+  background: #0c0920;
+  color: #ffffff;
+
+  outline: none;
+
+  cursor: pointer;
+}
+
+.voice-select:focus {
+  border-color: #8b5cf6;
+}
+
+.voice-range {
+  width: 100%;
+
+  height: 5px;
+
+  margin-top: 5px;
+
+  accent-color: #8b5cf6;
+
+  cursor: pointer;
+}
+
+.voice-setting-value {
+  margin-top: 6px;
+
+  color: #a78bfa;
+
+  font-size: 11px;
+  font-weight: 650;
+
+  text-align: right;
+}
+
+
+/* =====================================================
+   VOICE ACTIONS
+===================================================== */
+
+.voice-actions {
+  display: flex;
+
+  align-items: center;
+
+  gap: 5px;
+
+  margin-top: 7px;
+}
+
+.voice-action-button {
+  min-width: 31px;
+  height: 29px;
+
+  padding: 0 8px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: transparent;
+
+  color: #77718f;
+
+  font-size: 13px;
+
+  cursor: pointer;
+
+  transition:
+    background .18s ease,
+    color .18s ease,
+    transform .12s ease;
+}
+
+.voice-action-button:hover {
+  background: #1c173c;
+  color: #ffffff;
+}
+
+.voice-action-button:active {
+  transform: scale(.92);
+}
+
+.voice-action-button.speaking {
+  background: #251653;
+  color: #a78bfa;
+}
+
+
+/* =====================================================
+   MICROPHONE BUTTON
+===================================================== */
+
+.voice-mic-button {
+  width: 42px;
+  height: 42px;
+
+  flex: 0 0 42px;
+
+  border: 1px solid #342a5c;
+  border-radius: 12px;
+
+  background: #17132f;
+
+  color: #a78bfa;
+
+  cursor: pointer;
+
+  font-size: 17px;
+
+  transition:
+    background .18s ease,
+    transform .12s ease,
+    border-color .18s ease;
+}
+
+.voice-mic-button:hover {
+  background: #21194a;
+  border-color: #5b3fa0;
+}
+
+.voice-mic-button:active {
+  transform: scale(.93);
+}
+
+.voice-mic-button.listening {
+  background: #3a174c;
+
+  border-color: #a855f7;
+
+  color: #ffffff;
+
+  animation: voiceListeningPulse 1.2s infinite;
+}
+
+@keyframes voiceListeningPulse {
+
+  0% {
+    box-shadow:
+      0 0 0 0 rgba(168,85,247,.45);
+  }
+
+  70% {
+    box-shadow:
+      0 0 0 10px rgba(168,85,247,0);
+  }
+
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(168,85,247,0);
+  }
+}
+
+
+/* =====================================================
+   VOICE STATUS
+===================================================== */
+
+.voice-status {
+  margin-top: 8px;
+
+  color: #77718f;
+
+  font-size: 10px;
+
+  line-height: 1.5;
+}
+
+.voice-status.active {
+  color: #a78bfa;
+}
+
+
+/* =====================================================
+   VOICE CONVERSATION INDICATOR
+===================================================== */
+
+.voice-conversation-active {
+  display: none;
+
+  align-items: center;
+
+  gap: 8px;
+
+  margin-top: 9px;
+
+  padding: 8px 10px;
+
+  border-radius: 10px;
+
+  background: #21164b;
+
+  color: #c4b5fd;
+
+  font-size: 10px;
+}
+
+.voice-conversation-active.show {
+  display: flex;
+}
+
+.voice-conversation-dot {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: #a78bfa;
+
+  box-shadow:
+    0 0 9px rgba(167,139,250,.7);
+
+  animation:
+    voiceConversationDot 1s infinite;
+}
+
+@keyframes voiceConversationDot {
+
+  0%,
+  100% {
+    opacity: .35;
+    transform: scale(.8);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 520px) {
+
+  .voice-settings-panel {
+    padding: 15px;
+    border-radius: 17px;
+  }
+
+  .voice-setting-row {
+    margin-top: 13px;
+  }
+
+  .voice-select {
+    min-height: 41px;
+  }
+
+}
   </style>
 </head>
 
