@@ -1541,25 +1541,44 @@
 
       <div class="chat-composer">
 
-        <div class="composer-row">
+  <div class="composer-row">
 
-          <textarea
-            id="chatInput"
-            class="composer-input"
-            rows="1"
-            placeholder="Type your message..."
-          ></textarea>
+    <button
+      id="voiceInputButton"
+      class="voice-input-button"
+      type="button"
+      aria-label="Voice input"
+      title="Speak to Emogigs AI"
+    >
+      🎤
+    </button>
 
-          <button
-            id="chatSend"
-            class="composer-send"
-          >
-            ➜
-          </button>
+    <textarea
+      id="chatInput"
+      class="composer-input"
+      rows="1"
+      placeholder="Type or speak to Emogigs AI..."
+    ></textarea>
 
-        </div>
+    <button
+      id="chatSend"
+      class="composer-send"
+      type="button"
+      aria-label="Send message"
+    >
+      ➜
+    </button>
 
-      </div>
+  </div>
+
+  <div
+    id="voiceStatus"
+    class="voice-status"
+  >
+    🎙️ Voice ready
+  </div>
+
+</div>
 
     </section>
 
