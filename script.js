@@ -890,9 +890,16 @@ async function sendMessage(
 
 
     const errorMessage =
-      "I'm sorry, I couldn't connect " +
-      "to Emogigs AI right now. " +
-      "Please try again in a moment.";
+      addConversationMessage(
+  "assistant",
+  errorMessage
+);
+
+renderCurrentChat();
+
+showToast(
+  "Could not connect to Emogigs AI."
+);
 
 
     addConversationMessage(
