@@ -1828,7 +1828,7 @@ function stopSpeaking() {
 
 
 /* =========================================================
-   SPEAK TEXT
+   SPEAK TEXT — FIXED ANDROID VERSION
 ========================================================= */
 
 function speakText(
@@ -1840,9 +1840,7 @@ function speakText(
     !text ||
     !text.trim()
   ) {
-
     return;
-
   }
 
 
@@ -1855,7 +1853,6 @@ function speakText(
     );
 
     return;
-
   }
 
 
@@ -1863,125 +1860,235 @@ function speakText(
     Stop previous speech
   */
 
-  stopSpeaking();
+  window.speechSynthesis.cancel();
+
+  currentSpeech = null;
 
 
-  const utterance =
-    new SpeechSynthesisUtterance(
-      text
+  /*
+    Make sure browser voices are loaded
+  */
+
+  const speakNow = () => {
+
+    const voices =
+      window.speechSynthesis.getVoices();
+
+
+    console.log(
+      "Emogigs AI: Available voices:",
+      voices.length
     );
 
 
-  const voice =
-    findBestVoice();
+    const utterance =
+      new SpeechSynthesisUtterance(
+        text
+      );
 
 
-  if (voice) {
+    /*
+      Try to find the best available voice
+    */
 
-    utterance.voice =
-      voice;
+    const voice =
+      findBestVoice();
 
-    utterance.lang =
-      voice.lang;
 
-  } else {
+    if (voice) {
 
-    const language =
-      getLanguageCode();
-
-    if (language) {
+      utterance.voice =
+        voice;
 
       utterance.lang =
-        language;
+        voice.lang;
+
+    } else {
+
+      /*
+        Safe fallback for Android
+      */
+
+      utterance.lang =
+        "en-US";
 
     }
 
-  }
+
+    /*
+      Voice speed
+    */
+
+    utterance.rate =
+      Number(
+        voiceSettings.rate
+      ) || 1;
 
 
-  utterance.rate =
-    Number(
-      voiceSettings.rate
-    );
+    utterance.pitch =
+      1;
 
 
-  utterance.pitch =
-    1;
+    utterance.volume =
+      1;
 
 
-  utterance.volume =
-    1;
+    /*
+      Save current speech
+    */
+
+    currentSpeech =
+      utterance;
 
 
-  currentSpeech =
-    utterance;
+    /*
+      Button animation
+    */
 
+    if (button) {
 
-  if (button) {
-
-    button.classList.add(
-      "speaking"
-    );
-
-  }
-
-
-  utterance.onstart =
-    () => {
-
-      if (button) {
-
-        button.classList.add(
-          "speaking"
-        );
-
-      }
-
-    };
-
-
-  utterance.onend =
-    () => {
-
-      currentSpeech =
-        null;
-
-      if (button) {
-
-        button.classList.remove(
-          "speaking"
-        );
-
-      }
-
-    };
-
-
-  utterance.onerror =
-    error => {
-
-      console.error(
-        "Emogigs AI voice error:",
-        error
+      button.classList.add(
+        "speaking"
       );
 
-      currentSpeech =
-        null;
+    }
 
-      if (button) {
 
-        button.classList.remove(
-          "speaking"
+    /*
+      Speech started
+    */
+
+    utterance.onstart =
+      () => {
+
+        console.log(
+          "Emogigs AI: Voice started."
         );
 
-      }
+        if (button) {
 
-    };
+          button.classList.add(
+            "speaking"
+          );
+
+        }
+
+      };
 
 
-  window.speechSynthesis.speak(
-    utterance
-  );
+    /*
+      Speech finished
+    */
+
+    utterance.onend =
+      () => {
+
+        console.log(
+          "Emogigs AI: Voice finished."
+        );
+
+        currentSpeech =
+          null;
+
+        if (button) {
+
+          button.classList.remove(
+            "speaking"
+          );
+
+        }
+
+      };
+
+
+    /*
+      Speech error
+    */
+
+    utterance.onerror =
+      error => {
+
+        console.error(
+          "Emogigs AI voice error:",
+          error
+        );
+
+        currentSpeech =
+          null;
+
+        if (button) {
+
+          button.classList.remove(
+            "speaking"
+          );
+
+        }
+
+      };
+
+
+    /*
+      Start speech
+    */
+
+    window.speechSynthesis.speak(
+      utterance
+    );
+
+  };
+
+
+  /*
+    Android Chrome sometimes loads voices
+    asynchronously.
+  */
+
+  const voices =
+    window.speechSynthesis.getVoices();
+
+
+  if (voices.length > 0) {
+
+    speakNow();
+
+  } else {
+
+    console.log(
+      "Emogigs AI: Waiting for voices..."
+    );
+
+
+    window.speechSynthesis.onvoiceschanged =
+      () => {
+
+        window.speechSynthesis.onvoiceschanged =
+          null;
+
+        speakNow();
+
+      };
+
+
+    /*
+      Fallback retry
+    */
+
+    setTimeout(
+      () => {
+
+        if (
+          !currentSpeech
+        ) {
+
+          speakNow();
+
+        }
+
+      },
+      500
+    );
+
+  }
 
 }
 
