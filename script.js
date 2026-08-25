@@ -863,8 +863,12 @@ async function sendMessage(
 
 
     /*
-      Render actual response
-    */
+  Render actual response
+*/
+
+renderCurrentChat();
+
+
 /*
   Automatically speak AI response
 */
@@ -872,14 +876,13 @@ async function sendMessage(
 autoSpeakResponse(
   reply
 );
-    renderCurrentChat();
 
 
-    /*
-      Keep chat at bottom
-    */
+/*
+  Keep chat at bottom
+*/
 
-    scrollChatToBottom();
+scrollChatToBottom();
 
 
   } catch (error) {
