@@ -865,7 +865,13 @@ async function sendMessage(
     /*
       Render actual response
     */
+/*
+  Automatically speak AI response
+*/
 
+autoSpeakResponse(
+  reply
+);
     renderCurrentChat();
 
 
