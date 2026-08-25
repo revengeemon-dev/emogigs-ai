@@ -519,7 +519,10 @@ function renderMessage(
         "↗",
         "Share"
       );
-
+const voiceButton =
+  createVoiceButton(
+    content
+  );
 
     shareButton.onclick =
       () => shareText(content);
