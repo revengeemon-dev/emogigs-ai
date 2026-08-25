@@ -2653,8 +2653,334 @@ function checkVoiceSupport() {
   );
 
 }
+  /* =========================================================
+   DOM READY
+========================================================= */
+
+document.addEventListener(
   "DOMContentLoaded",
   () => {
+
+    console.log(
+      "Emogigs AI Step 18C frontend loaded."
+    );
+
+
+    /* =================================================
+       VOICE INITIALIZATION
+    ================================================= */
+
+    loadVoiceSettings();
+
+    loadAvailableVoices();
+
+    if (
+      "speechSynthesis" in window &&
+      "onvoiceschanged" in speechSynthesis
+    ) {
+
+      speechSynthesis.onvoiceschanged =
+        loadAvailableVoices;
+
+    }
+
+    initializeVoiceSettings();
+
+    initializeSpeechRecognition();
+
+    checkVoiceSupport();
+
+
+    /* =================================================
+       CONVERSATION STORAGE
+    ================================================= */
+
+    loadConversations();
+
+
+    if (
+      conversations.length === 0
+    ) {
+
+      createConversation();
+
+    }
+
+
+    currentConversationId =
+      conversations[0].id;
+
+
+    renderRecentChats();
+
+
+    /* =================================================
+       NAVIGATION
+    ================================================= */
+
+    document
+      .querySelectorAll(
+        ".nav-btn"
+      )
+      .forEach(button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            const screen =
+              button.dataset.screen;
+
+            showScreen(
+              screen
+            );
+
+          }
+        );
+
+      });
+
+
+    document
+      .querySelectorAll(
+        "[data-screen]"
+      )
+      .forEach(button => {
+
+        if (
+          !button.classList.contains(
+            "nav-btn"
+          )
+        ) {
+
+          button.addEventListener(
+            "click",
+            () => {
+
+              showScreen(
+                button.dataset.screen
+              );
+
+            }
+          );
+
+        }
+
+      });
+
+
+    /* =================================================
+       NEW CHAT
+    ================================================= */
+
+    const newChatButton =
+      document.getElementById(
+        "headerNewChat"
+      );
+
+    if (newChatButton) {
+
+      newChatButton.addEventListener(
+        "click",
+        startNewChat
+      );
+
+    }
+
+
+    /* =================================================
+       CHAT BACK
+    ================================================= */
+
+    const chatBack =
+      document.getElementById(
+        "chatBack"
+      );
+
+    if (chatBack) {
+
+      chatBack.addEventListener(
+        "click",
+        () => {
+
+          showScreen(
+            "homeScreen"
+          );
+
+        }
+      );
+
+    }
+
+
+    /* =================================================
+       CHAT SEND
+    ================================================= */
+
+    const chatSend =
+      document.getElementById(
+        "chatSend"
+      );
+
+    const chatInput =
+      document.getElementById(
+        "chatInput"
+      );
+
+
+    if (chatSend) {
+
+      chatSend.addEventListener(
+        "click",
+        () => sendMessage()
+      );
+
+    }
+
+
+    if (chatInput) {
+
+      chatInput.addEventListener(
+        "input",
+        () =>
+          autoResize(
+            chatInput
+          )
+      );
+
+
+      chatInput.addEventListener(
+        "keydown",
+        event => {
+
+          if (
+            event.key === "Enter" &&
+            !event.shiftKey
+          ) {
+
+            event.preventDefault();
+
+            sendMessage();
+
+          }
+
+        }
+      );
+
+    }
+
+
+    /* =================================================
+       HOME SEND
+    ================================================= */
+
+    const homeSend =
+      document.getElementById(
+        "homeSend"
+      );
+
+    const homeInput =
+      document.getElementById(
+        "homeInput"
+      );
+
+
+    if (homeSend) {
+
+      homeSend.addEventListener(
+        "click",
+        () => {
+
+          const text =
+            homeInput.value.trim();
+
+          if (text) {
+
+            sendMessage(
+              text
+            );
+
+          }
+
+        }
+      );
+
+    }
+
+
+    if (homeInput) {
+
+      homeInput.addEventListener(
+        "input",
+        () =>
+          autoResize(
+            homeInput
+          )
+      );
+
+
+      homeInput.addEventListener(
+        "keydown",
+        event => {
+
+          if (
+            event.key === "Enter" &&
+            !event.shiftKey
+          ) {
+
+            event.preventDefault();
+
+            const text =
+              homeInput.value.trim();
+
+            if (text) {
+
+              sendMessage(
+                text
+              );
+
+            }
+
+          }
+
+        }
+      );
+
+    }
+
+
+    /* =================================================
+       QUICK TOOLS + TEMPLATES
+    ================================================= */
+
+    document
+      .querySelectorAll(
+        "[data-template]"
+      )
+      .forEach(button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            useTemplate(
+              button.dataset.template
+            );
+
+          }
+        );
+
+      });
+
+
+    /* =================================================
+       INITIAL CHAT
+    ================================================= */
+
+    renderCurrentChat();
+
+  }
+);
 
     console.log(
       "Emogigs AI Step 17 frontend loaded."
