@@ -896,12 +896,25 @@ async function sendMessage(
 
 
     addConversationMessage(
-      "assistant",
-      errorMessage
-    );
+  "assistant",
+  reply
+);
 
 
-    renderCurrentChat();
+/*
+  Render actual response
+*/
+
+renderCurrentChat();
+
+
+/*
+  Automatically speak AI response
+*/
+
+autoSpeakResponse(
+  reply
+);
 
 
   } finally {
