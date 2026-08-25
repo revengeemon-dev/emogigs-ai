@@ -1476,6 +1476,1149 @@ function autoResize(
 ========================================================= */
 
 document.addEventListener(
+/* =========================================================
+   EMOGIGS AI — STEP 18C
+   VOICE ENGINE
+========================================================= */
+
+const VOICE_STORAGE_KEY =
+  "emogigs_voice_settings_v1";
+
+
+let voiceSettings = {
+
+  gender: "natural",
+
+  language: "auto",
+
+  rate: 1,
+
+  autoSpeak: true,
+
+  conversation: false
+
+};
+
+
+let availableVoices = [];
+
+let currentSpeech = null;
+
+let speechRecognition = null;
+
+let isVoiceListening = false;
+
+
+/* =========================================================
+   LOAD VOICE SETTINGS
+========================================================= */
+
+function loadVoiceSettings() {
+
+  try {
+
+    const saved =
+      localStorage.getItem(
+        VOICE_STORAGE_KEY
+      );
+
+    if (saved) {
+
+      const parsed =
+        JSON.parse(saved);
+
+      voiceSettings = {
+        ...voiceSettings,
+        ...parsed
+      };
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Emogigs AI: Could not load voice settings.",
+      error
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   SAVE VOICE SETTINGS
+========================================================= */
+
+function saveVoiceSettings() {
+
+  try {
+
+    localStorage.setItem(
+      VOICE_STORAGE_KEY,
+      JSON.stringify(
+        voiceSettings
+      )
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Emogigs AI: Could not save voice settings.",
+      error
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   LOAD BROWSER VOICES
+========================================================= */
+
+function loadAvailableVoices() {
+
+  if (
+    !("speechSynthesis" in window)
+  ) {
+
+    console.warn(
+      "Speech synthesis is not supported."
+    );
+
+    return;
+
+  }
+
+
+  availableVoices =
+    window.speechSynthesis
+      .getVoices();
+
+
+  console.log(
+    "Emogigs AI voices loaded:",
+    availableVoices.length
+  );
+
+}
+
+
+/* =========================================================
+   VOICE LANGUAGE MATCH
+========================================================= */
+
+function getLanguageCode() {
+
+  if (
+    voiceSettings.language ===
+    "auto"
+  ) {
+
+    return null;
+
+  }
+
+  return voiceSettings.language;
+
+}
+
+
+/* =========================================================
+   FIND BEST VOICE
+========================================================= */
+
+function findBestVoice() {
+
+  if (
+    !availableVoices.length
+  ) {
+
+    return null;
+
+  }
+
+
+  const language =
+    getLanguageCode();
+
+
+  let voices =
+    availableVoices.slice();
+
+
+  /*
+    Language filter
+  */
+
+  if (language) {
+
+    const languagePrefix =
+      language
+        .toLowerCase()
+        .split("-")[0];
+
+
+    const languageVoices =
+      voices.filter(
+        voice =>
+          voice.lang
+            .toLowerCase()
+            .startsWith(
+              languagePrefix
+            )
+      );
+
+
+    if (
+      languageVoices.length
+    ) {
+
+      voices =
+        languageVoices;
+
+    }
+
+  }
+
+
+  /*
+    Gender preference
+    Browser voice names are not
+    guaranteed to contain gender.
+    Therefore this is a best-effort
+    selection.
+  */
+
+  if (
+    voiceSettings.gender ===
+    "female"
+  ) {
+
+    const femaleVoice =
+      voices.find(
+        voice => {
+
+          const name =
+            voice.name
+              .toLowerCase();
+
+          return (
+            name.includes("female") ||
+            name.includes("woman") ||
+            name.includes("zira") ||
+            name.includes("samantha") ||
+            name.includes("susan") ||
+            name.includes("karen") ||
+            name.includes("victoria") ||
+            name.includes("google uk english female")
+          );
+
+        }
+      );
+
+
+    if (femaleVoice) {
+
+      return femaleVoice;
+
+    }
+
+  }
+
+
+  if (
+    voiceSettings.gender ===
+    "male"
+  ) {
+
+    const maleVoice =
+      voices.find(
+        voice => {
+
+          const name =
+            voice.name
+              .toLowerCase();
+
+          return (
+            name.includes("male") ||
+            name.includes("man") ||
+            name.includes("david") ||
+            name.includes("daniel") ||
+            name.includes("alex") ||
+            name.includes("george") ||
+            name.includes("mark") ||
+            name.includes("google uk english male")
+          );
+
+        }
+      );
+
+
+    if (maleVoice) {
+
+      return maleVoice;
+
+    }
+
+  }
+
+
+  /*
+    Natural / default voice
+  */
+
+  return (
+    voices.find(
+      voice =>
+        voice.default
+    ) ||
+    voices[0] ||
+    null
+  );
+
+}
+
+
+/* =========================================================
+   STOP SPEAKING
+========================================================= */
+
+function stopSpeaking() {
+
+  if (
+    "speechSynthesis" in window
+  ) {
+
+    window.speechSynthesis.cancel();
+
+  }
+
+
+  currentSpeech =
+    null;
+
+
+  document
+    .querySelectorAll(
+      ".voice-action-button.speaking"
+    )
+    .forEach(button => {
+
+      button.classList.remove(
+        "speaking"
+      );
+
+    });
+
+}
+
+
+/* =========================================================
+   SPEAK TEXT
+========================================================= */
+
+function speakText(
+  text,
+  button = null
+) {
+
+  if (
+    !text ||
+    !text.trim()
+  ) {
+
+    return;
+
+  }
+
+
+  if (
+    !("speechSynthesis" in window)
+  ) {
+
+    showToast(
+      "Voice playback is not supported on this browser."
+    );
+
+    return;
+
+  }
+
+
+  /*
+    Stop previous speech
+  */
+
+  stopSpeaking();
+
+
+  const utterance =
+    new SpeechSynthesisUtterance(
+      text
+    );
+
+
+  const voice =
+    findBestVoice();
+
+
+  if (voice) {
+
+    utterance.voice =
+      voice;
+
+    utterance.lang =
+      voice.lang;
+
+  } else {
+
+    const language =
+      getLanguageCode();
+
+    if (language) {
+
+      utterance.lang =
+        language;
+
+    }
+
+  }
+
+
+  utterance.rate =
+    Number(
+      voiceSettings.rate
+    );
+
+
+  utterance.pitch =
+    1;
+
+
+  utterance.volume =
+    1;
+
+
+  currentSpeech =
+    utterance;
+
+
+  if (button) {
+
+    button.classList.add(
+      "speaking"
+    );
+
+  }
+
+
+  utterance.onstart =
+    () => {
+
+      if (button) {
+
+        button.classList.add(
+          "speaking"
+        );
+
+      }
+
+    };
+
+
+  utterance.onend =
+    () => {
+
+      currentSpeech =
+        null;
+
+      if (button) {
+
+        button.classList.remove(
+          "speaking"
+        );
+
+      }
+
+    };
+
+
+  utterance.onerror =
+    error => {
+
+      console.error(
+        "Emogigs AI voice error:",
+        error
+      );
+
+      currentSpeech =
+        null;
+
+      if (button) {
+
+        button.classList.remove(
+          "speaking"
+        );
+
+      }
+
+    };
+
+
+  window.speechSynthesis.speak(
+    utterance
+  );
+
+}
+
+
+/* =========================================================
+   TOGGLE SPEECH
+========================================================= */
+
+function toggleSpeech(
+  text,
+  button
+) {
+
+  if (
+    currentSpeech
+  ) {
+
+    stopSpeaking();
+
+    return;
+
+  }
+
+
+  speakText(
+    text,
+    button
+  );
+
+}
+
+
+/* =========================================================
+   UPDATE VOICE RATE DISPLAY
+========================================================= */
+
+function updateVoiceRateDisplay() {
+
+  const rateInput =
+    document.getElementById(
+      "voiceRate"
+    );
+
+  const rateValue =
+    document.getElementById(
+      "voiceRateValue"
+    );
+
+
+  if (
+    rateInput &&
+    rateValue
+  ) {
+
+    rateValue.textContent =
+      Number(
+        rateInput.value
+      ).toFixed(2) + "×";
+
+  }
+
+}
+
+
+/* =========================================================
+   APPLY VOICE SETTINGS TO UI
+========================================================= */
+
+function applyVoiceSettingsToUI() {
+
+  const gender =
+    document.getElementById(
+      "voiceGender"
+    );
+
+  const language =
+    document.getElementById(
+      "voiceLanguage"
+    );
+
+  const rate =
+    document.getElementById(
+      "voiceRate"
+    );
+
+  const autoSpeak =
+    document.getElementById(
+      "voiceAutoSpeak"
+    );
+
+  const conversation =
+    document.getElementById(
+      "voiceConversation"
+    );
+
+
+  if (gender) {
+
+    gender.value =
+      voiceSettings.gender;
+
+  }
+
+
+  if (language) {
+
+    language.value =
+      voiceSettings.language;
+
+  }
+
+
+  if (rate) {
+
+    rate.value =
+      voiceSettings.rate;
+
+  }
+
+
+  if (autoSpeak) {
+
+    autoSpeak.value =
+      voiceSettings.autoSpeak
+        ? "on"
+        : "off";
+
+  }
+
+
+  if (conversation) {
+
+    conversation.value =
+      voiceSettings.conversation
+        ? "on"
+        : "off";
+
+  }
+
+
+  updateVoiceRateDisplay();
+
+}
+
+
+/* =========================================================
+   VOICE SETTINGS EVENTS
+========================================================= */
+
+function initializeVoiceSettings() {
+
+  const panel =
+    document.getElementById(
+      "voiceSettingsPanel"
+    );
+
+
+  if (!panel) {
+
+    console.warn(
+      "Voice settings panel not found."
+    );
+
+    return;
+
+  }
+
+
+  const gender =
+    document.getElementById(
+      "voiceGender"
+    );
+
+  const language =
+    document.getElementById(
+      "voiceLanguage"
+    );
+
+  const rate =
+    document.getElementById(
+      "voiceRate"
+    );
+
+  const autoSpeak =
+    document.getElementById(
+      "voiceAutoSpeak"
+    );
+
+  const conversation =
+    document.getElementById(
+      "voiceConversation"
+    );
+
+
+  if (gender) {
+
+    gender.addEventListener(
+      "change",
+      () => {
+
+        voiceSettings.gender =
+          gender.value;
+
+        saveVoiceSettings();
+
+        stopSpeaking();
+
+      }
+    );
+
+  }
+
+
+  if (language) {
+
+    language.addEventListener(
+      "change",
+      () => {
+
+        voiceSettings.language =
+          language.value;
+
+        saveVoiceSettings();
+
+        stopSpeaking();
+
+      }
+    );
+
+  }
+
+
+  if (rate) {
+
+    rate.addEventListener(
+      "input",
+      () => {
+
+        voiceSettings.rate =
+          Number(
+            rate.value
+          );
+
+        updateVoiceRateDisplay();
+
+        saveVoiceSettings();
+
+      }
+    );
+
+  }
+
+
+  if (autoSpeak) {
+
+    autoSpeak.addEventListener(
+      "change",
+      () => {
+
+        voiceSettings.autoSpeak =
+          autoSpeak.value === "on";
+
+        saveVoiceSettings();
+
+      }
+    );
+
+  }
+
+
+  if (conversation) {
+
+    conversation.addEventListener(
+      "change",
+      () => {
+
+        voiceSettings.conversation =
+          conversation.value === "on";
+
+        saveVoiceSettings();
+
+      }
+    );
+
+  }
+
+
+  applyVoiceSettingsToUI();
+
+}
+
+
+/* =========================================================
+   VOICE SETTINGS PANEL TOGGLE
+========================================================= */
+
+function toggleVoiceSettingsPanel() {
+
+  const panel =
+    document.getElementById(
+      "voiceSettingsPanel"
+    );
+
+
+  if (!panel) {
+
+    showToast(
+      "Voice settings are not available."
+    );
+
+    return;
+
+  }
+
+
+  panel.classList.toggle(
+    "show"
+  );
+
+}
+
+
+/* =========================================================
+   SPEECH RECOGNITION
+========================================================= */
+
+function initializeSpeechRecognition() {
+
+  const Recognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+
+  if (!Recognition) {
+
+    console.warn(
+      "Speech recognition is not supported."
+    );
+
+    return;
+
+  }
+
+
+  speechRecognition =
+    new Recognition();
+
+
+  speechRecognition.continuous =
+    false;
+
+  speechRecognition.interimResults =
+    false;
+
+  speechRecognition.lang =
+    voiceSettings.language ===
+    "auto"
+      ? "en-US"
+      : voiceSettings.language;
+
+
+  speechRecognition.onstart =
+    () => {
+
+      isVoiceListening =
+        true;
+
+      updateVoiceListeningUI(
+        true
+      );
+
+    };
+
+
+  speechRecognition.onresult =
+    event => {
+
+      const transcript =
+        event.results[
+          event.results.length - 1
+        ][0].transcript;
+
+
+      console.log(
+        "Voice input:",
+        transcript
+      );
+
+
+      const input =
+        document.getElementById(
+          "chatInput"
+        );
+
+
+      if (input) {
+
+        input.value =
+          transcript;
+
+        autoResize(input);
+
+      }
+
+
+      /*
+        Automatically send the
+        recognized voice message.
+      */
+
+      sendMessage(
+        transcript
+      );
+
+    };
+
+
+  speechRecognition.onerror =
+    error => {
+
+      console.error(
+        "Voice recognition error:",
+        error
+      );
+
+      isVoiceListening =
+        false;
+
+      updateVoiceListeningUI(
+        false
+      );
+
+    };
+
+
+  speechRecognition.onend =
+    () => {
+
+      isVoiceListening =
+        false;
+
+      updateVoiceListeningUI(
+        false
+      );
+
+    };
+
+}
+
+
+/* =========================================================
+   START VOICE INPUT
+========================================================= */
+
+function startVoiceInput() {
+
+  if (!speechRecognition) {
+
+    initializeSpeechRecognition();
+
+  }
+
+
+  if (!speechRecognition) {
+
+    showToast(
+      "Microphone voice input is not supported on this browser."
+    );
+
+    return;
+
+  }
+
+
+  if (isVoiceListening) {
+
+    speechRecognition.stop();
+
+    return;
+
+  }
+
+
+  stopSpeaking();
+
+
+  speechRecognition.lang =
+    voiceSettings.language ===
+    "auto"
+      ? "en-US"
+      : voiceSettings.language;
+
+
+  try {
+
+    speechRecognition.start();
+
+  } catch (error) {
+
+    console.error(
+      "Could not start voice recognition:",
+      error
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   VOICE LISTENING UI
+========================================================= */
+
+function updateVoiceListeningUI(
+  listening
+) {
+
+  document
+    .querySelectorAll(
+      ".voice-mic-button"
+    )
+    .forEach(button => {
+
+      button.classList.toggle(
+        "listening",
+        listening
+      );
+
+    });
+
+
+  document
+    .querySelectorAll(
+      ".voice-status"
+    )
+    .forEach(status => {
+
+      status.classList.toggle(
+        "active",
+        listening
+      );
+
+
+      status.textContent =
+        listening
+          ? "🎙️ Listening..."
+          : "Voice ready";
+
+    });
+
+}
+
+
+/* =========================================================
+   VOICE ACTION BUTTON
+========================================================= */
+
+function createVoiceButton(
+  text
+) {
+
+  const button =
+    createActionButton(
+      "🔊",
+      "Listen to response"
+    );
+
+
+  button.classList.add(
+    "voice-action-button"
+  );
+
+
+  button.onclick =
+    () => {
+
+      toggleSpeech(
+        text,
+        button
+      );
+
+    };
+
+
+  return button;
+
+}
+
+
+/* =========================================================
+   AUTO SPEAK AI RESPONSE
+========================================================= */
+
+function autoSpeakResponse(
+  text
+) {
+
+  if (
+    !voiceSettings.autoSpeak
+  ) {
+
+    return;
+
+  }
+
+
+  /*
+    Small delay makes the UI feel
+    more natural after the response
+    appears.
+  */
+
+  setTimeout(
+    () => {
+
+      speakText(text);
+
+    },
+    250
+  );
+
+}
+
+
+/* =========================================================
+   VOICE SUPPORT CHECK
+========================================================= */
+
+function checkVoiceSupport() {
+
+  const speech =
+    "speechSynthesis" in window;
+
+  const recognition =
+    !!(
+      window.SpeechRecognition ||
+      window.webkitSpeechRecognition
+    );
+
+
+  console.log(
+    "Emogigs AI Voice Support:",
+    {
+      speechSynthesis: speech,
+      speechRecognition: recognition
+    }
+  );
+
+}
   "DOMContentLoaded",
   () => {
 
