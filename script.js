@@ -544,7 +544,9 @@ const voiceButton =
       shareButton
     );
 
-
+actions.appendChild(
+  voiceButton
+);
     messageWrap.appendChild(
       bubble
     );
