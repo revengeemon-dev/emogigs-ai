@@ -2533,7 +2533,7 @@ function toggleVoiceSettingsPanel() {
 
 
 /* =========================================================
-   SPEECH RECOGNITION
+   SPEECH RECOGNITION — FINAL VOICE ASSISTANT
 ========================================================= */
 
 function initializeSpeechRecognition() {
@@ -2543,20 +2543,34 @@ function initializeSpeechRecognition() {
     window.webkitSpeechRecognition;
 
 
+  /*
+    Browser support check
+  */
+
   if (!Recognition) {
 
     console.warn(
-      "Speech recognition is not supported."
+      "Emogigs AI: Speech recognition is not supported."
     );
+
+    speechRecognition = null;
 
     return;
 
   }
 
 
+  /*
+    Create recognition instance
+  */
+
   speechRecognition =
     new Recognition();
 
+
+  /*
+    Recognition settings
+  */
 
   speechRecognition.continuous =
     false;
@@ -2564,40 +2578,114 @@ function initializeSpeechRecognition() {
   speechRecognition.interimResults =
     false;
 
-  speechRecognition.lang =
-    voiceSettings.language ===
-    "auto"
-      ? "en-US"
-      : voiceSettings.language;
+  speechRecognition.maxAlternatives =
+    1;
 
+
+  /*
+    Language
+  */
+
+  speechRecognition.lang =
+    voiceSettings.language &&
+    voiceSettings.language !== "auto"
+      ? voiceSettings.language
+      : "en-US";
+
+
+  /* =======================================================
+     START
+  ======================================================= */
 
   speechRecognition.onstart =
     () => {
 
+      console.log(
+        "Emogigs AI: 🎙️ Voice Assistant is listening."
+      );
+
+
       isVoiceListening =
         true;
+
 
       updateVoiceListeningUI(
         true
       );
 
+
+      showToast(
+        "🎙️ Listening..."
+      );
+
     };
 
+
+  /* =======================================================
+     RESULT
+  ======================================================= */
 
   speechRecognition.onresult =
     event => {
 
-      const transcript =
-        event.results[
-          event.results.length - 1
-        ][0].transcript;
+      console.log(
+        "Emogigs AI: Voice result received."
+      );
+
+
+      let transcript = "";
+
+
+      /*
+        Collect the final transcript
+      */
+
+      for (
+        let i = event.resultIndex;
+        i < event.results.length;
+        i++
+      ) {
+
+        if (
+          event.results[i].isFinal
+        ) {
+
+          transcript +=
+            event.results[i][0].transcript;
+
+        }
+
+      }
+
+
+      transcript =
+        transcript.trim();
 
 
       console.log(
-        "Voice input:",
+        "Emogigs AI: Voice transcript:",
         transcript
       );
 
+
+      /*
+        Nothing recognized
+      */
+
+      if (!transcript) {
+
+        showToast(
+          "I couldn't hear anything. Please try again."
+        );
+
+        return;
+
+      }
+
+
+      /*
+        Put recognized text into chat input
+      */
 
       const input =
         document.getElementById(
@@ -2610,14 +2698,15 @@ function initializeSpeechRecognition() {
         input.value =
           transcript;
 
-        autoResize(input);
+        autoResize(
+          input
+        );
 
       }
 
 
       /*
-        Automatically send the
-        recognized voice message.
+        Send voice message to Emogigs AI
       */
 
       sendMessage(
@@ -2627,35 +2716,138 @@ function initializeSpeechRecognition() {
     };
 
 
+  /* =======================================================
+     ERROR
+  ======================================================= */
+
   speechRecognition.onerror =
-    error => {
+    event => {
 
       console.error(
-        "Voice recognition error:",
-        error
+        "Emogigs AI Voice Recognition Error:",
+        event.error,
+        event
       );
+
 
       isVoiceListening =
         false;
+
 
       updateVoiceListeningUI(
         false
       );
 
+
+      /*
+        Permission denied
+      */
+
+      if (
+        event.error ===
+        "not-allowed"
+      ) {
+
+        showToast(
+          "🎙️ Microphone permission was denied. Please allow microphone access."
+        );
+
+        return;
+
+      }
+
+
+      /*
+        Microphone unavailable
+      */
+
+      if (
+        event.error ===
+        "audio-capture"
+      ) {
+
+        showToast(
+          "🎙️ Microphone could not be accessed."
+        );
+
+        return;
+
+      }
+
+
+      /*
+        Nothing heard
+      */
+
+      if (
+        event.error ===
+        "no-speech"
+      ) {
+
+        showToast(
+          "🎙️ I didn't hear anything. Please try again."
+        );
+
+        return;
+
+      }
+
+
+      /*
+        Network problem
+      */
+
+      if (
+        event.error ===
+        "network"
+      ) {
+
+        showToast(
+          "Voice recognition network error. Please try again."
+        );
+
+        return;
+
+      }
+
+
+      /*
+        Generic error
+      */
+
+      showToast(
+        "Voice Assistant could not start. Please try again."
+      );
+
     };
 
+
+  /* =======================================================
+     END
+  ======================================================= */
 
   speechRecognition.onend =
     () => {
 
+      console.log(
+        "Emogigs AI: 🎙️ Voice Assistant stopped."
+      );
+
+
       isVoiceListening =
         false;
+
 
       updateVoiceListeningUI(
         false
       );
 
     };
+
+
+  console.log(
+    "Emogigs AI: Voice Assistant initialized successfully."
+  );
 
 }
 
