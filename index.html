@@ -2,849 +2,897 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#08080d">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-  >
+  <title>Emogigs AI</title>
 
-  <meta
-    name="theme-color"
-    content="#0b0b0f"
-  >
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-  <meta
-    name="apple-mobile-web-app-capable"
-    content="yes"
-  >
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100%;
+      background: #08080d;
+      color: #f5f5f7;
+      font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    }
 
-  <meta
-    name="apple-mobile-web-app-status-bar-style"
-    content="black-translucent"
-  >
+    body {
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-  <title>Emogigs AI — AI Life OS</title>
+    button,
+    textarea,
+    input {
+      font: inherit;
+    }
 
-  <link
-    rel="stylesheet"
-    href="style.css"
-  >
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    /* =========================
+       APP
+    ========================== */
+
+    .app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background:
+        radial-gradient(
+          circle at 50% -10%,
+          rgba(91, 70, 255, 0.18),
+          transparent 38%
+        ),
+        #08080d;
+    }
+
+    /* =========================
+       HEADER
+    ========================== */
+
+    .topbar {
+      height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: rgba(8,8,13,0.92);
+      backdrop-filter: blur(18px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-width: 0;
+    }
+
+    .brand-logo {
+      width: 39px;
+      height: 39px;
+      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      background:
+        linear-gradient(135deg, #7957ff, #269dff);
+      box-shadow:
+        0 0 25px rgba(91, 88, 255, 0.35);
+    }
+
+    .brand-info {
+      min-width: 0;
+    }
+
+    .brand-name {
+      font-size: 16px;
+      font-weight: 750;
+      letter-spacing: -0.2px;
+    }
+
+    .brand-status {
+      margin-top: 2px;
+      font-size: 11px;
+      color: #8e8e9a;
+    }
+
+    .online-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #52e88b;
+      margin-right: 5px;
+      box-shadow: 0 0 8px rgba(82,232,139,.6);
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ededf2;
+      background: rgba(255,255,255,0.055);
+      border: 1px solid rgba(255,255,255,0.07);
+      font-size: 19px;
+    }
+
+    .icon-btn:active {
+      transform: scale(.94);
+    }
+
+    /* =========================
+       MAIN
+    ========================== */
+
+    .main {
+      width: 100%;
+      max-width: 850px;
+      margin: 0 auto;
+      flex: 1;
+      padding: 22px 16px 145px;
+    }
+
+    /* =========================
+       HERO
+    ========================== */
+
+    .hero {
+      padding: 22px 3px 25px;
+      text-align: left;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #a98cff;
+      font-size: 13px;
+      font-weight: 650;
+      margin-bottom: 11px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(31px, 9vw, 53px);
+      line-height: 1.05;
+      letter-spacing: -2px;
+      font-weight: 800;
+    }
+
+    .gradient-text {
+      background:
+        linear-gradient(
+          90deg,
+          #ffffff,
+          #a982ff,
+          #55b9ff
+        );
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero p {
+      margin: 14px 0 0;
+      max-width: 650px;
+      color: #94949f;
+      font-size: 15px;
+      line-height: 1.75;
+    }
+
+    /* =========================
+       MODE BAR
+    ========================== */
+
+    .mode-row {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 4px 0 16px;
+      scrollbar-width: none;
+    }
+
+    .mode-row::-webkit-scrollbar {
+      display: none;
+    }
+
+    .mode-chip {
+      flex: 0 0 auto;
+      padding: 9px 14px;
+      border-radius: 999px;
+      color: #a4a4af;
+      background: rgba(255,255,255,0.045);
+      border: 1px solid rgba(255,255,255,0.07);
+      font-size: 13px;
+      transition: .2s;
+    }
+
+    .mode-chip.active {
+      color: #fff;
+      background: rgba(125,93,255,.18);
+      border-color: rgba(125,93,255,.45);
+      box-shadow: 0 0 18px rgba(125,93,255,.12);
+    }
+
+    /* =========================
+       QUICK ACTIONS
+    ========================== */
+
+    .section-title {
+      margin: 7px 2px 10px;
+      color: #8c8c98;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+    }
+
+    .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .quick-card {
+      min-height: 105px;
+      padding: 16px;
+      text-align: left;
+      color: white;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(255,255,255,.055),
+          rgba(255,255,255,.025)
+        );
+      border: 1px solid rgba(255,255,255,.065);
+      border-radius: 20px;
+      transition: .2s;
+    }
+
+    .quick-card:active {
+      transform: scale(.97);
+    }
+
+    .quick-icon {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    .quick-title {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .quick-desc {
+      margin-top: 4px;
+      color: #777783;
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    /* =========================
+       CHAT
+    ========================== */
+
+    #chatArea {
+      display: none;
+      flex-direction: column;
+      gap: 18px;
+      margin-top: 12px;
+    }
+
+    #chatArea.visible {
+      display: flex;
+    }
+
+    .message {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      animation: messageIn .25s ease;
+    }
+
+    @keyframes messageIn {
+      from {
+        opacity: 0;
+        transform: translateY(7px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message.user {
+      justify-content: flex-end;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      flex: 0 0 32px;
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      background: linear-gradient(135deg,#7658ff,#28a1ff);
+    }
+
+    .message.user .avatar {
+      order: 2;
+      background: rgba(255,255,255,.09);
+    }
+
+    .bubble-wrap {
+      max-width: min(86%, 700px);
+    }
+
+    .bubble {
+      padding: 13px 15px;
+      border-radius: 18px;
+      color: #eeeeF3;
+      font-size: 14px;
+      line-height: 1.7;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+
+    .assistant .bubble {
+      background: rgba(255,255,255,.045);
+      border: 1px solid rgba(255,255,255,.055);
+      border-top-left-radius: 6px;
+    }
+
+    .user .bubble {
+      background: linear-gradient(135deg,#6249d9,#456de5);
+      border-top-right-radius: 6px;
+    }
+
+    .message-actions {
+      display: flex;
+      gap: 5px;
+      margin-top: 6px;
+    }
+
+    .message.user .message-actions {
+      justify-content: flex-end;
+    }
+
+    .small-btn {
+      min-width: 34px;
+      height: 31px;
+      padding: 0 9px;
+      border-radius: 10px;
+      color: #888894;
+      background: transparent;
+      border: 1px solid transparent;
+      font-size: 13px;
+    }
+
+    .small-btn:hover {
+      color: white;
+      background: rgba(255,255,255,.06);
+    }
+
+    .small-btn.speaking {
+      color: #9b7cff;
+      background: rgba(123,92,255,.12);
+      border-color: rgba(123,92,255,.25);
+    }
+
+    /* =========================
+       TYPING
+    ========================== */
+
+    .typing {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 14px 16px;
+    }
+
+    .typing span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #92929c;
+      animation: typing 1s infinite ease-in-out;
+    }
+
+    .typing span:nth-child(2) {
+      animation-delay: .15s;
+    }
+
+    .typing span:nth-child(3) {
+      animation-delay: .3s;
+    }
+
+    @keyframes typing {
+      0%, 70%, 100% {
+        transform: translateY(0);
+        opacity: .35;
+      }
+      35% {
+        transform: translateY(-4px);
+        opacity: 1;
+      }
+    }
+
+    /* =========================
+       INPUT AREA
+    ========================== */
+
+    .composer-wrap {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 100;
+      padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+      background:
+        linear-gradient(
+          to top,
+          #08080d 65%,
+          rgba(8,8,13,.93),
+          transparent
+        );
+    }
+
+    .composer {
+      width: 100%;
+      max-width: 850px;
+      margin: 0 auto;
+      padding: 8px;
+      display: flex;
+      align-items: flex-end;
+      gap: 7px;
+      border-radius: 25px;
+      background: rgba(30,30,35,.94);
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: 0 10px 50px rgba(0,0,0,.4);
+      backdrop-filter: blur(18px);
+    }
+
+    .composer textarea {
+      flex: 1;
+      min-width: 0;
+      max-height: 130px;
+      min-height: 44px;
+      resize: none;
+      padding: 11px 6px 9px;
+      border: 0;
+      outline: 0;
+      color: #f2f2f5;
+      background: transparent;
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .composer textarea::placeholder {
+      color: #73737e;
+    }
+
+    .composer-btn {
+      width: 43px;
+      height: 43px;
+      flex: 0 0 43px;
+      border-radius: 50%;
+      color: #dadbe0;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 19px;
+    }
+
+    .composer-btn:active {
+      transform: scale(.92);
+    }
+
+    .mic-btn.listening {
+      color: white;
+      background: #e84d72;
+      box-shadow: 0 0 22px rgba(232,77,114,.45);
+      animation: micPulse 1.4s infinite;
+    }
+
+    @keyframes micPulse {
+      50% {
+        box-shadow: 0 0 0 9px rgba(232,77,114,.08),
+                    0 0 25px rgba(232,77,114,.5);
+      }
+    }
+
+    .send-btn {
+      color: white;
+      background: linear-gradient(135deg,#7256ff,#289fff);
+      box-shadow: 0 0 22px rgba(82,101,255,.25);
+    }
+
+    /* =========================
+       LISTENING STATUS
+    ========================== */
+
+    .voice-status {
+      display: none;
+      width: 100%;
+      max-width: 850px;
+      margin: 0 auto 7px;
+      padding: 0 10px;
+      color: #c4a9ff;
+      font-size: 12px;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .voice-status.show {
+      display: flex;
+    }
+
+    .voice-bars {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      height: 17px;
+    }
+
+    .voice-bars span {
+      width: 3px;
+      height: 6px;
+      border-radius: 5px;
+      background: #9d78ff;
+      animation: voiceBar .7s infinite ease-in-out;
+    }
+
+    .voice-bars span:nth-child(2) {
+      animation-delay: .1s;
+    }
+
+    .voice-bars span:nth-child(3) {
+      animation-delay: .2s;
+    }
+
+    .voice-bars span:nth-child(4) {
+      animation-delay: .3s;
+    }
+
+    @keyframes voiceBar {
+      50% {
+        height: 16px;
+      }
+    }
+
+    /* =========================
+       TOAST
+    ========================== */
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 105px;
+      transform: translate(-50%, 20px);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 200;
+      padding: 10px 15px;
+      border-radius: 13px;
+      color: white;
+      background: #24242b;
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      font-size: 12px;
+      transition: .25s;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    /* =========================
+       EMPTY CHAT
+    ========================== */
+
+    .empty-chat {
+      padding: 35px 10px;
+      text-align: center;
+      color: #777783;
+    }
+
+    .empty-chat-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 22px;
+      background: linear-gradient(135deg,#6547d9,#279ef8);
+      font-size: 29px;
+      box-shadow: 0 0 35px rgba(98,81,255,.25);
+    }
+
+    .empty-chat strong {
+      display: block;
+      color: #dddde5;
+      margin-bottom: 7px;
+    }
+
+    /* =========================
+       DESKTOP
+    ========================== */
+
+    @media (min-width: 700px) {
+      .topbar {
+        padding: 0 28px;
+      }
+
+      .main {
+        padding-left: 24px;
+        padding-right: 24px;
+      }
+
+      .quick-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      .quick-card {
+        min-height: 125px;
+      }
+
+      .hero {
+        padding-top: 50px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-  <!-- =====================================================
-       APP
-  ====================================================== -->
+  <div class="app">
 
-  <div id="app">
+    <!-- HEADER -->
+    <header class="topbar">
 
-    <!-- ===================================================
-         HOME SCREEN
-    ==================================================== -->
+      <div class="brand">
+        <div class="brand-logo">✦</div>
 
-    <section
-      id="homeScreen"
-      class="screen active"
-    >
-
-      <!-- HEADER -->
-
-      <header class="top-header">
-
-        <div class="brand-area">
-
-          <div class="brand-mark">
-            ✦
+        <div class="brand-info">
+          <div class="brand-name">Emogigs AI</div>
+          <div class="brand-status">
+            <span class="online-dot"></span>
+            Your personal AI Life OS
           </div>
+        </div>
+      </div>
 
-          <div class="brand-text">
+      <div class="top-actions">
+        <button
+          class="icon-btn"
+          id="newChatBtn"
+          title="New chat"
+          aria-label="New chat">
+          ＋
+        </button>
+      </div>
 
-            <div class="brand-name">
-              Emogigs <span>AI</span>
-            </div>
+    </header>
 
-            <div class="brand-status">
-              <span class="status-dot"></span>
-              AI Life OS
-            </div>
 
-          </div>
+    <!-- MAIN -->
+    <main class="main">
 
+      <!-- HERO -->
+      <section class="hero" id="hero">
+
+        <div class="eyebrow">
+          ✦ AI Life OS
         </div>
 
+        <h1>
+          What can I help you
+          <span class="gradient-text">achieve?</span>
+        </h1>
 
-        <button
-          id="headerNewChat"
-          class="header-action"
-          type="button"
-          aria-label="New conversation"
-        >
-          +
+        <p>
+          Learn new skills, solve problems, plan your goals,
+          create content, find opportunities and grow with Emogigs AI.
+        </p>
+
+      </section>
+
+
+      <!-- MODES -->
+      <div class="mode-row" id="modeRow">
+
+        <button class="mode-chip active" data-mode="General">
+          ✦ General
         </button>
 
-      </header>
-
-
-      <!-- HOME CONTENT -->
-
-      <main class="home-content">
-
-        <div class="home-hero">
-
-          <div class="hero-eyebrow">
-            YOUR AI LIFE OS
-          </div>
-
-          <h1>
-            What can I help you
-            <span>achieve?</span>
-          </h1>
-
-          <p>
-            Learn, create, plan, work and grow
-            with Emogigs AI.
-          </p>
-
-        </div>
-
-
-        <!-- HOME INPUT -->
-
-        <div class="home-composer">
-
-          <button
-            class="composer-plus"
-            type="button"
-            aria-label="More options"
-          >
-            +
-          </button>
-
-          <textarea
-            id="homeInput"
-            rows="1"
-            maxlength="8000"
-            placeholder="Message Emogigs AI..."
-            autocomplete="off"
-            spellcheck="true"
-          ></textarea>
-
-
-          <button
-            id="homeVoice"
-            class="composer-mic voice-mic-button"
-            type="button"
-            onclick="startVoiceInput()"
-            aria-label="Voice input"
-          >
-            🎙
-          </button>
-
-
-          <button
-            id="homeSend"
-            class="composer-send"
-            type="button"
-            aria-label="Send message"
-          >
-            ↑
-          </button>
-
-        </div>
-
-
-        <!-- QUICK ACTIONS -->
-
-        <div class="quick-section">
-
-          <div class="section-label">
-            QUICK START
-          </div>
-
-
-          <div class="quick-grid">
-
-            <button
-              class="quick-card"
-              type="button"
-              data-template="Help me create a professional daily plan."
-            >
-              <span class="quick-icon">◷</span>
-
-              <span>
-                <strong>Plan my day</strong>
-                <small>Create a productive routine</small>
-              </span>
-            </button>
-
-
-            <button
-              class="quick-card"
-              type="button"
-              data-template="Teach me an important skill step by step."
-            >
-              <span class="quick-icon">⌁</span>
-
-              <span>
-                <strong>Learn a skill</strong>
-                <small>Learn something useful</small>
-              </span>
-            </button>
-
-
-            <button
-              class="quick-card"
-              type="button"
-              data-template="Help me find realistic ways to earn money online."
-            >
-              <span class="quick-icon">↗</span>
-
-              <span>
-                <strong>Earn online</strong>
-                <small>Explore opportunities</small>
-              </span>
-            </button>
-
-
-            <button
-              class="quick-card"
-              type="button"
-              data-template="Help me improve my English from beginner level."
-            >
-              <span class="quick-icon">Aa</span>
-
-              <span>
-                <strong>Improve English</strong>
-                <small>Practice step by step</small>
-              </span>
-            </button>
-
-          </div>
-
-        </div>
-
-
-        <!-- RECENT CHATS -->
-
-        <div class="recent-section">
-
-          <div class="section-heading">
-
-            <div>
-              <div class="section-label">
-                RECENT
-              </div>
-
-              <h2>
-                Your conversations
-              </h2>
-            </div>
-
-            <button
-              class="text-button"
-              type="button"
-              data-screen="historyScreen"
-            >
-              View all
-            </button>
-
-          </div>
-
-
-          <div
-            id="recentChats"
-            class="recent-list"
-          ></div>
-
-        </div>
-
-      </main>
-
-    </section>
-
-
-    <!-- ===================================================
-         CHAT SCREEN
-    ==================================================== -->
-
-    <section
-      id="chatScreen"
-      class="screen chat-screen"
-    >
-
-      <!-- CHAT HEADER -->
-
-      <header class="chat-header">
-
-        <button
-          id="chatBack"
-          class="icon-button"
-          type="button"
-          aria-label="Back"
-        >
-          ‹
+        <button class="mode-chip" data-mode="Learn">
+          📚 Learn
         </button>
 
-
-        <div class="chat-brand">
-
-          <div class="chat-brand-mark">
-            ✦
-          </div>
-
-          <div>
-
-            <div class="chat-brand-name">
-              Emogigs AI
-            </div>
-
-            <div class="chat-brand-status">
-              <span class="status-dot"></span>
-              Online
-            </div>
-
-          </div>
-
-        </div>
-
-
-        <button
-          id="chatNewTop"
-          class="icon-button"
-          type="button"
-          onclick="startNewChat()"
-          aria-label="New chat"
-        >
-          +
+        <button class="mode-chip" data-mode="Work">
+          💼 Work
         </button>
 
-      </header>
+        <button class="mode-chip" data-mode="Plan">
+          🎯 Plan
+        </button>
 
+        <button class="mode-chip" data-mode="Create">
+          🎨 Create
+        </button>
 
-      <!-- CHAT MESSAGES -->
-
-      <main
-        id="chatMessages"
-        class="chat-messages"
-      ></main>
-
-
-      <!-- CHAT COMPOSER -->
-
-      <div class="chat-composer-wrap">
-
-        <div class="chat-composer">
-
-          <button
-            class="composer-plus"
-            type="button"
-            aria-label="More options"
-          >
-            +
-          </button>
-
-
-          <textarea
-            id="chatInput"
-            rows="1"
-            maxlength="8000"
-            placeholder="Message Emogigs AI..."
-            autocomplete="off"
-            spellcheck="true"
-          ></textarea>
-
-
-          <button
-            id="chatMic"
-            class="composer-mic voice-mic-button"
-            type="button"
-            onclick="startVoiceInput()"
-            aria-label="Voice input"
-          >
-            🎙
-          </button>
-
-
-          <button
-            id="chatSend"
-            class="composer-send"
-            type="button"
-            aria-label="Send message"
-          >
-            ↑
-          </button>
-
-        </div>
-
-
-        <div class="composer-hint">
-          Emogigs AI can make mistakes. Check important information.
-        </div>
+        <button class="mode-chip" data-mode="Coach">
+          🧠 Coach
+        </button>
 
       </div>
 
-    </section>
 
+      <!-- QUICK TOOLS -->
+      <section id="quickTools">
 
-    <!-- ===================================================
-         HISTORY SCREEN
-    ==================================================== -->
-
-    <section
-      id="historyScreen"
-      class="screen"
-    >
-
-      <header class="page-header">
-
-        <div>
-          <div class="page-eyebrow">
-            CONVERSATIONS
-          </div>
-
-          <h1>
-            History
-          </h1>
+        <div class="section-title">
+          Quick Tools
         </div>
 
+        <div class="quick-grid">
+
+          <button
+            class="quick-card"
+            data-prompt="Teach me a useful skill step by step that I can learn from my phone.">
+            <div class="quick-icon">📚</div>
+            <div class="quick-title">Learn</div>
+            <div class="quick-desc">
+              Build a new skill step by step.
+            </div>
+          </button>
+
+          <button
+            class="quick-card"
+            data-prompt="Help me find realistic online work or income opportunities that match my skills.">
+            <div class="quick-icon">💼</div>
+            <div class="quick-title">Work</div>
+            <div class="quick-desc">
+              Explore skills and opportunities.
+            </div>
+          </button>
+
+          <button
+            class="quick-card"
+            data-prompt="Help me create a practical plan for achieving an important goal.">
+            <div class="quick-icon">🎯</div>
+            <div class="quick-title">Plan</div>
+            <div class="quick-desc">
+              Organize your goals and tasks.
+            </div>
+          </button>
+
+          <button
+            class="quick-card"
+            data-prompt="Give me three creative ideas for something useful, unique and realistic that I can build.">
+            <div class="quick-icon">🚀</div>
+            <div class="quick-title">Create</div>
+            <div class="quick-desc">
+              Turn ideas into something real.
+            </div>
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <!-- CHAT -->
+      <section id="chatArea">
+
+        <div class="empty-chat" id="emptyChat">
+          <div class="empty-chat-icon">✦</div>
+
+          <strong>
+            Emogigs AI is ready
+          </strong>
+
+          Ask anything, type a message,
+          or use your microphone.
+        </div>
+
+      </section>
+
+    </main>
+
+
+    <!-- VOICE STATUS -->
+    <div class="voice-status" id="voiceStatus">
+
+      <div class="voice-bars">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+
+      <span id="voiceStatusText">
+        Listening...
+      </span>
+
+    </div>
+
+
+    <!-- COMPOSER -->
+    <div class="composer-wrap">
+
+      <div class="composer">
+
+        <textarea
+          id="messageInput"
+          rows="1"
+          placeholder="Ask Emogigs AI anything..."
+          autocomplete="off"></textarea>
 
         <button
-          class="header-action"
-          type="button"
-          onclick="startNewChat()"
-        >
-          +
+          class="composer-btn mic-btn"
+          id="micBtn"
+          title="Voice input"
+          aria-label="Voice input">
+          🎙️
         </button>
 
-      </header>
+        <button
+          class="composer-btn send-btn"
+          id="sendBtn"
+          title="Send"
+          aria-label="Send">
+          ↑
+        </button>
 
+      </div>
 
-      <main class="page-content">
+    </div>
 
-        <div
-          id="historyList"
-          class="history-list"
-        ></div>
 
-      </main>
-
-    </section>
-
-
-    <!-- ===================================================
-         PROFILE / SETTINGS SCREEN
-    ==================================================== -->
-
-    <section
-      id="profileScreen"
-      class="screen"
-    >
-
-      <header class="page-header">
-
-        <div>
-          <div class="page-eyebrow">
-            EMOGIGS
-          </div>
-
-          <h1>
-            Profile
-          </h1>
-        </div>
-
-      </header>
-
-
-      <main class="page-content">
-
-        <!-- PROFILE CARD -->
-
-        <div class="profile-card">
-
-          <div class="profile-mark">
-            ✦
-          </div>
-
-          <div>
-
-            <h2>
-              Emogigs AI
-            </h2>
-
-            <p>
-              Your personal AI Life OS
-            </p>
-
-          </div>
-
-        </div>
-
-
-        <!-- VOICE SETTINGS -->
-
-        <div class="settings-card">
-
-          <div class="settings-card-header">
-
-            <div>
-
-              <div class="section-label">
-                VOICE
-              </div>
-
-              <h2>
-                Voice settings
-              </h2>
-
-              <p>
-                Customize how Emogigs AI speaks and listens.
-              </p>
-
-            </div>
-
-            <button
-              class="settings-toggle"
-              type="button"
-              onclick="toggleVoiceSettingsPanel()"
-              aria-label="Toggle voice settings"
-            >
-              ⚙
-            </button>
-
-          </div>
-
-
-          <div
-            id="voiceSettingsPanel"
-            class="voice-settings-panel show"
-          >
-
-            <!-- GENDER -->
-
-            <div class="setting-row">
-
-              <div class="setting-info">
-
-                <strong>
-                  Voice
-                </strong>
-
-                <span>
-                  Choose a preferred voice style.
-                </span>
-
-              </div>
-
-
-              <select
-                id="voiceGender"
-                class="setting-select"
-              >
-                <option value="natural">
-                  Natural
-                </option>
-
-                <option value="female">
-                  Female
-                </option>
-
-                <option value="male">
-                  Male
-                </option>
-              </select>
-
-            </div>
-
-
-            <!-- LANGUAGE -->
-
-            <div class="setting-row">
-
-              <div class="setting-info">
-
-                <strong>
-                  Language
-                </strong>
-
-                <span>
-                  Language used for voice.
-                </span>
-
-              </div>
-
-
-              <select
-                id="voiceLanguage"
-                class="setting-select"
-              >
-
-                <option value="auto">
-                  Auto
-                </option>
-
-                <option value="en-US">
-                  English
-                </option>
-
-                <option value="bn-BD">
-                  বাংলা
-                </option>
-
-              </select>
-
-            </div>
-
-
-            <!-- RATE -->
-
-            <div class="setting-row setting-row-column">
-
-              <div class="setting-info">
-
-                <strong>
-                  Speaking speed
-                </strong>
-
-                <span>
-                  Adjust AI voice speed.
-                </span>
-
-              </div>
-
-
-              <div class="range-wrapper">
-
-                <input
-                  id="voiceRate"
-                  class="voice-range"
-                  type="range"
-                  min="0.6"
-                  max="1.5"
-                  step="0.05"
-                  value="1"
-                >
-
-                <span
-                  id="voiceRateValue"
-                  class="range-value"
-                >
-                  1.00×
-                </span>
-
-              </div>
-
-            </div>
-
-
-            <!-- AUTO SPEAK -->
-
-            <div class="setting-row">
-
-              <div class="setting-info">
-
-                <strong>
-                  Auto speak
-                </strong>
-
-                <span>
-                  Automatically read AI responses aloud.
-                </span>
-
-              </div>
-
-
-              <select
-                id="voiceAutoSpeak"
-                class="setting-select"
-              >
-
-                <option value="off">
-                  Off
-                </option>
-
-                <option value="on">
-                  On
-                </option>
-
-              </select>
-
-            </div>
-
-
-            <!-- CONVERSATION -->
-
-            <div class="setting-row">
-
-              <div class="setting-info">
-
-                <strong>
-                  Voice conversation
-                </strong>
-
-                <span>
-                  Prepare for continuous voice interaction.
-                </span>
-
-              </div>
-
-
-              <select
-                id="voiceConversation"
-                class="setting-select"
-              >
-
-                <option value="off">
-                  Off
-                </option>
-
-                <option value="on">
-                  On
-                </option>
-
-              </select>
-
-            </div>
-
-
-            <!-- VOICE STATUS -->
-
-            <div class="voice-status-card">
-
-              <span class="voice-status">
-                Voice ready
-              </span>
-
-              <button
-                class="voice-test-button"
-                type="button"
-                onclick="speakText('Hello. This is Emogigs AI.')"
-              >
-                Test voice
-              </button>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </main>
-
-    </section>
-
-
-    <!-- ===================================================
-         BOTTOM NAVIGATION
-    ==================================================== -->
-
-    <nav class="bottom-nav">
-
-      <button
-        class="nav-btn active"
-        type="button"
-        data-screen="homeScreen"
-      >
-
-        <span class="nav-icon">
-          ⌂
-        </span>
-
-        <span class="nav-label">
-          Home
-        </span>
-
-      </button>
-
-
-      <button
-        class="nav-btn"
-        type="button"
-        data-screen="chatScreen"
-      >
-
-        <span class="nav-icon">
-          ◉
-        </span>
-
-        <span class="nav-label">
-          Chats
-        </span>
-
-      </button>
-
-
-      <button
-        class="nav-btn nav-new"
-        type="button"
-        data-screen="chatScreen"
-        onclick="startNewChat()"
-      >
-
-        <span class="nav-new-icon">
-          ✦
-        </span>
-
-        <span class="nav-label">
-          New
-        </span>
-
-      </button>
-
-
-      <button
-        class="nav-btn"
-        type="button"
-        data-screen="historyScreen"
-      >
-
-        <span class="nav-icon">
-          ▤
-        </span>
-
-        <span class="nav-label">
-          History
-        </span>
-
-      </button>
-
-
-      <button
-        class="nav-btn"
-        type="button"
-        data-screen="profileScreen"
-      >
-
-        <span class="nav-icon">
-          ◯
-        </span>
-
-        <span class="nav-label">
-          Profile
-        </span>
-
-      </button>
-
-    </nav>
-
-
-    <!-- ===================================================
-         TOAST
-    ==================================================== -->
-
-    <div
-      id="toast"
-      class="toast"
-      role="status"
-      aria-live="polite"
-    ></div>
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
 
   </div>
-
-
-  <!-- =====================================================
-       SCRIPT
-  ====================================================== -->
 
   <script src="script.js"></script>
 
