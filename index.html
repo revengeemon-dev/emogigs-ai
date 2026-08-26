@@ -2,773 +2,474 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0b0820">
-  <meta name="description" content="Emogigs AI - Your personal AI Life OS">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+  <meta name="theme-color" content="#09090f">
+  <meta name="description"
+        content="Emogigs AI — Your personal AI Life OS">
+
   <title>Emogigs AI</title>
 
   <style>
-    /* =====================================================
-       EMOGIGS AI — STEP 17
-       PROFESSIONAL APP SHELL
-    ===================================================== */
-
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    :root {
-      --bg: #080619;
-      --bg-2: #0d0924;
-      --panel: #11102b;
-      --panel-2: #171338;
-      --border: #28204b;
-      --purple: #8b5cf6;
-      --purple-2: #a855f7;
-      --purple-soft: #21164b;
-      --text: #ffffff;
-      --muted: #9b96b5;
-      --muted-2: #77718f;
-      --danger: #f87171;
-      --success: #34d399;
+      -webkit-tap-highlight-color: transparent;
     }
 
     html,
     body {
+      margin: 0;
+      padding: 0;
       width: 100%;
       min-height: 100%;
-    }
-
-    body {
+      background: #08080d;
+      color: #f5f5f7;
       font-family:
         Inter,
+        system-ui,
         -apple-system,
         BlinkMacSystemFont,
         "Segoe UI",
-        Arial,
         sans-serif;
+    }
 
-      background:
-        radial-gradient(
-          circle at 20% 0%,
-          rgba(139, 92, 246, 0.14),
-          transparent 30%
-        ),
-        var(--bg);
-
-      color: var(--text);
-      min-height: 100vh;
+    body {
       overflow-x: hidden;
     }
 
     button,
     textarea,
-    input {
+    select {
       font: inherit;
     }
 
     button {
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    /* =====================================================
-       APP
-    ===================================================== */
-
-    .app {
-      width: 100%;
-      max-width: 1180px;
-      min-height: 100vh;
-      margin: 0 auto;
-      position: relative;
-    }
-
-    /* =====================================================
-       TOP HEADER
-    ===================================================== */
-
-    .topbar {
-      height: 72px;
-      padding: 0 20px;
-
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-
-      background: rgba(8, 6, 25, 0.82);
-
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-
-      position: sticky;
-      top: 0;
-      z-index: 50;
-    }
-
-    .brand-area {
-      display: flex;
-      align-items: center;
-      gap: 11px;
-    }
-
-    .brand-logo {
-      width: 40px;
-      height: 40px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      border-radius: 13px;
-
-      background:
-        linear-gradient(
-          135deg,
-          #8b5cf6,
-          #6d28d9
-        );
-
-      box-shadow:
-        0 8px 25px rgba(139,92,246,0.3);
-
-      font-size: 19px;
-    }
-
-    .brand-name {
-      font-size: 17px;
-      font-weight: 750;
-      letter-spacing: -0.3px;
-    }
-
-    .brand-subtitle {
-      margin-top: 2px;
-      font-size: 10px;
-      color: var(--muted);
-    }
-
-    .online-dot {
-      display: inline-block;
-      width: 6px;
-      height: 6px;
-      margin-right: 4px;
-      border-radius: 50%;
-      background: var(--success);
-      box-shadow: 0 0 8px rgba(52,211,153,.6);
-    }
-
-    .header-action {
-      width: 40px;
-      height: 40px;
-
-      border: 1px solid var(--border);
-      border-radius: 12px;
-
-      background: var(--panel);
-      color: white;
-
       cursor: pointer;
     }
 
-    /* =====================================================
-       MAIN
-    ===================================================== */
-
-    main {
-      padding: 24px 18px 110px;
+    .app {
+      width: 100%;
+      min-height: 100vh;
+      background:
+        radial-gradient(
+          circle at top right,
+          rgba(111, 70, 255, .16),
+          transparent 35%
+        ),
+        #08080d;
     }
 
     .screen {
       display: none;
-      animation: screenIn .25s ease;
+      width: 100%;
+      min-height: 100vh;
+      padding-bottom: 88px;
     }
 
     .screen.active {
       display: block;
     }
 
-    @keyframes screenIn {
-      from {
-        opacity: 0;
-        transform: translateY(7px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .container {
+      width: min(100%, 900px);
+      margin: auto;
+      padding: 18px;
     }
 
-    /* =====================================================
-       HOME
-    ===================================================== */
+    /* ================= HEADER ================= */
 
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-
-      padding: 7px 11px;
-      margin-bottom: 17px;
-
-      border: 1px solid #35246a;
-      border-radius: 999px;
-
-      background: rgba(139,92,246,.09);
-
-      color: #c4a8ff;
-      font-size: 11px;
-      font-weight: 650;
-    }
-
-    .hero h1 {
-      font-size: clamp(29px, 7vw, 48px);
-      line-height: 1.08;
-      letter-spacing: -1.6px;
-      max-width: 720px;
-    }
-
-    .hero h1 span {
-      color: #a78bfa;
-    }
-
-    .hero p {
-      max-width: 650px;
-      margin-top: 13px;
-
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.7;
-    }
-
-    /* =====================================================
-       AI SEARCH CARD
-    ===================================================== */
-
-    .home-ai-card {
-      margin-top: 26px;
-      padding: 16px;
-
-      border: 1px solid #342765;
-      border-radius: 23px;
-
-      background:
-        linear-gradient(
-          145deg,
-          rgba(31,20,67,.96),
-          rgba(16,13,40,.98)
-        );
-
-      box-shadow:
-        0 18px 60px rgba(0,0,0,.22);
-    }
-
-    .ai-card-top {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 13px;
-    }
-
-    .ai-small-avatar {
-      width: 38px;
-      height: 38px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      border-radius: 12px;
-      background: linear-gradient(135deg,#8b5cf6,#6d28d9);
-    }
-
-    .ai-card-name {
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .ai-card-desc {
-      margin-top: 2px;
-      color: var(--muted);
-      font-size: 10px;
-    }
-
-    .home-input-row {
-      display: flex;
-      gap: 9px;
-      align-items: flex-end;
-
-      padding: 8px;
-
-      border-radius: 17px;
-
-      background: #09071a;
-      border: 1px solid #2c2350;
-    }
-
-    .home-input {
-      flex: 1;
-
-      min-height: 47px;
-      max-height: 130px;
-
-      resize: none;
-      border: none;
-      outline: none;
-
-      background: transparent;
-      color: white;
-
-      padding: 11px 9px;
-
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    .home-input::placeholder {
-      color: #69627f;
-    }
-
-    .primary-send {
-      flex: 0 0 48px;
-      width: 48px;
-      height: 48px;
-
-      border: none;
-      border-radius: 14px;
-
-      background: linear-gradient(
-        135deg,
-        #a855f7,
-        #7c3aed
-      );
-
-      color: white;
-      font-size: 18px;
-
-      cursor: pointer;
-
-      box-shadow:
-        0 7px 20px rgba(124,58,237,.3);
-    }
-
-    .primary-send:active {
-      transform: scale(.94);
-    }
-
-    /* =====================================================
-       SECTION
-    ===================================================== */
-
-    .section-head {
+    .topbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-
-      margin: 28px 0 13px;
+      gap: 12px;
+      padding: 14px 18px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(8, 8, 13, .86);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(255,255,255,.06);
     }
 
-    .section-head h2 {
-      font-size: 18px;
-      letter-spacing: -.4px;
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
-    .section-link {
+    .brand-icon,
+    .message-ai-avatar {
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      width: 38px;
+      height: 38px;
+      border-radius: 13px;
+      background:
+        linear-gradient(
+          135deg,
+          #7c4dff,
+          #38bdf8
+        );
+      color: white;
+      font-weight: 800;
+      box-shadow:
+        0 0 24px rgba(124,77,255,.28);
+    }
+
+    .brand-title {
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .brand-subtitle {
+      font-size: 11px;
+      color: #9696a5;
+      margin-top: 2px;
+    }
+
+    .icon-button {
+      width: 42px;
+      height: 42px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.04);
+      color: #fff;
+      border-radius: 13px;
+    }
+
+    /* ================= HERO ================= */
+
+    .hero {
+      padding: 34px 0 20px;
+    }
+
+    .eyebrow {
       color: #a78bfa;
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 10px;
     }
 
-    /* =====================================================
-       QUICK TOOLS
-    ===================================================== */
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(30px, 8vw, 54px);
+      line-height: 1.04;
+      letter-spacing: -1.8px;
+    }
+
+    .gradient-text {
+      background:
+        linear-gradient(
+          90deg,
+          #fff,
+          #a78bfa,
+          #38bdf8
+        );
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero p {
+      color: #a0a0af;
+      line-height: 1.65;
+      max-width: 650px;
+      margin: 15px 0 25px;
+    }
+
+    /* ================= HOME INPUT ================= */
+
+    .ask-card {
+      padding: 12px;
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.045);
+      box-shadow:
+        0 20px 70px rgba(0,0,0,.25);
+    }
+
+    .ask-card textarea {
+      width: 100%;
+      min-height: 70px;
+      resize: none;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: #fff;
+      padding: 10px;
+      line-height: 1.55;
+    }
+
+    .ask-card textarea::placeholder {
+      color: #707080;
+    }
+
+    .ask-footer {
+      display: flex;
+      justify-content: flex-end;
+      padding-top: 6px;
+    }
+
+    .send-button {
+      width: 48px;
+      height: 48px;
+      border: 0;
+      border-radius: 16px;
+      background:
+        linear-gradient(
+          135deg,
+          #7c4dff,
+          #38bdf8
+        );
+      color: #fff;
+      font-size: 21px;
+      box-shadow:
+        0 10px 28px rgba(99,102,241,.28);
+    }
+
+    .send-button:disabled {
+      opacity: .45;
+    }
+
+    /* ================= QUICK TOOLS ================= */
+
+    .section {
+      margin-top: 30px;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 13px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: 18px;
+    }
 
     .tools-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 11px;
+      gap: 12px;
     }
 
     .tool-card {
-      min-height: 145px;
-
-      padding: 16px;
-
-      border: 1px solid var(--border);
-      border-radius: 17px;
-
-      background:
-        linear-gradient(
-          145deg,
-          rgba(22,18,52,.98),
-          rgba(13,11,34,.98)
-        );
-
-      cursor: pointer;
-
-      transition:
-        transform .18s ease,
-        border-color .18s ease;
+      text-align: left;
+      padding: 17px;
+      min-height: 125px;
+      color: white;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.07);
+      background: rgba(255,255,255,.035);
+      transition: transform .18s ease;
     }
 
     .tool-card:active {
       transform: scale(.97);
     }
 
-    .tool-card:hover {
-      border-color: #49348a;
-    }
-
     .tool-icon {
-      width: 40px;
-      height: 40px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      border-radius: 12px;
-
-      background: #21164b;
-
-      font-size: 20px;
-
-      margin-bottom: 12px;
+      font-size: 25px;
+      margin-bottom: 15px;
     }
 
-    .tool-card h3 {
-      font-size: 14px;
+    .tool-title {
+      font-weight: 750;
       margin-bottom: 5px;
     }
 
-    .tool-card p {
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.5;
+    .tool-desc {
+      color: #8d8d9b;
+      font-size: 12px;
+      line-height: 1.4;
     }
 
-    /* =====================================================
-       ASSISTANT CARD
-    ===================================================== */
-
-    .assistant-card {
-      margin-top: 14px;
-
-      padding: 17px;
-
-      border-radius: 18px;
-      border: 1px solid #342765;
-
-      background:
-        linear-gradient(
-          120deg,
-          #211448,
-          #120d2e
-        );
-
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .assistant-robot {
-      width: 52px;
-      height: 52px;
-
-      flex: 0 0 52px;
-
-      border-radius: 16px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      background:
-        radial-gradient(
-          circle at 35% 30%,
-          #c4b5fd,
-          #7c3aed
-        );
-
-      font-size: 27px;
-    }
-
-    .assistant-card h3 {
-      font-size: 14px;
-    }
-
-    .assistant-card p {
-      margin-top: 5px;
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.5;
-    }
-
-    /* =====================================================
-       RECENT CHAT
-    ===================================================== */
+    /* ================= RECENT ================= */
 
     .recent-list {
-      border: 1px solid var(--border);
-      border-radius: 17px;
-      overflow: hidden;
+      display: grid;
+      gap: 8px;
     }
 
     .recent-item {
       width: 100%;
-
-      padding: 13px;
-
-      display: flex;
+      display: grid;
+      grid-template-columns: 42px 1fr auto;
       align-items: center;
-      gap: 11px;
-
-      border: none;
-      border-bottom: 1px solid rgba(255,255,255,.05);
-
-      background: #11102b;
-      color: white;
-
+      gap: 10px;
       text-align: left;
-      cursor: pointer;
+      padding: 12px;
+      color: white;
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 16px;
+      background: rgba(255,255,255,.03);
     }
 
-    .recent-item:last-child {
-      border-bottom: none;
-    }
-
-    .recent-icon {
-      width: 35px;
-      height: 35px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      border-radius: 10px;
-      background: #241650;
-
-      font-size: 15px;
+    .recent-icon,
+    .history-icon {
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 13px;
+      background: rgba(124,77,255,.14);
+      color: #b9a7ff;
     }
 
     .recent-title {
-      flex: 1;
-      min-width: 0;
-
-      font-size: 12px;
-      white-space: nowrap;
+      font-size: 14px;
+      font-weight: 650;
       overflow: hidden;
       text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .recent-time {
-      color: var(--muted-2);
-      font-size: 10px;
+      color: #777785;
+      font-size: 11px;
     }
 
-    /* =====================================================
-       CHAT SCREEN
-    ===================================================== */
+    /* ================= CHAT ================= */
 
     .chat-screen {
-      min-height: calc(100vh - 180px);
+      padding-bottom: 100px;
     }
 
-    .chat-header {
-      display: flex;
-      align-items: center;
-      gap: 11px;
-
-      padding-bottom: 15px;
-
-      border-bottom: 1px solid rgba(255,255,255,.06);
+    .chat-topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
     }
 
-    .chat-back {
-      width: 38px;
-      height: 38px;
-
-      border: 1px solid var(--border);
-      border-radius: 11px;
-
-      background: var(--panel);
-      color: white;
-
-      cursor: pointer;
-    }
-
-    .chat-avatar {
-      width: 39px;
-      height: 39px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      border-radius: 12px;
-      background: linear-gradient(135deg,#8b5cf6,#6d28d9);
-    }
-
-    .chat-header-info {
+    .chat-title {
       flex: 1;
+      text-align: center;
     }
 
-    .chat-header-name {
-      font-size: 14px;
-      font-weight: 700;
+    .chat-title strong {
+      display: block;
+      font-size: 15px;
     }
 
-    .chat-status {
-      margin-top: 2px;
-      color: var(--success);
+    .online {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: #7dd3fc;
       font-size: 10px;
     }
 
-    .chat-menu {
-      width: 35px;
-      height: 35px;
-
-      border: none;
-      background: transparent;
-      color: white;
-
-      font-size: 20px;
+    .online-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #4ade80;
     }
 
     .chat-messages {
-      padding: 18px 0 155px;
+      width: min(100%, 900px);
+      margin: auto;
+      padding: 18px;
+      min-height: calc(100vh - 160px);
     }
 
     .chat-message {
       display: flex;
-      width: 100%;
-      margin-bottom: 18px;
+      margin: 13px 0;
+      gap: 9px;
     }
 
     .chat-message.user {
       justify-content: flex-end;
     }
 
+    .chat-message.ai {
+      align-items: flex-start;
+    }
+
+    .user-bubble,
+    .ai-bubble {
+      max-width: min(82%, 680px);
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
     .user-bubble {
-      max-width: 82%;
-
       padding: 12px 15px;
-
-      border-radius: 18px 18px 5px 18px;
-
+      border-radius: 20px 20px 5px 20px;
       background:
         linear-gradient(
           135deg,
-          #7c3aed,
-          #8b5cf6
+          #6941d9,
+          #4361ee
         );
-
-      color: white;
-
-      font-size: 14px;
-      line-height: 1.6;
-
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
-
-      box-shadow:
-        0 7px 20px rgba(124,58,237,.16);
-    }
-
-    .chat-message.ai {
-      justify-content: flex-start;
-      align-items: flex-start;
-      gap: 9px;
-    }
-
-    .message-ai-avatar {
-      width: 33px;
-      height: 33px;
-
-      flex: 0 0 33px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      border-radius: 10px;
-
-      background: #251653;
-
-      font-size: 14px;
     }
 
     .ai-message-wrap {
-      max-width: 84%;
+      max-width: calc(100% - 48px);
     }
 
     .ai-bubble {
-      padding: 13px 15px;
+      padding: 12px 15px;
+      border-radius: 5px 20px 20px 20px;
+      background: rgba(255,255,255,.055);
+      border: 1px solid rgba(255,255,255,.06);
+    }
 
-      border-radius: 5px 18px 18px 18px;
-
-      background: #14122e;
-      border: 1px solid #2b2450;
-
-      color: #eeeafd;
-
-      font-size: 14px;
-      line-height: 1.7;
-
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
+    .message-ai-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      font-size: 15px;
     }
 
     .message-actions {
       display: flex;
-      gap: 3px;
+      flex-wrap: wrap;
+      gap: 4px;
       margin-top: 6px;
     }
 
     .message-action {
-      width: 30px;
-      height: 28px;
-
-      border: none;
-      border-radius: 8px;
-
+      border: 0;
       background: transparent;
-      color: #77718f;
-
-      cursor: pointer;
+      color: #777786;
+      width: 34px;
+      height: 30px;
+      border-radius: 9px;
     }
 
+    .message-action:active,
     .message-action:hover {
-      background: #1c173c;
-      color: white;
+      background: rgba(255,255,255,.06);
+      color: #fff;
     }
 
-    /* =====================================================
-       THINKING
-    ===================================================== */
+    .voice-action-button.speaking {
+      color: #a78bfa;
+      background: rgba(124,77,255,.14);
+    }
+
+    /* ================= THINKING ================= */
 
     .thinking {
       display: flex;
-      align-items: center;
       gap: 5px;
-
-      min-height: 35px;
+      padding: 3px;
     }
 
     .thinking span {
       width: 7px;
       height: 7px;
-
       border-radius: 50%;
-
       background: #a78bfa;
-
-      animation: thinking 1.2s infinite;
+      animation: thinking 1s infinite ease-in-out;
     }
 
     .thinking span:nth-child(2) {
@@ -776,1022 +477,297 @@
     }
 
     .thinking span:nth-child(3) {
-      animation-delay: .30s;
+      animation-delay: .3s;
     }
 
     @keyframes thinking {
-      0%, 60%, 100% {
-        opacity: .3;
+      0%, 100% {
+        opacity: .25;
         transform: translateY(0);
       }
-
-      30% {
+      50% {
         opacity: 1;
         transform: translateY(-4px);
       }
     }
 
-    /* =====================================================
-       CHAT COMPOSER
-    ===================================================== */
+    /* ================= CHAT INPUT ================= */
 
-    .chat-composer {
+    .chat-input-bar {
       position: fixed;
-
-      left: 50%;
-      bottom: 76px;
-
-      transform: translateX(-50%);
-
-      width: min(100% - 24px, 760px);
-
-      padding: 8px;
-
-      border-radius: 18px;
-
-      background: rgba(19,16,44,.94);
-      border: 1px solid #342a5c;
-
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      padding:
+        10px
+        max(12px, env(safe-area-inset-right))
+        calc(10px + env(safe-area-inset-bottom))
+        max(12px, env(safe-area-inset-left));
+      background: rgba(8,8,13,.91);
       backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-
-      z-index: 40;
-
-      box-shadow:
-        0 -8px 30px rgba(0,0,0,.2);
+      border-top: 1px solid rgba(255,255,255,.07);
     }
 
-    .composer-row {
+    .chat-input-inner {
+      width: min(100%, 900px);
+      margin: auto;
       display: flex;
       align-items: flex-end;
-      gap: 7px;
+      gap: 8px;
+      padding: 8px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.055);
+      border: 1px solid rgba(255,255,255,.08);
     }
 
-    .composer-input {
+    .chat-input-inner textarea {
       flex: 1;
-
-      min-height: 43px;
-      max-height: 120px;
-
+      min-height: 40px;
+      max-height: 130px;
       resize: none;
-
-      border: none;
-      outline: none;
-
+      border: 0;
+      outline: 0;
       background: transparent;
-
-      color: white;
-
+      color: #fff;
       padding: 10px;
-
-      font-size: 14px;
-      line-height: 1.5;
+      line-height: 1.45;
     }
 
-    .composer-input::placeholder {
-      color: #6f6887;
+    .chat-input-inner textarea::placeholder {
+      color: #707080;
     }
 
-    .composer-send {
-      width: 44px;
-      height: 44px;
-
-      flex: 0 0 44px;
-
-      border: none;
-      border-radius: 13px;
-
-      background: linear-gradient(
-        135deg,
-        #a855f7,
-        #7c3aed
-      );
-
-      color: white;
-      cursor: pointer;
+    .mic-button,
+    .chat-send {
+      width: 42px;
+      height: 42px;
+      flex-shrink: 0;
+      border: 0;
+      border-radius: 14px;
+      background: rgba(255,255,255,.06);
+      color: #fff;
     }
 
-    /* =====================================================
-       HISTORY
-    ===================================================== */
-
-    .page-title {
-      font-size: 27px;
-      letter-spacing: -.8px;
+    .chat-send {
+      background:
+        linear-gradient(
+          135deg,
+          #7c4dff,
+          #38bdf8
+        );
     }
 
-    .page-subtitle {
-      margin-top: 7px;
-      color: var(--muted);
-      font-size: 13px;
+    .voice-mic-button.listening {
+      background: rgba(239,68,68,.18);
+      color: #fb7185;
+      animation: pulse 1.2s infinite;
     }
+
+    @keyframes pulse {
+      50% {
+        box-shadow:
+          0 0 0 7px rgba(239,68,68,.08);
+      }
+    }
+
+    /* ================= HISTORY ================= */
 
     .history-list {
-      margin-top: 22px;
-
-      border: 1px solid var(--border);
-      border-radius: 18px;
-
-      overflow: hidden;
+      display: grid;
+      gap: 10px;
     }
 
     .history-item {
-      display: flex;
+      display: grid;
+      grid-template-columns: 42px 1fr 40px;
+      gap: 10px;
       align-items: center;
-      gap: 12px;
-
-      padding: 15px;
-
-      background: #11102b;
-      border-bottom: 1px solid rgba(255,255,255,.05);
-
-      cursor: pointer;
-    }
-
-    .history-item:last-child {
-      border-bottom: none;
-    }
-
-    .history-icon {
-      width: 40px;
-      height: 40px;
-
-      flex: 0 0 40px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      border-radius: 12px;
-
-      background: #251653;
+      padding: 12px;
+      border-radius: 17px;
+      border: 1px solid rgba(255,255,255,.06);
+      background: rgba(255,255,255,.035);
     }
 
     .history-info {
-      flex: 1;
       min-width: 0;
     }
 
     .history-title {
-      font-size: 13px;
+      font-weight: 700;
+      font-size: 14px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
     .history-preview {
+      color: #777786;
+      font-size: 11px;
       margin-top: 4px;
-
-      color: var(--muted);
-
-      font-size: 10px;
-
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
     .history-delete {
-      border: none;
-      background: transparent;
-      color: #77718f;
-      cursor: pointer;
-      font-size: 15px;
+      width: 38px;
+      height: 38px;
+      border: 0;
+      border-radius: 12px;
+      background: rgba(239,68,68,.08);
+      color: #fb7185;
     }
 
-    /* =====================================================
-       TEMPLATES
-    ===================================================== */
+    /* ================= VOICE SETTINGS ================= */
 
-    .template-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-
-      margin-top: 22px;
-    }
-
-    .template-card {
-      min-height: 135px;
-
+    .voice-panel {
+      display: none;
+      margin-top: 12px;
       padding: 16px;
-
-      border: 1px solid var(--border);
-      border-radius: 17px;
-
-      background: #11102b;
-
-      cursor: pointer;
-    }
-
-    .template-card:active {
-      transform: scale(.97);
-    }
-
-    .template-card-icon {
-      font-size: 24px;
-      margin-bottom: 12px;
-    }
-
-    .template-card h3 {
-      font-size: 13px;
-    }
-
-    .template-card p {
-      margin-top: 5px;
-      color: var(--muted);
-      font-size: 10px;
-      line-height: 1.5;
-    }
-
-    /* =====================================================
-       PROFILE
-    ===================================================== */
-
-    .profile-card {
-      margin-top: 22px;
-
-      padding: 20px;
-
-      text-align: center;
-
-      border: 1px solid var(--border);
-      border-radius: 20px;
-
-      background: #11102b;
-    }
-
-    .profile-avatar {
-      width: 72px;
-      height: 72px;
-
-      margin: 0 auto 12px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      border-radius: 22px;
-
-      background:
-        linear-gradient(
-          135deg,
-          #8b5cf6,
-          #6d28d9
-        );
-
-      font-size: 30px;
-    }
-
-    .profile-card h2 {
-      font-size: 18px;
-    }
-
-    .profile-card p {
-      margin-top: 4px;
-      color: var(--muted);
-      font-size: 11px;
-    }
-
-    .settings-list {
-      margin-top: 18px;
-
-      border: 1px solid var(--border);
       border-radius: 18px;
-
-      overflow: hidden;
+      background: rgba(255,255,255,.045);
+      border: 1px solid rgba(255,255,255,.07);
     }
 
-    .setting-item {
-      width: 100%;
-
-      padding: 15px;
-
-      display: flex;
-      align-items: center;
-      gap: 12px;
-
-      border: none;
-      border-bottom: 1px solid rgba(255,255,255,.05);
-
-      background: #11102b;
-      color: white;
-
-      text-align: left;
+    .voice-panel.show {
+      display: block;
     }
 
-    .setting-item:last-child {
-      border-bottom: none;
+    .voice-row {
+      margin-bottom: 15px;
     }
 
-    .setting-icon {
-      width: 35px;
-      height: 35px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      border-radius: 10px;
-
-      background: #21164b;
+    .voice-row:last-child {
+      margin-bottom: 0;
     }
 
-    .setting-info {
-      flex: 1;
-    }
-
-    .setting-name {
+    .voice-row label {
+      display: block;
       font-size: 12px;
+      color: #9b9baa;
+      margin-bottom: 7px;
     }
 
-    .setting-description {
-      margin-top: 3px;
-      color: var(--muted);
-      font-size: 9px;
+    .voice-row select,
+    .voice-row input {
+      width: 100%;
     }
 
-    /* =====================================================
-       EMPTY
-    ===================================================== */
-
-    .empty-state {
-      padding: 50px 20px;
-      text-align: center;
-      color: var(--muted);
+    .voice-row select {
+      color: white;
+      background: #15151e;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 12px;
+      padding: 10px;
+      outline: 0;
     }
 
-    .empty-icon {
-      font-size: 35px;
-      margin-bottom: 12px;
+    .voice-status {
+      color: #777786;
+      font-size: 11px;
+      margin-top: 8px;
     }
 
-    /* =====================================================
-       BOTTOM NAVIGATION
-    ===================================================== */
+    .voice-status.active {
+      color: #7dd3fc;
+    }
+
+    /* ================= BOTTOM NAV ================= */
 
     .bottom-nav {
       position: fixed;
-
-      left: 50%;
       bottom: 0;
-
-      transform: translateX(-50%);
-
-      width: min(100%, 760px);
-      height: 67px;
-
+      left: 0;
+      right: 0;
+      z-index: 40;
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
-
-      background: rgba(13,10,31,.97);
-
-      border-top: 1px solid rgba(255,255,255,.08);
-
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-
-      z-index: 60;
+      grid-template-columns: repeat(3, 1fr);
+      padding:
+        8px
+        max(8px, env(safe-area-inset-right))
+        calc(8px + env(safe-area-inset-bottom))
+        max(8px, env(safe-area-inset-left));
+      background: rgba(8,8,13,.92);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255,255,255,.07);
     }
 
     .nav-btn {
-      border: none;
+      border: 0;
       background: transparent;
-
-      color: #706a87;
-
-      cursor: pointer;
-
-      font-size: 9px;
+      color: #686875;
+      padding: 8px 4px;
+      border-radius: 14px;
+      font-size: 11px;
     }
 
-    .nav-btn-icon {
+    .nav-btn span {
       display: block;
-
-      width: 30px;
-      height: 30px;
-
-      margin: 0 auto 2px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      border-radius: 10px;
-
-      font-size: 17px;
+      font-size: 20px;
+      margin-bottom: 2px;
     }
 
     .nav-btn.active {
-      color: #a78bfa;
+      color: #b9a7ff;
+      background: rgba(124,77,255,.09);
     }
 
-    .nav-btn.active .nav-btn-icon {
-      background: #251653;
-    }
-
-    /* =====================================================
-       TOAST
-    ===================================================== */
+    /* ================= TOAST ================= */
 
     .toast {
       position: fixed;
-
       left: 50%;
-      bottom: 84px;
-
-      transform: translateX(-50%) translateY(10px);
-
-      padding: 9px 14px;
-
-      border-radius: 10px;
-
-      background: #211b3e;
-      border: 1px solid #3b2c68;
-
-      color: white;
-
-      font-size: 11px;
-
+      bottom: 90px;
+      z-index: 100;
+      transform: translate(-50%, 20px);
       opacity: 0;
       pointer-events: none;
-
-      transition: .2s ease;
-
-      z-index: 100;
+      padding: 11px 15px;
+      border-radius: 13px;
+      background: #1d1d27;
+      border: 1px solid rgba(255,255,255,.08);
+      color: white;
+      font-size: 12px;
+      transition: .25s ease;
+      white-space: nowrap;
+      max-width: 90vw;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .toast.show {
       opacity: 1;
-      transform: translateX(-50%) translateY(0);
+      transform: translate(-50%, 0);
     }
 
-    /* =====================================================
-       RESPONSIVE
-    ===================================================== */
+    /* ================= EMPTY ================= */
+
+    .empty-state {
+      text-align: center;
+      color: #777786;
+      padding: 35px 15px;
+    }
+
+    .empty-icon {
+      font-size: 30px;
+      margin-bottom: 10px;
+    }
 
     @media (min-width: 700px) {
-
-      main {
-        padding-left: 30px;
-        padding-right: 30px;
-      }
-
       .tools-grid {
         grid-template-columns: repeat(4, 1fr);
       }
 
-      .template-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-
-    @media (min-width: 1000px) {
-
-      main {
-        padding-left: 55px;
-        padding-right: 55px;
-      }
-
       .bottom-nav {
-        border-radius: 18px 18px 0 0;
+        width: min(600px, 100%);
+        left: 50%;
+        transform: translateX(-50%);
+        border: 1px solid rgba(255,255,255,.07);
+        border-bottom: 0;
+        border-radius: 20px 20px 0 0;
       }
     }
-
-    @media (max-width: 520px) {
-
-      .topbar {
-        height: 64px;
-        padding: 0 15px;
-      }
-
-      main {
-        padding: 21px 14px 105px;
-      }
-
-      .user-bubble {
-        max-width: 88%;
-      }
-
-      .ai-message-wrap {
-        max-width: calc(100% - 42px);
-      }
-
-      .chat-composer {
-        width: calc(100% - 18px);
-      }
-    }
-/* =====================================================
-   EMOGIGS AI — VOICE SYSTEM
-===================================================== */
-
-.voice-input-button {
-  width: 44px;
-  height: 44px;
-
-  flex: 0 0 44px;
-
-  border: 1px solid #3a2d68;
-  border-radius: 13px;
-
-  background: #21164b;
-  color: white;
-
-  cursor: pointer;
-  font-size: 18px;
-
-  transition:
-    transform .18s ease,
-    background .18s ease,
-    box-shadow .18s ease;
-}
-
-.voice-input-button:active {
-  transform: scale(.92);
-}
-
-.voice-input-button.listening {
-  background:
-    linear-gradient(
-      135deg,
-      #ef4444,
-      #dc2626
-    );
-
-  border-color: #f87171;
-
-  box-shadow:
-    0 0 0 6px rgba(239,68,68,.12),
-    0 8px 25px rgba(239,68,68,.28);
-
-  animation:
-    voicePulse 1.4s infinite;
-}
-
-@keyframes voicePulse {
-
-  0% {
-    box-shadow:
-      0 0 0 0 rgba(239,68,68,.35);
-  }
-
-  70% {
-    box-shadow:
-      0 0 0 10px rgba(239,68,68,0);
-  }
-
-  100% {
-    box-shadow:
-      0 0 0 0 rgba(239,68,68,0);
-  }
-
-}
-
-.voice-status {
-  display: none;
-
-  padding:
-    5px 8px 2px;
-
-  color: #9b96b5;
-
-  font-size: 9px;
-
-  text-align: center;
-}
-
-.voice-status.active {
-  display: block;
-  color: #c4b5fd;
-}
-
-
-/* =====================================================
-   AI VOICE ACTION
-===================================================== */
-
-.voice-play-button {
-  width: 30px;
-  height: 28px;
-
-  border: none;
-  border-radius: 8px;
-
-  background: transparent;
-  color: #77718f;
-
-  cursor: pointer;
-
-  font-size: 14px;
-}
-
-.voice-play-button:hover {
-  background: #1c173c;
-  color: white;
-}
-
-.voice-play-button.speaking {
-  color: #a78bfa;
-  background: #21164b;
-}
-
-
-/* =====================================================
-   VOICE SETTINGS
-===================================================== */
-
-.voice-settings-panel {
-  display: none;
-
-  margin-top: 18px;
-
-  padding: 17px;
-
-  border: 1px solid #342765;
-  border-radius: 18px;
-
-  background:
-    linear-gradient(
-      145deg,
-      #171338,
-      #0f0c28
-    );
-}
-
-.voice-settings-panel.active {
-  display: block;
-}
-
-.voice-settings-title {
-  font-size: 15px;
-  font-weight: 700;
-
-  margin-bottom: 14px;
-}
-
-.voice-setting-row {
-  margin-bottom: 14px;
-}
-
-.voice-setting-row:last-child {
-  margin-bottom: 0;
-}
-
-.voice-setting-label {
-  display: block;
-
-  margin-bottom: 6px;
-
-  color: #9b96b5;
-
-  font-size: 10px;
-}
-
-.voice-select,
-.voice-range {
-  width: 100%;
-}
-
-.voice-select {
-  padding: 10px;
-
-  border: 1px solid #302654;
-  border-radius: 11px;
-
-  background: #0b0920;
-  color: white;
-
-  outline: none;
-}
-
-.voice-range {
-  accent-color: #8b5cf6;
-}
-
-.voice-setting-value {
-  margin-top: 4px;
-
-  color: #a78bfa;
-
-  font-size: 10px;
-}
-/* =====================================================
-   EMOGIGS AI — STEP 18B
-   VOICE SYSTEM
-===================================================== */
-
-.voice-settings-panel {
-  display: none;
-
-  margin-top: 20px;
-  padding: 18px;
-
-  border: 1px solid #342765;
-  border-radius: 20px;
-
-  background:
-    linear-gradient(
-      145deg,
-      rgba(31,20,67,.98),
-      rgba(16,13,40,.98)
-    );
-
-  box-shadow:
-    0 18px 50px rgba(0,0,0,.22);
-}
-
-.voice-settings-panel.show {
-  display: block;
-}
-
-.voice-settings-title {
-  font-size: 15px;
-  font-weight: 750;
-
-  margin-bottom: 17px;
-
-  color: #ffffff;
-}
-
-.voice-setting-row {
-  margin-top: 15px;
-}
-
-.voice-setting-row:first-of-type {
-  margin-top: 0;
-}
-
-.voice-setting-label {
-  display: block;
-
-  margin-bottom: 7px;
-
-  color: #aaa4c1;
-
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.voice-select {
-  width: 100%;
-
-  min-height: 43px;
-
-  padding: 9px 12px;
-
-  border: 1px solid #342a5c;
-  border-radius: 12px;
-
-  background: #0c0920;
-  color: #ffffff;
-
-  outline: none;
-
-  cursor: pointer;
-}
-
-.voice-select:focus {
-  border-color: #8b5cf6;
-}
-
-.voice-range {
-  width: 100%;
-
-  height: 5px;
-
-  margin-top: 5px;
-
-  accent-color: #8b5cf6;
-
-  cursor: pointer;
-}
-
-.voice-setting-value {
-  margin-top: 6px;
-
-  color: #a78bfa;
-
-  font-size: 11px;
-  font-weight: 650;
-
-  text-align: right;
-}
-
-
-/* =====================================================
-   VOICE ACTIONS
-===================================================== */
-
-.voice-actions {
-  display: flex;
-
-  align-items: center;
-
-  gap: 5px;
-
-  margin-top: 7px;
-}
-
-.voice-action-button {
-  min-width: 31px;
-  height: 29px;
-
-  padding: 0 8px;
-
-  border: none;
-  border-radius: 8px;
-
-  background: transparent;
-
-  color: #77718f;
-
-  font-size: 13px;
-
-  cursor: pointer;
-
-  transition:
-    background .18s ease,
-    color .18s ease,
-    transform .12s ease;
-}
-
-.voice-action-button:hover {
-  background: #1c173c;
-  color: #ffffff;
-}
-
-.voice-action-button:active {
-  transform: scale(.92);
-}
-
-.voice-action-button.speaking {
-  background: #251653;
-  color: #a78bfa;
-}
-
-
-/* =====================================================
-   MICROPHONE BUTTON
-===================================================== */
-
-.voice-mic-button {
-  width: 42px;
-  height: 42px;
-
-  flex: 0 0 42px;
-
-  border: 1px solid #342a5c;
-  border-radius: 12px;
-
-  background: #17132f;
-
-  color: #a78bfa;
-
-  cursor: pointer;
-
-  font-size: 17px;
-
-  transition:
-    background .18s ease,
-    transform .12s ease,
-    border-color .18s ease;
-}
-
-.voice-mic-button:hover {
-  background: #21194a;
-  border-color: #5b3fa0;
-}
-
-.voice-mic-button:active {
-  transform: scale(.93);
-}
-
-.voice-mic-button.listening {
-  background: #3a174c;
-
-  border-color: #a855f7;
-
-  color: #ffffff;
-
-  animation: voiceListeningPulse 1.2s infinite;
-}
-
-@keyframes voiceListeningPulse {
-
-  0% {
-    box-shadow:
-      0 0 0 0 rgba(168,85,247,.45);
-  }
-
-  70% {
-    box-shadow:
-      0 0 0 10px rgba(168,85,247,0);
-  }
-
-  100% {
-    box-shadow:
-      0 0 0 0 rgba(168,85,247,0);
-  }
-}
-
-
-/* =====================================================
-   VOICE STATUS
-===================================================== */
-
-.voice-status {
-  margin-top: 8px;
-
-  color: #77718f;
-
-  font-size: 10px;
-
-  line-height: 1.5;
-}
-
-.voice-status.active {
-  color: #a78bfa;
-}
-
-
-/* =====================================================
-   VOICE CONVERSATION INDICATOR
-===================================================== */
-
-.voice-conversation-active {
-  display: none;
-
-  align-items: center;
-
-  gap: 8px;
-
-  margin-top: 9px;
-
-  padding: 8px 10px;
-
-  border-radius: 10px;
-
-  background: #21164b;
-
-  color: #c4b5fd;
-
-  font-size: 10px;
-}
-
-.voice-conversation-active.show {
-  display: flex;
-}
-
-.voice-conversation-dot {
-  width: 7px;
-  height: 7px;
-
-  border-radius: 50%;
-
-  background: #a78bfa;
-
-  box-shadow:
-    0 0 9px rgba(167,139,250,.7);
-
-  animation:
-    voiceConversationDot 1s infinite;
-}
-
-@keyframes voiceConversationDot {
-
-  0%,
-  100% {
-    opacity: .35;
-    transform: scale(.8);
-  }
-
-  50% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-
-/* =====================================================
-   RESPONSIVE
-===================================================== */
-
-@media (max-width: 520px) {
-
-  .voice-settings-panel {
-    padding: 15px;
-    border-radius: 17px;
-  }
-
-  .voice-setting-row {
-    margin-top: 13px;
-  }
-
-  .voice-select {
-    min-height: 41px;
-  }
-
-}
   </style>
 </head>
 
@@ -1799,105 +775,76 @@
 
 <div class="app">
 
-  <!-- ===================================================
-       TOP BAR
-  ==================================================== -->
+  <!-- ================= HOME ================= -->
 
-  <header class="topbar">
+  <section id="homeScreen" class="screen active">
 
-    <div class="brand-area">
+    <header class="topbar">
 
-      <div class="brand-logo">✦</div>
+      <div class="brand">
+        <div class="brand-icon">✦</div>
 
-      <div>
-        <div class="brand-name">
-          Emogigs <span style="color:#a78bfa;">AI</span>
-        </div>
+        <div>
+          <div class="brand-title">
+            Emogigs AI
+          </div>
 
-        <div class="brand-subtitle">
-          <span class="online-dot"></span>
-          AI Life OS online
+          <div class="brand-subtitle">
+            Your personal AI Life OS
+          </div>
         </div>
       </div>
 
-    </div>
+      <button
+        id="headerNewChat"
+        class="icon-button"
+        type="button"
+        aria-label="New chat">
+        ＋
+      </button>
 
-    <button
-      class="header-action"
-      id="headerNewChat"
-      aria-label="New chat"
-    >
-      ＋
-    </button>
-
-  </header>
+    </header>
 
 
-  <main>
-
-    <!-- =================================================
-         HOME
-    ================================================== -->
-
-    <section
-      id="homeScreen"
-      class="screen active"
-    >
+    <main class="container">
 
       <div class="hero">
 
-        <div class="hero-badge">
-          ✦ Personal AI Life OS
+        <div class="eyebrow">
+          ✦ AI Life OS
         </div>
 
         <h1>
-          Your AI.
-          <span>Your next move.</span>
+          What can I help you
+          <span class="gradient-text">
+            achieve?
+          </span>
         </h1>
 
         <p>
-          Learn, plan, create, grow and discover
-          opportunities with one intelligent assistant.
+          Learn new skills, solve problems,
+          plan your goals, create content,
+          find opportunities and grow with
+          Emogigs AI.
         </p>
 
       </div>
 
 
-      <div class="home-ai-card">
+      <div class="ask-card">
 
-        <div class="ai-card-top">
+        <textarea
+          id="homeInput"
+          rows="2"
+          placeholder="Ask Emogigs AI anything..."></textarea>
 
-          <div class="ai-small-avatar">
-            ✦
-          </div>
-
-          <div>
-            <div class="ai-card-name">
-              Emogigs AI
-            </div>
-
-            <div class="ai-card-desc">
-              Your intelligent personal assistant
-            </div>
-          </div>
-
-        </div>
-
-
-        <div class="home-input-row">
-
-          <textarea
-            id="homeInput"
-            class="home-input"
-            rows="1"
-            placeholder="What do you want to learn, build or achieve?"
-          ></textarea>
+        <div class="ask-footer">
 
           <button
             id="homeSend"
-            class="primary-send"
-          >
-            ➜
+            class="send-button"
+            type="button">
+            ↑
           </button>
 
         </div>
@@ -1905,708 +852,393 @@
       </div>
 
 
-      <div class="section-head">
+      <!-- QUICK TOOLS -->
 
-        <h2>Quick Tools</h2>
+      <section class="section">
 
-        <button
-          class="section-link"
-          data-screen="templatesScreen"
-        >
-          View all
-        </button>
+        <div class="section-heading">
+          <h2>Quick Tools</h2>
+        </div>
+
+        <div class="tools-grid">
+
+          <button
+            class="tool-card"
+            data-template="Create a step-by-step learning roadmap for me."
+            type="button">
+
+            <div class="tool-icon">📚</div>
+            <div class="tool-title">Learn</div>
+            <div class="tool-desc">
+              Build new skills step by step.
+            </div>
+
+          </button>
+
+
+          <button
+            class="tool-card"
+            data-template="Help me find skills and work opportunities that fit me."
+            type="button">
+
+            <div class="tool-icon">💼</div>
+            <div class="tool-title">Work</div>
+            <div class="tool-desc">
+              Explore skills and opportunities.
+            </div>
+
+          </button>
+
+
+          <button
+            class="tool-card"
+            data-template="Help me organize my goals and create a practical plan."
+            type="button">
+
+            <div class="tool-icon">🎯</div>
+            <div class="tool-title">Plan</div>
+            <div class="tool-desc">
+              Organize your goals and tasks.
+            </div>
+
+          </button>
+
+
+          <button
+            class="tool-card"
+            data-template="Create a personal improvement plan for me."
+            type="button">
+
+            <div class="tool-icon">🚀</div>
+            <div class="tool-title">Grow</div>
+            <div class="tool-desc">
+              Improve yourself step by step.
+            </div>
+
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <!-- RECENT CHATS -->
+
+      <section class="section">
+
+        <div class="section-heading">
+          <h2>Recent Chats</h2>
+        </div>
+
+        <div
+          id="recentChats"
+          class="recent-list">
+        </div>
+
+      </section>
+
+    </main>
+
+  </section>
+
+
+  <!-- ================= CHAT ================= -->
+
+  <section id="chatScreen" class="screen chat-screen">
+
+    <header class="topbar chat-topbar">
+
+      <button
+        id="chatBack"
+        class="icon-button"
+        type="button">
+        ←
+      </button>
+
+
+      <div class="chat-title">
+
+        <strong>
+          Emogigs AI
+        </strong>
+
+        <span class="online">
+          <span class="online-dot"></span>
+          Online
+        </span>
 
       </div>
 
 
-      <div class="tools-grid">
+      <button
+        id="voiceSettingsButton"
+        class="icon-button"
+        type="button"
+        title="Voice settings">
+        ⚙
+      </button>
 
-        <button
-          class="tool-card"
-          data-template="Create a personalized learning plan for me"
-        >
-          <div class="tool-icon">📚</div>
-          <h3>Learn</h3>
-          <p>Build new skills step by step.</p>
-        </button>
-
-
-        <button
-          class="tool-card"
-          data-template="Help me find a realistic remote work and freelancing path"
-        >
-          <div class="tool-icon">💼</div>
-          <h3>Work</h3>
-          <p>Find skills, jobs and opportunities.</p>
-        </button>
+    </header>
 
 
-        <button
-          class="tool-card"
-          data-template="Create a practical plan for my day"
-        >
-          <div class="tool-icon">🎯</div>
-          <h3>Plan</h3>
-          <p>Organize goals and daily tasks.</p>
-        </button>
+    <div
+      id="chatMessages"
+      class="chat-messages">
+    </div>
 
 
-        <button
-          class="tool-card"
-          data-template="Help me improve myself and my career step by step"
-        >
-          <div class="tool-icon">🚀</div>
-          <h3>Grow</h3>
-          <p>Improve yourself every day.</p>
-        </button>
+    <!-- VOICE SETTINGS -->
+
+    <div
+      id="voiceSettingsPanel"
+      class="voice-panel container">
+
+      <div class="voice-row">
+
+        <label for="voiceGender">
+          Voice
+        </label>
+
+        <select id="voiceGender">
+
+          <option value="natural">
+            Natural
+          </option>
+
+          <option value="female">
+            Female
+          </option>
+
+          <option value="male">
+            Male
+          </option>
+
+        </select>
 
       </div>
 
 
-      <div class="assistant-card">
+      <div class="voice-row">
 
-        <div class="assistant-robot">
-          🤖
+        <label for="voiceLanguage">
+          Language
+        </label>
+
+        <select id="voiceLanguage">
+
+          <option value="auto">
+            Auto
+          </option>
+
+          <option value="en-US">
+            English
+          </option>
+
+          <option value="bn-BD">
+            বাংলা
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="voice-row">
+
+        <label for="voiceRate">
+          Speaking speed:
+          <span id="voiceRateValue">
+            1.00×
+          </span>
+        </label>
+
+        <input
+          id="voiceRate"
+          type="range"
+          min="0.6"
+          max="1.5"
+          step="0.05"
+          value="1">
+
+      </div>
+
+
+      <div class="voice-row">
+
+        <label for="voiceAutoSpeak">
+          Auto speak AI responses
+        </label>
+
+        <select id="voiceAutoSpeak">
+
+          <option value="on">
+            On
+          </option>
+
+          <option value="off">
+            Off
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="voice-row">
+
+        <label for="voiceConversation">
+          Voice conversation mode
+        </label>
+
+        <select id="voiceConversation">
+
+          <option value="off">
+            Off
+          </option>
+
+          <option value="on">
+            On
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div
+        id="voiceStatus"
+        class="voice-status">
+        Voice ready
+      </div>
+
+    </div>
+
+
+    <!-- CHAT INPUT -->
+
+    <div class="chat-input-bar">
+
+      <div class="chat-input-inner">
+
+        <textarea
+          id="chatInput"
+          rows="1"
+          placeholder="Message Emogigs AI..."></textarea>
+
+
+        <button
+          id="voiceMicButton"
+          class="mic-button voice-mic-button"
+          type="button"
+          title="Voice input">
+          🎙️
+        </button>
+
+
+        <button
+          id="chatSend"
+          class="chat-send"
+          type="button"
+          aria-label="Send">
+          ↑
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ================= HISTORY ================= -->
+
+  <section id="historyScreen" class="screen">
+
+    <header class="topbar">
+
+      <div class="brand">
+
+        <div class="brand-icon">
+          ▣
         </div>
 
         <div>
-          <h3>Your AI Assistant</h3>
-
-          <p>
-            Powered by advanced AI to help you
-            learn, work, plan, create and grow.
-          </p>
-        </div>
-
-      </div>
-
-
-      <div class="section-head">
-
-        <h2>Recent Chats</h2>
-
-        <button
-          class="section-link"
-          data-screen="historyScreen"
-        >
-          View all
-        </button>
-
-      </div>
-
-
-      <div
-        id="recentChats"
-        class="recent-list"
-      ></div>
-
-    </section>
-
-
-    <!-- =================================================
-         CHAT
-    ================================================== -->
-
-    <section
-      id="chatScreen"
-      class="screen chat-screen"
-    >
-
-      <div class="chat-header">
-
-        <button
-          class="chat-back"
-          id="chatBack"
-        >
-          ←
-        </button>
-
-        <div class="chat-avatar">
-          ✦
-        </div>
-
-        <div class="chat-header-info">
-
-          <div class="chat-header-name">
-            Emogigs AI
+          <div class="brand-title">
+            Chat History
           </div>
 
-          <div class="chat-status">
-            ● Online
+          <div class="brand-subtitle">
+            Your conversations
           </div>
-
         </div>
-
-        <button class="chat-menu">
-          ⋯
-        </button>
 
       </div>
 
-
-      <div
-        id="chatMessages"
-        class="chat-messages"
-      ></div>
+    </header>
 
 
-      <div class="chat-composer">
-
-  <div class="composer-row">
-
-    <button
-      id="voiceInputButton"
-      class="voice-input-button"
-      type="button"
-      aria-label="Voice input"
-      title="Speak to Emogigs AI"
-    >
-      🎤
-    </button>
-
-    <textarea
-      id="chatInput"
-      class="composer-input"
-      rows="1"
-      placeholder="Type or speak to Emogigs AI..."
-    ></textarea>
-
-    <button
-      id="chatSend"
-      class="composer-send"
-      type="button"
-      aria-label="Send message"
-    >
-      ➜
-    </button>
-
-  </div>
-
-  <div
-    id="voiceStatus"
-    class="voice-status"
-  >
-    🎙️ Voice ready
-  </div>
-
-</div>
-
-    </section>
-
-
-    <!-- =================================================
-         HISTORY
-    ================================================== -->
-
-    <section
-      id="historyScreen"
-      class="screen"
-    >
-
-      <h1 class="page-title">
-        Chat History
-      </h1>
-
-      <p class="page-subtitle">
-        Continue your previous conversations.
-      </p>
+    <main class="container">
 
       <div
         id="historyList"
-        class="history-list"
-      ></div>
-
-    </section>
-
-
-    <!-- =================================================
-         TEMPLATES
-    ================================================== -->
-
-    <section
-      id="templatesScreen"
-      class="screen"
-    >
-
-      <h1 class="page-title">
-        New Chat & Templates
-      </h1>
-
-      <p class="page-subtitle">
-        Start with a ready-made AI workflow.
-      </p>
-
-      <div class="template-grid">
-
-        <button
-          class="template-card"
-          data-template="Create a 30-day learning roadmap for me"
-        >
-          <div class="template-card-icon">📚</div>
-          <h3>Learning Roadmap</h3>
-          <p>Build a structured learning journey.</p>
-        </button>
-
-
-        <button
-          class="template-card"
-          data-template="Help me create a freelancing career plan"
-        >
-          <div class="template-card-icon">💼</div>
-          <h3>Freelancing</h3>
-          <p>Plan your path toward online work.</p>
-        </button>
-
-
-        <button
-          class="template-card"
-          data-template="Help me create a career development plan"
-        >
-          <div class="template-card-icon">🚀</div>
-          <h3>Career Growth</h3>
-          <p>Improve skills and career direction.</p>
-        </button>
-
-
-        <button
-          class="template-card"
-          data-template="Create a productive daily plan for me"
-        >
-          <div class="template-card-icon">🎯</div>
-          <h3>Daily Planner</h3>
-          <p>Turn your goals into actionable tasks.</p>
-        </button>
-
-
-        <button
-          class="template-card"
-          data-template="Help me generate creative ideas for a project"
-        >
-          <div class="template-card-icon">💡</div>
-          <h3>Creative Ideas</h3>
-          <p>Brainstorm and develop new concepts.</p>
-        </button>
-
-
-        <button
-          class="template-card"
-          data-template="Help me solve a programming problem step by step"
-        >
-          <div class="template-card-icon">💻</div>
-          <h3>Coding</h3>
-          <p>Understand and build technical solutions.</p>
-        </button>
-
+        class="history-list">
       </div>
 
-    </section>
+    </main>
 
+  </section>
 
-    <!-- =================================================
-         PROFILE
-    ================================================== -->
 
-    <section
-      id="profileScreen"
-      class="screen"
-    >
-
-      <h1 class="page-title">
-        Profile & Settings
-      </h1>
-
-      <p class="page-subtitle">
-        Customize your Emogigs AI experience.
-      </p>
-
-
-      <div class="profile-card">
-
-        <div class="profile-avatar">
-          👤
-        </div>
-
-        <h2>Emogigs User</h2>
-
-        <p>
-          Personal AI Life OS
-        </p>
-
-      </div>
-
-
-      <div class="settings-list">
-
-<button
-  class="setting-item"
-  id="voiceSettingsButton"
-  type="button"
->
-
-  <div class="setting-icon">
-    🎙️
-  </div>
-
-  <div class="setting-info">
-
-    <div class="setting-name">
-      AI Voice
-    </div>
-
-    <div class="setting-description">
-      Choose male, female, natural voice and conversation settings.
-    </div>
-
-  </div>
-
-  <span>›</span>
-
-</button>
-        <button class="setting-item">
-
-          <div class="setting-icon">
-            🧠
-          </div>
-
-          <div class="setting-info">
-
-            <div class="setting-name">
-              AI Memory
-            </div>
-
-            <div class="setting-description">
-              Manage how Emogigs remembers your conversations.
-            </div>
-
-          </div>
-
-          <span>›</span>
-
-        </button>
-
-
-        <button class="setting-item">
-
-          <div class="setting-icon">
-            🎨
-          </div>
-
-          <div class="setting-info">
-
-            <div class="setting-name">
-              Appearance
-            </div>
-
-            <div class="setting-description">
-              Customize the look of your AI.
-            </div>
-
-          </div>
-
-          <span>›</span>
-
-        </button>
-
-
-        <button class="setting-item">
-
-          <div class="setting-icon">
-            🌐
-          </div>
-
-          <div class="setting-info">
-
-            <div class="setting-name">
-              Language
-            </div>
-
-            <div class="setting-description">
-              Choose your preferred language.
-            </div>
-
-          </div>
-
-          <span>›</span>
-
-        </button>
-
-
-        <button class="setting-item">
-
-          <div class="setting-icon">
-            🔒
-          </div>
-
-          <div class="setting-info">
-
-            <div class="setting-name">
-              Privacy
-            </div>
-
-            <div class="setting-description">
-              Manage your privacy preferences.
-            </div>
-
-          </div>
-
-          <span>›</span>
-
-        </button>
-
-
-        <button class="setting-item">
-
-          <div class="setting-icon">
-            ℹ️
-          </div>
-
-          <div class="setting-info">
-
-            <div class="setting-name">
-              About Emogigs AI
-            </div>
-
-            <div class="setting-description">
-              Your personal AI Life OS.
-            </div>
-
-          </div>
-
-          <span>›</span>
-
-        </button>
-
-      </div>
-
-    </section>
-
-  </main>
-
-
-  <!-- ===================================================
-       BOTTOM NAV
-  ==================================================== -->
+  <!-- ================= NAV ================= -->
 
   <nav class="bottom-nav">
 
     <button
       class="nav-btn active"
       data-screen="homeScreen"
-    >
-      <span class="nav-btn-icon">⌂</span>
+      type="button">
+
+      <span>⌂</span>
       Home
+
     </button>
 
 
     <button
       class="nav-btn"
       data-screen="chatScreen"
-    >
-      <span class="nav-btn-icon">◌</span>
-      Chats
-    </button>
+      type="button">
 
+      <span>✦</span>
+      AI
 
-    <button
-      class="nav-btn"
-      data-screen="templatesScreen"
-    >
-      <span class="nav-btn-icon">✦</span>
-      New Chat
     </button>
 
 
     <button
       class="nav-btn"
       data-screen="historyScreen"
-    >
-      <span class="nav-btn-icon">◫</span>
+      type="button">
+
+      <span>▣</span>
       History
-    </button>
 
-
-    <button
-      class="nav-btn"
-      data-screen="profileScreen"
-    >
-      <span class="nav-btn-icon">♙</span>
-      Profile
     </button>
 
   </nav>
 
 
+  <!-- ================= TOAST ================= -->
+
   <div
     id="toast"
-    class="toast"
-  ></div>
-
-</div>
-
-<div
-  id="voiceSettingsPanel"
-  class="voice-settings-panel"
->
-
-  <div class="voice-settings-title">
-    🎙️ Emogigs AI Voice
-  </div>
-
-
-  <div class="voice-setting-row">
-
-    <label
-      class="voice-setting-label"
-      for="voiceGender"
-    >
-      Voice style
-    </label>
-
-    <select
-      id="voiceGender"
-      class="voice-select"
-    >
-
-      <option value="natural">
-        🤖 Natural / Default
-      </option>
-
-      <option value="female">
-        👩 Female
-      </option>
-
-      <option value="male">
-        👨 Male
-      </option>
-
-    </select>
-
-  </div>
-
-
-  <div class="voice-setting-row">
-
-    <label
-      class="voice-setting-label"
-      for="voiceLanguage"
-    >
-      Language
-    </label>
-
-    <select
-      id="voiceLanguage"
-      class="voice-select"
-    >
-
-      <option value="auto">
-        🌐 Auto Detect
-      </option>
-
-      <option value="en-US">
-        🇺🇸 English (US)
-      </option>
-
-      <option value="en-GB">
-        🇬🇧 English (UK)
-      </option>
-
-      <option value="bn-BD">
-        🇧🇩 বাংলা (Bangladesh)
-      </option>
-
-      <option value="hi-IN">
-        🇮🇳 Hindi
-      </option>
-
-    </select>
-
-  </div>
-
-
-  <div class="voice-setting-row">
-
-    <label
-      class="voice-setting-label"
-      for="voiceRate"
-    >
-      Speaking speed
-    </label>
-
-    <input
-      id="voiceRate"
-      class="voice-range"
-      type="range"
-      min="0.7"
-      max="1.3"
-      step="0.05"
-      value="1"
-    >
-
-    <div
-      id="voiceRateValue"
-      class="voice-setting-value"
-    >
-      1.00×
-    </div>
-
-  </div>
-
-
-  <div class="voice-setting-row">
-
-    <label
-      class="voice-setting-label"
-      for="voiceAutoSpeak"
-    >
-      Auto voice response
-    </label>
-
-    <select
-      id="voiceAutoSpeak"
-      class="voice-select"
-    >
-
-      <option value="on">
-        🔊 Automatically speak AI responses
-      </option>
-
-      <option value="off">
-        🔇 Text only
-      </option>
-
-    </select>
-
-  </div>
-
-
-  <div class="voice-setting-row">
-
-    <label
-      class="voice-setting-label"
-      for="voiceConversation"
-    >
-      Voice conversation
-    </label>
-
-    <select
-      id="voiceConversation"
-      class="voice-select"
-    >
-
-      <option value="off">
-        🎤 Push to speak
-      </option>
-
-      <option value="on">
-        🗣️ Continuous conversation
-      </option>
-
-    </select>
-
+    class="toast">
   </div>
 
 </div>
-<script src="/script.js"></script>
+
+
+<script src="./script.js" defer></script>
 
 </body>
 </html>
