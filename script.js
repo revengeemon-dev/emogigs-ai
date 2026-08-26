@@ -1,11 +1,13 @@
 /* =========================================================
    EMOGIGS AI
-   STEP 17 — PROFESSIONAL APP ENGINE
+   STEP 18D — PRODUCTION APP ENGINE
+   Conversation + AI Chat + Voice Engine
 ========================================================= */
 
 let isSending = false;
 
-const STORAGE_KEY = "emogigs_conversations_v2";
+const STORAGE_KEY =
+  "emogigs_conversations_v2";
 
 let conversations = [];
 let currentConversationId = null;
@@ -20,10 +22,19 @@ function loadConversations() {
   try {
 
     const saved =
-      localStorage.getItem(STORAGE_KEY);
+      localStorage.getItem(
+        STORAGE_KEY
+      );
 
     if (saved) {
-      conversations = JSON.parse(saved);
+
+      conversations =
+        JSON.parse(saved);
+
+      if (!Array.isArray(conversations)) {
+        conversations = [];
+      }
+
     }
 
   } catch (error) {
@@ -34,7 +45,9 @@ function loadConversations() {
     );
 
     conversations = [];
+
   }
+
 }
 
 
@@ -44,7 +57,9 @@ function saveConversations() {
 
     localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify(conversations)
+      JSON.stringify(
+        conversations
+      )
     );
 
   } catch (error) {
@@ -53,7 +68,9 @@ function saveConversations() {
       "Emogigs AI: Could not save conversations.",
       error
     );
+
   }
+
 }
 
 
@@ -65,8 +82,11 @@ function createId() {
 
   return (
     Date.now().toString(36) +
-    Math.random().toString(36).slice(2)
+    Math.random()
+      .toString(36)
+      .slice(2)
   );
+
 }
 
 
@@ -78,8 +98,10 @@ function getCurrentConversation() {
 
   return conversations.find(
     conversation =>
-      conversation.id === currentConversationId
+      conversation.id ===
+      currentConversationId
   );
+
 }
 
 
@@ -99,14 +121,21 @@ function createConversation() {
 
   };
 
-  conversations.unshift(conversation);
+
+  conversations.unshift(
+    conversation
+  );
+
 
   currentConversationId =
     conversation.id;
 
+
   saveConversations();
 
+
   return conversation;
+
 }
 
 
@@ -119,13 +148,17 @@ function ensureConversation() {
   let conversation =
     getCurrentConversation();
 
+
   if (!conversation) {
 
     conversation =
       createConversation();
+
   }
 
+
   return conversation;
+
 }
 
 
@@ -141,18 +174,21 @@ function addConversationMessage(
   const conversation =
     ensureConversation();
 
+
   conversation.messages.push({
 
-    role,
+    role: role,
 
-    content,
+    content: content,
 
     timestamp: Date.now()
 
   });
 
+
   conversation.updatedAt =
     Date.now();
+
 
   /*
     Automatically create a useful title
@@ -169,9 +205,12 @@ function addConversationMessage(
       content.length > 42
         ? content.substring(0, 42) + "..."
         : content;
+
   }
 
+
   saveConversations();
+
 }
 
 
@@ -179,53 +218,89 @@ function addConversationMessage(
    SCREEN NAVIGATION
 ========================================================= */
 
-function showScreen(screenId) {
+function showScreen(
+  screenId
+) {
 
   const screens =
-    document.querySelectorAll(".screen");
+    document.querySelectorAll(
+      ".screen"
+    );
 
-  screens.forEach(screen => {
 
-    screen.classList.remove("active");
+  screens.forEach(
+    screen => {
 
-  });
+      screen.classList.remove(
+        "active"
+      );
+
+    }
+  );
 
 
   const target =
-    document.getElementById(screenId);
+    document.getElementById(
+      screenId
+    );
+
 
   if (target) {
-    target.classList.add("active");
+
+    target.classList.add(
+      "active"
+    );
+
   }
 
 
   const navButtons =
-    document.querySelectorAll(".nav-btn");
-
-  navButtons.forEach(button => {
-
-    button.classList.toggle(
-      "active",
-      button.dataset.screen === screenId
+    document.querySelectorAll(
+      ".nav-btn"
     );
 
-  });
+
+  navButtons.forEach(
+    button => {
+
+      button.classList.toggle(
+        "active",
+        button.dataset.screen ===
+          screenId
+      );
+
+    }
+  );
 
 
   window.scrollTo({
+
     top: 0,
+
     behavior: "smooth"
+
   });
 
 
-  if (screenId === "historyScreen") {
+  if (
+    screenId ===
+    "historyScreen"
+  ) {
+
     renderHistory();
+
   }
 
 
-  if (screenId === "homeScreen") {
+  if (
+    screenId ===
+    "homeScreen"
+  ) {
+
     renderRecentChats();
+
   }
+
 }
 
 
@@ -233,24 +308,37 @@ function showScreen(screenId) {
    OPEN CHAT
 ========================================================= */
 
-function openChat(conversationId) {
+function openChat(
+  conversationId
+) {
 
   const conversation =
     conversations.find(
       item =>
-        item.id === conversationId
+        item.id ===
+        conversationId
     );
+
 
   if (!conversation) {
     return;
   }
 
+
   currentConversationId =
     conversationId;
 
-  showScreen("chatScreen");
+
+  stopSpeaking();
+
+
+  showScreen(
+    "chatScreen"
+  );
+
 
   renderCurrentChat();
+
 }
 
 
@@ -260,22 +348,39 @@ function openChat(conversationId) {
 
 function startNewChat() {
 
+  stopSpeaking();
+
+
   createConversation();
+
 
   renderCurrentChat();
 
-  showScreen("chatScreen");
 
-  setTimeout(() => {
+  showScreen(
+    "chatScreen"
+  );
 
-    const input =
-      document.getElementById("chatInput");
 
-    if (input) {
-      input.focus();
-    }
+  setTimeout(
+    () => {
 
-  }, 100);
+      const input =
+        document.getElementById(
+          "chatInput"
+        );
+
+
+      if (input) {
+
+        input.focus();
+
+      }
+
+    },
+    100
+  );
+
 }
 
 
@@ -290,23 +395,31 @@ function renderCurrentChat() {
       "chatMessages"
     );
 
+
   if (!container) {
     return;
   }
 
+
   container.innerHTML = "";
+
 
   const conversation =
     getCurrentConversation();
 
+
   if (
     !conversation ||
+    !Array.isArray(
+      conversation.messages
+    ) ||
     conversation.messages.length === 0
   ) {
 
     renderChatWelcome();
 
     return;
+
   }
 
 
@@ -323,6 +436,7 @@ function renderCurrentChat() {
 
 
   scrollChatToBottom();
+
 }
 
 
@@ -337,38 +451,55 @@ function renderChatWelcome() {
       "chatMessages"
     );
 
+
   if (!container) {
     return;
   }
 
+
   const wrapper =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
+
 
   wrapper.className =
     "chat-message ai";
 
 
   const avatar =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
+
 
   avatar.className =
     "message-ai-avatar";
 
-  avatar.textContent = "✦";
+
+  avatar.textContent =
+    "✦";
 
 
   const messageWrap =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
+
 
   messageWrap.className =
     "ai-message-wrap";
 
 
   const bubble =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
+
 
   bubble.className =
     "ai-bubble";
+
 
   bubble.textContent =
     "Hello! I'm Emogigs AI. ✨\n\n" +
@@ -378,13 +509,25 @@ function renderChatWelcome() {
     "step by step.";
 
 
-  messageWrap.appendChild(bubble);
+  messageWrap.appendChild(
+    bubble
+  );
 
-  wrapper.appendChild(avatar);
 
-  wrapper.appendChild(messageWrap);
+  wrapper.appendChild(
+    avatar
+  );
 
-  container.appendChild(wrapper);
+
+  wrapper.appendChild(
+    messageWrap
+  );
+
+
+  container.appendChild(
+    wrapper
+  );
+
 }
 
 
@@ -402,14 +545,21 @@ function renderMessage(
       "chatMessages"
     );
 
+
   if (!container) {
     return;
   }
 
 
   const wrapper =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
+
+  /* =======================================================
+     USER MESSAGE
+  ======================================================= */
 
   if (role === "user") {
 
@@ -418,56 +568,89 @@ function renderMessage(
 
 
     const bubble =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
+
 
     bubble.className =
       "user-bubble";
 
+
     bubble.textContent =
       content;
+
 
     wrapper.appendChild(
       bubble
     );
 
-  } else {
+
+  }
+
+  /* =======================================================
+     AI MESSAGE
+  ======================================================= */
+
+  else {
 
     wrapper.className =
       "chat-message ai";
 
 
     const avatar =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
+
 
     avatar.className =
       "message-ai-avatar";
 
-    avatar.textContent = "✦";
+
+    avatar.textContent =
+      "✦";
 
 
     const messageWrap =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
+
 
     messageWrap.className =
       "ai-message-wrap";
 
 
     const bubble =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
+
 
     bubble.className =
       "ai-bubble";
+
 
     bubble.textContent =
       content;
 
 
+    /* =====================================================
+       MESSAGE ACTIONS
+    ===================================================== */
+
     const actions =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
+
 
     actions.className =
       "message-actions";
 
+
+    /* COPY */
 
     const copyButton =
       createActionButton(
@@ -475,9 +658,18 @@ function renderMessage(
         "Copy"
       );
 
-    copyButton.onclick =
-      () => copyText(content);
 
+    copyButton.onclick =
+      () => {
+
+        copyText(
+          content
+        );
+
+      };
+
+
+    /* LIKE */
 
     const likeButton =
       createActionButton(
@@ -492,11 +684,15 @@ function renderMessage(
         likeButton.textContent =
           "♥";
 
+
         showToast(
           "Thanks for your feedback."
         );
+
       };
 
+
+    /* DISLIKE */
 
     const dislikeButton =
       createActionButton(
@@ -511,45 +707,66 @@ function renderMessage(
         showToast(
           "Feedback recorded."
         );
+
       };
 
+
+    /* SHARE */
 
     const shareButton =
       createActionButton(
         "↗",
         "Share"
       );
-const voiceButton =
-  createVoiceButton(
-    content
-  );
+
 
     shareButton.onclick =
-      () => shareText(content);
+      () => {
+
+        shareText(
+          content
+        );
+
+      };
+
+
+    /* VOICE */
+
+    const voiceButton =
+      createVoiceButton(
+        content
+      );
 
 
     actions.appendChild(
       copyButton
     );
 
+
     actions.appendChild(
       likeButton
     );
+
 
     actions.appendChild(
       dislikeButton
     );
 
+
     actions.appendChild(
       shareButton
     );
 
-actions.appendChild(
-  voiceButton
-);
+
+    actions.appendChild(
+      voiceButton
+    );
+
+
     messageWrap.appendChild(
       bubble
     );
+
 
     messageWrap.appendChild(
       actions
@@ -560,15 +777,18 @@ actions.appendChild(
       avatar
     );
 
+
     wrapper.appendChild(
       messageWrap
     );
+
   }
 
 
   container.appendChild(
     wrapper
   );
+
 }
 
 
@@ -586,16 +806,25 @@ function createActionButton(
       "button"
     );
 
+
   button.className =
     "message-action";
+
 
   button.textContent =
     icon;
 
+
   button.title =
     label;
 
+
+  button.type =
+    "button";
+
+
   return button;
+
 }
 
 
@@ -610,57 +839,82 @@ function showThinking() {
       "chatMessages"
     );
 
+
   if (!container) {
     return null;
   }
 
 
   const wrapper =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
+
 
   wrapper.className =
     "chat-message ai";
 
 
   const avatar =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
+
 
   avatar.className =
     "message-ai-avatar";
+
 
   avatar.textContent =
     "✦";
 
 
   const messageWrap =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
+
 
   messageWrap.className =
     "ai-message-wrap";
 
 
   const bubble =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
+
 
   bubble.className =
     "ai-bubble";
 
 
   const thinking =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
+
 
   thinking.className =
     "thinking";
 
 
-  for (let i = 0; i < 3; i++) {
+  for (
+    let i = 0;
+    i < 3;
+    i++
+  ) {
 
     const dot =
       document.createElement(
         "span"
       );
 
-    thinking.appendChild(dot);
+
+    thinking.appendChild(
+      dot
+    );
+
   }
 
 
@@ -668,17 +922,21 @@ function showThinking() {
     thinking
   );
 
+
   messageWrap.appendChild(
     bubble
   );
+
 
   wrapper.appendChild(
     avatar
   );
 
+
   wrapper.appendChild(
     messageWrap
   );
+
 
   container.appendChild(
     wrapper
@@ -689,6 +947,7 @@ function showThinking() {
 
 
   return wrapper;
+
 }
 
 
@@ -719,7 +978,7 @@ async function sendMessage(
 
   let text =
     customText !== null
-      ? customText
+      ? String(customText).trim()
       : chatInput
         ? chatInput.value.trim()
         : "";
@@ -733,25 +992,13 @@ async function sendMessage(
   isSending = true;
 
 
-  /*
-    Make sure we have a conversation
-  */
-
   ensureConversation();
 
-
-  /*
-    Switch to chat screen
-  */
 
   showScreen(
     "chatScreen"
   );
 
-
-  /*
-    Add user message
-  */
 
   addConversationMessage(
     "user",
@@ -759,13 +1006,10 @@ async function sendMessage(
   );
 
 
-  /*
-    Clear inputs
-  */
-
   if (chatInput) {
     chatInput.value = "";
   }
+
 
   if (homeInput) {
     homeInput.value = "";
@@ -774,10 +1018,6 @@ async function sendMessage(
 
   renderCurrentChat();
 
-
-  /*
-    Show AI thinking
-  */
 
   const thinkingElement =
     showThinking();
@@ -788,8 +1028,12 @@ async function sendMessage(
       "chatSend"
     );
 
+
   if (sendButton) {
-    sendButton.disabled = true;
+
+    sendButton.disabled =
+      true;
+
   }
 
 
@@ -804,17 +1048,23 @@ async function sendMessage(
       await fetch(
         "/api/chat",
         {
+
           method: "POST",
 
           headers: {
+
             "Content-Type":
               "application/json"
+
           },
 
           body:
             JSON.stringify({
+
               message: text
+
             })
+
         }
       );
 
@@ -825,8 +1075,21 @@ async function sendMessage(
     );
 
 
-    const data =
-      await res.json();
+    let data;
+
+
+    try {
+
+      data =
+        await res.json();
+
+    } catch (jsonError) {
+
+      throw new Error(
+        "Invalid server response."
+      );
+
+    }
 
 
     if (!res.ok) {
@@ -835,6 +1098,7 @@ async function sendMessage(
         data.error ||
         "Server returned an error."
       );
+
     }
 
 
@@ -843,18 +1107,12 @@ async function sendMessage(
       "I couldn't generate a response.";
 
 
-    /*
-      Remove thinking
-    */
-
     if (thinkingElement) {
+
       thinkingElement.remove();
+
     }
 
-
-    /*
-      Save AI response
-    */
 
     addConversationMessage(
       "assistant",
@@ -862,27 +1120,19 @@ async function sendMessage(
     );
 
 
+    renderCurrentChat();
+
+
     /*
-  Render actual response
-*/
+      Automatically speak the real AI response.
+    */
 
-renderCurrentChat();
-
-
-/*
-  Automatically speak AI response
-*/
-
-autoSpeakResponse(
-  reply
-);
+    autoSpeakResponse(
+      reply
+    );
 
 
-/*
-  Keep chat at bottom
-*/
-
-scrollChatToBottom();
+    scrollChatToBottom();
 
 
   } catch (error) {
@@ -894,37 +1144,46 @@ scrollChatToBottom();
 
 
     if (thinkingElement) {
+
       thinkingElement.remove();
+
     }
 
 
     const errorMessage =
-  "I'm sorry, I couldn't connect " +
-  "to Emogigs AI right now. " +
-  "Please try again in a moment.";
+      "I'm sorry, I couldn't connect " +
+      "to Emogigs AI right now. " +
+      "Please try again in a moment.";
 
-addConversationMessage(
-  "assistant",
-  errorMessage
-);
 
-renderCurrentChat();
+    addConversationMessage(
+      "assistant",
+      errorMessage
+    );
 
-showToast(
-  "Could not connect to Emogigs AI."
-);
 
+    renderCurrentChat();
+
+
+    showToast(
+      "Could not connect to Emogigs AI."
+    );
 
   } finally {
 
-    isSending = false;
+    isSending =
+      false;
 
 
     if (sendButton) {
-      sendButton.disabled = false;
+
+      sendButton.disabled =
+        false;
+
     }
 
   }
+
 }
 
 
@@ -939,21 +1198,33 @@ function scrollChatToBottom() {
       "chatMessages"
     );
 
+
   if (!container) {
     return;
   }
 
 
-  setTimeout(() => {
+  setTimeout(
+    () => {
 
-    window.scrollTo({
-      top:
-        document.body.scrollHeight,
-      behavior:
-        "smooth"
-    });
+      container.scrollTop =
+        container.scrollHeight;
 
-  }, 50);
+
+      window.scrollTo({
+
+        top:
+          document.body.scrollHeight,
+
+        behavior:
+          "smooth"
+
+      });
+
+    },
+    50
+  );
+
 }
 
 
@@ -968,16 +1239,19 @@ function renderHistory() {
       "historyList"
     );
 
+
   if (!list) {
     return;
   }
 
 
-  list.innerHTML = "";
+  list.innerHTML =
+    "";
 
 
   if (
-    conversations.length === 0
+    conversations.length ===
+    0
   ) {
 
     list.innerHTML = `
@@ -988,13 +1262,14 @@ function renderHistory() {
     `;
 
     return;
+
   }
 
 
   conversations
     .slice()
     .sort(
-      (a,b) =>
+      (a, b) =>
         b.updatedAt -
         a.updatedAt
     )
@@ -1005,6 +1280,7 @@ function renderHistory() {
           document.createElement(
             "div"
           );
+
 
         item.className =
           "history-item";
@@ -1018,12 +1294,16 @@ function renderHistory() {
                 ".history-delete"
               )
             ) {
+
               return;
+
             }
+
 
             openChat(
               conversation.id
             );
+
           };
 
 
@@ -1032,8 +1312,10 @@ function renderHistory() {
             "div"
           );
 
+
         icon.className =
           "history-icon";
+
 
         icon.textContent =
           "▣";
@@ -1044,6 +1326,7 @@ function renderHistory() {
             "div"
           );
 
+
         info.className =
           "history-info";
 
@@ -1053,8 +1336,10 @@ function renderHistory() {
             "div"
           );
 
+
         title.className =
           "history-title";
+
 
         title.textContent =
           conversation.title;
@@ -1065,8 +1350,10 @@ function renderHistory() {
             "div"
           );
 
+
         preview.className =
           "history-preview";
+
 
         const lastMessage =
           conversation.messages[
@@ -1080,9 +1367,14 @@ function renderHistory() {
             : "Empty conversation";
 
 
-        info.appendChild(title);
+        info.appendChild(
+          title
+        );
 
-        info.appendChild(preview);
+
+        info.appendChild(
+          preview
+        );
 
 
         const deleteButton =
@@ -1090,11 +1382,17 @@ function renderHistory() {
             "button"
           );
 
+
         deleteButton.className =
           "history-delete";
 
+
         deleteButton.textContent =
           "🗑";
+
+
+        deleteButton.type =
+          "button";
 
 
         deleteButton.onclick =
@@ -1102,24 +1400,36 @@ function renderHistory() {
 
             event.stopPropagation();
 
+
             deleteConversation(
               conversation.id
             );
+
           };
 
 
-        item.appendChild(icon);
+        item.appendChild(
+          icon
+        );
 
-        item.appendChild(info);
+
+        item.appendChild(
+          info
+        );
+
 
         item.appendChild(
           deleteButton
         );
 
 
-        list.appendChild(item);
+        list.appendChild(
+          item
+        );
+
       }
     );
+
 }
 
 
@@ -1134,26 +1444,34 @@ function renderRecentChats() {
       "recentChats"
     );
 
+
   if (!list) {
     return;
   }
 
 
-  list.innerHTML = "";
+  list.innerHTML =
+    "";
 
 
   const recent =
     conversations
       .slice()
       .sort(
-        (a,b) =>
+        (a, b) =>
           b.updatedAt -
           a.updatedAt
       )
-      .slice(0,4);
+      .slice(
+        0,
+        4
+      );
 
 
-  if (recent.length === 0) {
+  if (
+    recent.length ===
+    0
+  ) {
 
     list.innerHTML = `
       <div class="empty-state">
@@ -1163,6 +1481,7 @@ function renderRecentChats() {
     `;
 
     return;
+
   }
 
 
@@ -1174,14 +1493,20 @@ function renderRecentChats() {
           "button"
         );
 
+
       button.className =
         "recent-item";
 
 
+      button.type =
+        "button";
+
+
       button.onclick =
-        () => openChat(
-          conversation.id
-        );
+        () =>
+          openChat(
+            conversation.id
+          );
 
 
       button.innerHTML = `
@@ -1202,8 +1527,10 @@ function renderRecentChats() {
       list.appendChild(
         button
       );
+
     }
   );
+
 }
 
 
@@ -1214,6 +1541,9 @@ function renderRecentChats() {
 function deleteConversation(
   conversationId
 ) {
+
+  stopSpeaking();
+
 
   conversations =
     conversations.filter(
@@ -1231,19 +1561,37 @@ function deleteConversation(
     currentConversationId =
       null;
 
-    createConversation();
+
+    if (
+      conversations.length ===
+      0
+    ) {
+
+      createConversation();
+
+    } else {
+
+      currentConversationId =
+        conversations[0].id;
+
+    }
+
   }
 
 
   saveConversations();
 
+
   renderHistory();
 
+
   renderRecentChats();
+
 
   showToast(
     "Conversation deleted."
   );
+
 }
 
 
@@ -1251,26 +1599,41 @@ function deleteConversation(
    TEMPLATE
 ========================================================= */
 
-function useTemplate(text) {
+function useTemplate(
+  text
+) {
 
   startNewChat();
 
-  setTimeout(() => {
 
-    const input =
-      document.getElementById(
-        "chatInput"
-      );
+  setTimeout(
+    () => {
 
-    if (input) {
+      const input =
+        document.getElementById(
+          "chatInput"
+        );
 
-      input.value =
-        text;
 
-      input.focus();
-    }
+      if (input) {
 
-  }, 100);
+        input.value =
+          text;
+
+
+        input.focus();
+
+
+        autoResize(
+          input
+        );
+
+      }
+
+    },
+    100
+  );
+
 }
 
 
@@ -1278,24 +1641,78 @@ function useTemplate(text) {
    COPY
 ========================================================= */
 
-async function copyText(text) {
+async function copyText(
+  text
+) {
 
   try {
 
-    await navigator.clipboard.writeText(
-      text
-    );
+    if (
+      navigator.clipboard &&
+      navigator.clipboard.writeText
+    ) {
+
+      await navigator.clipboard.writeText(
+        text
+      );
+
+    } else {
+
+      const textarea =
+        document.createElement(
+          "textarea"
+        );
+
+
+      textarea.value =
+        text;
+
+
+      textarea.style.position =
+        "fixed";
+
+
+      textarea.style.opacity =
+        "0";
+
+
+      document.body.appendChild(
+        textarea
+      );
+
+
+      textarea.select();
+
+
+      document.execCommand(
+        "copy"
+      );
+
+
+      textarea.remove();
+
+    }
+
 
     showToast(
       "Response copied."
     );
 
+
   } catch (error) {
+
+    console.error(
+      "Copy error:",
+      error
+    );
+
 
     showToast(
       "Copy is not available."
     );
+
   }
+
 }
 
 
@@ -1303,7 +1720,9 @@ async function copyText(text) {
    SHARE
 ========================================================= */
 
-async function shareText(text) {
+async function shareText(
+  text
+) {
 
   try {
 
@@ -1312,18 +1731,26 @@ async function shareText(text) {
     ) {
 
       await navigator.share({
+
         title:
           "Emogigs AI",
-        text
+
+        text:
+          text
+
       });
 
     } else {
 
-      await copyText(text);
+      await copyText(
+        text
+      );
+
 
       showToast(
         "Response copied for sharing."
       );
+
     }
 
   } catch (error) {
@@ -1331,7 +1758,9 @@ async function shareText(text) {
     console.log(
       "Share cancelled."
     );
+
   }
+
 }
 
 
@@ -1341,12 +1770,16 @@ async function shareText(text) {
 
 let toastTimer;
 
-function showToast(message) {
+
+function showToast(
+  message
+) {
 
   const toast =
     document.getElementById(
       "toast"
     );
+
 
   if (!toast) {
     return;
@@ -1355,6 +1788,7 @@ function showToast(message) {
 
   toast.textContent =
     message;
+
 
   toast.classList.add(
     "show"
@@ -1367,13 +1801,17 @@ function showToast(message) {
 
 
   toastTimer =
-    setTimeout(() => {
+    setTimeout(
+      () => {
 
-      toast.classList.remove(
-        "show"
-      );
+        toast.classList.remove(
+          "show"
+        );
 
-    }, 2200);
+      },
+      2200
+    );
+
 }
 
 
@@ -1381,29 +1819,37 @@ function showToast(message) {
    ESCAPE HTML
 ========================================================= */
 
-function escapeHTML(text) {
+function escapeHTML(
+  text
+) {
 
   return String(text)
+
     .replace(
       /&/g,
       "&amp;"
     )
+
     .replace(
       /</g,
       "&lt;"
     )
+
     .replace(
       />/g,
       "&gt;"
     )
+
     .replace(
       /"/g,
       "&quot;"
     )
+
     .replace(
       /'/g,
       "&#039;"
     );
+
 }
 
 
@@ -1411,10 +1857,15 @@ function escapeHTML(text) {
    TIME
 ========================================================= */
 
-function formatTime(timestamp) {
+function formatTime(
+  timestamp
+) {
 
   const date =
-    new Date(timestamp);
+    new Date(
+      timestamp
+    );
+
 
   const now =
     new Date();
@@ -1433,38 +1884,49 @@ function formatTime(timestamp) {
 
 
   if (minutes < 1) {
+
     return "now";
+
   }
 
 
   if (minutes < 60) {
+
     return `${minutes}m`;
+
   }
 
 
   const hours =
     Math.floor(
-      minutes / 60
+      minutes /
+      60
     );
 
 
   if (hours < 24) {
+
     return `${hours}h`;
+
   }
 
 
   const days =
     Math.floor(
-      hours / 24
+      hours /
+      24
     );
 
 
   if (days < 7) {
+
     return `${days}d`;
+
   }
 
 
   return date.toLocaleDateString();
+
 }
 
 
@@ -1476,45 +1938,74 @@ function autoResize(
   textarea
 ) {
 
+  if (!textarea) {
+    return;
+  }
+
+
   textarea.style.height =
     "auto";
+
 
   textarea.style.height =
     Math.min(
       textarea.scrollHeight,
       130
     ) + "px";
+
 }
 
 
-
 /* =========================================================
-   EMOGIGS AI — STEP 18C
-   VOICE ENGINE
+   EMOGIGS AI
+   STEP 18D — VOICE ENGINE
 ========================================================= */
 
 const VOICE_STORAGE_KEY =
-  "emogigs_voice_settings_v1";
+  "emogigs_voice_settings_v2";
 
 
 let voiceSettings = {
 
-  gender: "natural",
+  gender:
+    "natural",
 
-  language: "auto",
+  language:
+    "auto",
 
-  rate: 1,
+  rate:
+    1,
 
-  autoSpeak: true,
+  autoSpeak:
+    true,
 
-  conversation: false
+  conversation:
+    false
 
 };
 
 
 let availableVoices = [];
 
+
+/*
+  Current speech state
+*/
+
 let currentSpeech = null;
+
+let speechChunks = [];
+
+let speechChunkIndex = 0;
+
+let currentSpeechButton = null;
+
+let speechSessionId = 0;
+
+
+/*
+  Voice recognition
+*/
 
 let speechRecognition = null;
 
@@ -1534,15 +2025,30 @@ function loadVoiceSettings() {
         VOICE_STORAGE_KEY
       );
 
+
     if (saved) {
 
       const parsed =
-        JSON.parse(saved);
+        JSON.parse(
+          saved
+        );
 
-      voiceSettings = {
-        ...voiceSettings,
-        ...parsed
-      };
+
+      if (
+        parsed &&
+        typeof parsed ===
+          "object"
+      ) {
+
+        voiceSettings = {
+
+          ...voiceSettings,
+
+          ...parsed
+
+        };
+
+      }
 
     }
 
@@ -1567,10 +2073,13 @@ function saveVoiceSettings() {
   try {
 
     localStorage.setItem(
+
       VOICE_STORAGE_KEY,
+
       JSON.stringify(
         voiceSettings
       )
+
     );
 
   } catch (error) {
@@ -1592,12 +2101,20 @@ function saveVoiceSettings() {
 function loadAvailableVoices() {
 
   if (
-    !("speechSynthesis" in window)
+    !(
+      "speechSynthesis" in
+      window
+    )
   ) {
 
     console.warn(
       "Speech synthesis is not supported."
     );
+
+
+    availableVoices =
+      [];
+
 
     return;
 
@@ -1618,7 +2135,7 @@ function loadAvailableVoices() {
 
 
 /* =========================================================
-   VOICE LANGUAGE MATCH
+   GET LANGUAGE CODE
 ========================================================= */
 
 function getLanguageCode() {
@@ -1632,7 +2149,112 @@ function getLanguageCode() {
 
   }
 
+
   return voiceSettings.language;
+
+}
+
+
+/* =========================================================
+   DETECT TEXT LANGUAGE
+========================================================= */
+
+function detectTextLanguage(
+  text
+) {
+
+  const value =
+    String(text || "");
+
+
+  /*
+    Bengali Unicode range:
+    U+0980 — U+09FF
+  */
+
+  const bengaliMatches =
+    value.match(
+      /[\u0980-\u09FF]/g
+    );
+
+
+  const englishMatches =
+    value.match(
+      /[A-Za-z]/g
+    );
+
+
+  const bengaliCount =
+    bengaliMatches
+      ? bengaliMatches.length
+      : 0;
+
+
+  const englishCount =
+    englishMatches
+      ? englishMatches.length
+      : 0;
+
+
+  if (
+    bengaliCount >
+    englishCount
+  ) {
+
+    return "bn";
+
+  }
+
+
+  return "en";
+
+}
+
+
+/* =========================================================
+   GET SPEECH LANGUAGE
+========================================================= */
+
+function getSpeechLanguage(
+  text
+) {
+
+  const configured =
+    getLanguageCode();
+
+
+  if (configured) {
+
+    return configured;
+
+  }
+
+
+  /*
+    Auto language mode.
+    Browser speech synthesis cannot
+    truly auto-detect every language,
+    so we detect Bengali vs English
+    from the response text.
+  */
+
+  const detected =
+    detectTextLanguage(
+      text
+    );
+
+
+  if (
+    detected ===
+    "bn"
+  ) {
+
+    return "bn-BD";
+
+  }
+
+
+  return "en-US";
 
 }
 
@@ -1641,7 +2263,21 @@ function getLanguageCode() {
    FIND BEST VOICE
 ========================================================= */
 
-function findBestVoice() {
+function findBestVoice(
+  text = ""
+) {
+
+  if (
+    !availableVoices.length &&
+    "speechSynthesis" in window
+  ) {
+
+    availableVoices =
+      window.speechSynthesis
+        .getVoices();
+
+  }
+
 
   if (
     !availableVoices.length
@@ -1653,7 +2289,15 @@ function findBestVoice() {
 
 
   const language =
-    getLanguageCode();
+    getSpeechLanguage(
+      text
+    );
+
+
+  const languagePrefix =
+    language
+      .toLowerCase()
+      .split("-")[0];
 
 
   let voices =
@@ -1661,18 +2305,29 @@ function findBestVoice() {
 
 
   /*
-    Language filter
+    First try exact language.
   */
 
-  if (language) {
+  let languageVoices =
+    voices.filter(
+      voice =>
+        voice.lang
+          .toLowerCase()
+          ===
+          language.toLowerCase()
+    );
 
-    const languagePrefix =
-      language
-        .toLowerCase()
-        .split("-")[0];
 
+  /*
+    Then try language prefix.
+  */
 
-    const languageVoices =
+  if (
+    languageVoices.length ===
+    0
+  ) {
+
+    languageVoices =
       voices.filter(
         voice =>
           voice.lang
@@ -1682,25 +2337,21 @@ function findBestVoice() {
             )
       );
 
+  }
 
-    if (
-      languageVoices.length
-    ) {
 
-      voices =
-        languageVoices;
+  if (
+    languageVoices.length
+  ) {
 
-    }
+    voices =
+      languageVoices;
 
   }
 
 
   /*
-    Gender preference
-    Browser voice names are not
-    guaranteed to contain gender.
-    Therefore this is a best-effort
-    selection.
+    Female voice preference
   */
 
   if (
@@ -1716,15 +2367,45 @@ function findBestVoice() {
             voice.name
               .toLowerCase();
 
+
           return (
-            name.includes("female") ||
-            name.includes("woman") ||
-            name.includes("zira") ||
-            name.includes("samantha") ||
-            name.includes("susan") ||
-            name.includes("karen") ||
-            name.includes("victoria") ||
-            name.includes("google uk english female")
+
+            name.includes(
+              "female"
+            ) ||
+
+            name.includes(
+              "woman"
+            ) ||
+
+            name.includes(
+              "zira"
+            ) ||
+
+            name.includes(
+              "samantha"
+            ) ||
+
+            name.includes(
+              "susan"
+            ) ||
+
+            name.includes(
+              "karen"
+            ) ||
+
+            name.includes(
+              "victoria"
+            ) ||
+
+            name.includes(
+              "google uk english female"
+            ) ||
+
+            name.includes(
+              "google us english"
+            )
+
           );
 
         }
@@ -1740,6 +2421,10 @@ function findBestVoice() {
   }
 
 
+  /*
+    Male voice preference
+  */
+
   if (
     voiceSettings.gender ===
     "male"
@@ -1753,15 +2438,41 @@ function findBestVoice() {
             voice.name
               .toLowerCase();
 
+
           return (
-            name.includes("male") ||
-            name.includes("man") ||
-            name.includes("david") ||
-            name.includes("daniel") ||
-            name.includes("alex") ||
-            name.includes("george") ||
-            name.includes("mark") ||
-            name.includes("google uk english male")
+
+            name.includes(
+              "male"
+            ) ||
+
+            name.includes(
+              "man"
+            ) ||
+
+            name.includes(
+              "david"
+            ) ||
+
+            name.includes(
+              "daniel"
+            ) ||
+
+            name.includes(
+              "alex"
+            ) ||
+
+            name.includes(
+              "george"
+            ) ||
+
+            name.includes(
+              "mark"
+            ) ||
+
+            name.includes(
+              "google uk english male"
+            )
+
           );
 
         }
@@ -1778,17 +2489,189 @@ function findBestVoice() {
 
 
   /*
-    Natural / default voice
+    Natural/default voice
   */
 
-  return (
+  const defaultVoice =
     voices.find(
       voice =>
         voice.default
-    ) ||
+    );
+
+
+  if (defaultVoice) {
+
+    return defaultVoice;
+
+  }
+
+
+  return (
     voices[0] ||
     null
   );
+
+}
+
+
+/* =========================================================
+   SPLIT TEXT FOR ANDROID
+========================================================= */
+
+function splitSpeechText(
+  text,
+  maxLength = 180
+) {
+
+  const clean =
+    String(text || "")
+      .trim();
+
+
+  if (!clean) {
+
+    return [];
+
+  }
+
+
+  if (
+    clean.length <=
+    maxLength
+  ) {
+
+    return [clean];
+
+  }
+
+
+  /*
+    Split by sentences first.
+  */
+
+  const sentences =
+    clean.split(
+      /(?<=[.!?।！？])\s+/u
+    );
+
+
+  const chunks = [];
+
+  let current = "";
+
+
+  sentences.forEach(
+    sentence => {
+
+      sentence =
+        sentence.trim();
+
+
+      if (!sentence) {
+        return;
+      }
+
+
+      if (
+        (
+          current.length +
+          sentence.length +
+          1
+        ) <=
+        maxLength
+      ) {
+
+        current =
+          current
+            ? current +
+              " " +
+              sentence
+            : sentence;
+
+      } else {
+
+        if (current) {
+
+          chunks.push(
+            current
+          );
+
+        }
+
+
+        /*
+          Very long sentence.
+        */
+
+        if (
+          sentence.length >
+          maxLength
+        ) {
+
+          for (
+            let i = 0;
+            i < sentence.length;
+            i += maxLength
+          ) {
+
+            chunks.push(
+              sentence.substring(
+                i,
+                i + maxLength
+              )
+            );
+
+          }
+
+
+          current = "";
+
+        } else {
+
+          current =
+            sentence;
+
+        }
+
+      }
+
+    }
+  );
+
+
+  if (current) {
+
+    chunks.push(
+      current
+    );
+
+  }
+
+
+  return chunks;
+
+}
+
+
+/* =========================================================
+   RESET VOICE BUTTONS
+========================================================= */
+
+function resetVoiceButtons() {
+
+  document
+    .querySelectorAll(
+      ".voice-action-button.speaking"
+    )
+    .forEach(
+      button => {
+
+        button.classList.remove(
+          "speaking"
+        );
+
+      }
+    );
 
 }
 
@@ -1799,8 +2682,16 @@ function findBestVoice() {
 
 function stopSpeaking() {
 
+  /*
+    Invalidate current speech session.
+  */
+
+  speechSessionId++;
+
+
   if (
-    "speechSynthesis" in window
+    "speechSynthesis" in
+    window
   ) {
 
     window.speechSynthesis.cancel();
@@ -1812,352 +2703,107 @@ function stopSpeaking() {
     null;
 
 
-  document
-    .querySelectorAll(
-      ".voice-action-button.speaking"
-    )
-    .forEach(button => {
+  speechChunks =
+    [];
 
-      button.classList.remove(
-        "speaking"
-      );
 
-    });
+  speechChunkIndex =
+    0;
+
+
+  currentSpeechButton =
+    null;
+
+
+  resetVoiceButtons();
 
 }
 
 
 /* =========================================================
-   SPEAK TEXT — FIXED ANDROID VERSION
+   SPEAK NEXT CHUNK
 ========================================================= */
 
-function speakText(
-  text,
-  button = null
+function speakNextChunk(
+  sessionId
 ) {
 
+  /*
+    Session is no longer active.
+  */
+
   if (
-    !text ||
-    !text.trim()
+    sessionId !==
+    speechSessionId
   ) {
+
     return;
+
   }
 
 
   if (
-    !("speechSynthesis" in window)
+    speechChunkIndex >=
+    speechChunks.length
   ) {
-
-    showToast(
-      "Voice playback is not supported on this browser."
-    );
-
-    return;
-  }
-
-
-  /*
-    Stop previous speech
-  */
-
-  window.speechSynthesis.cancel();
-
-  currentSpeech = null;
-
-
-  /*
-    Make sure browser voices are loaded
-  */
-
-  const speakNow = () => {
-
-    const voices =
-      window.speechSynthesis.getVoices();
-
-
-    console.log(
-      "Emogigs AI: Available voices:",
-      voices.length
-    );
-
-
-    const utterance =
-      new SpeechSynthesisUtterance(
-        text
-      );
-
-
-    /*
-      Try to find the best available voice
-    */
-
-    const voice =
-      findBestVoice();
-
-
-    if (voice) {
-
-      utterance.voice =
-        voice;
-
-      utterance.lang =
-        voice.lang;
-
-    } else {
-
-      /*
-        Safe fallback for Android
-      */
-
-      utterance.lang =
-        "en-US";
-
-    }
-
-
-    /*
-      Voice speed
-    */
-
-    utterance.rate =
-      Number(
-        voiceSettings.rate
-      ) || 1;
-
-
-    utterance.pitch =
-      1;
-
-
-    utterance.volume =
-      1;
-
-
-    /*
-      Save current speech
-    */
 
     currentSpeech =
-      utterance;
+      null;
 
 
-    /*
-      Button animation
-    */
+    resetVoiceButtons();
 
-    if (button) {
-
-      button.classList.add(
-        "speaking"
-      );
-
-    }
-
-
-    /*
-      Speech started
-    */
-
-    utterance.onstart =
-      () => {
-
-        console.log(
-          "Emogigs AI: Voice started."
-        );
-
-        if (button) {
-
-          button.classList.add(
-            "speaking"
-          );
-
-        }
-
-      };
-
-
-    /*
-      Speech finished
-    */
-
-    utterance.onend =
-      () => {
-
-        console.log(
-          "Emogigs AI: Voice finished."
-        );
-
-        currentSpeech =
-          null;
-
-        if (button) {
-
-          button.classList.remove(
-            "speaking"
-          );
-
-        }
-
-      };
-
-
-    /*
-      Speech error
-    */
-
-    utterance.onerror =
-      error => {
-
-        console.error(
-          "Emogigs AI voice error:",
-          error
-        );
-
-        currentSpeech =
-          null;
-
-        if (button) {
-
-          button.classList.remove(
-            "speaking"
-          );
-
-        }
-
-      };
-
-
-    /*
-      Start speech
-    */
-
-    window.speechSynthesis.speak(
-      utterance
-    );
-
-  };
-
-
-  /*
-    Android Chrome sometimes loads voices
-    asynchronously.
-  */
-
-  const voices =
-    window.speechSynthesis.getVoices();
-
-
-  if (voices.length > 0) {
-
-    speakNow();
-
-  } else {
-
-    console.log(
-      "Emogigs AI: Waiting for voices..."
-    );
-
-
-    window.speechSynthesis.onvoiceschanged =
-      () => {
-
-        window.speechSynthesis.onvoiceschanged =
-          null;
-
-        speakNow();
-
-      };
-
-
-    /*
-      Fallback retry
-    */
-
-    setTimeout(
-      () => {
-
-        if (
-          !currentSpeech
-        ) {
-
-          speakNow();
-
-        }
-
-      },
-      500
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   TOGGLE SPEECH — DIAGNOSTIC TEST
-========================================================= */
-
-function toggleSpeech(
-  text,
-  button
-) {
-
-  console.log(
-    "Emogigs AI: Voice button clicked."
-  );
-
-  console.log(
-    "Emogigs AI: Text to speak:",
-    text
-  );
-
-
-  if (
-    !("speechSynthesis" in window)
-  ) {
-
-    showToast(
-      "Speech engine is not available."
-    );
-
-    console.error(
-      "Emogigs AI: speechSynthesis NOT supported."
-    );
 
     return;
+
   }
 
 
-  /*
-    Stop previous speech
-  */
-
-  window.speechSynthesis.cancel();
-
-  currentSpeech = null;
-
-
-  /*
-    TEST PHRASE
-    This intentionally speaks a fixed sentence.
-  */
-
-  const testText =
-    "Hello. This is Emogigs AI voice test.";
+  const text =
+    speechChunks[
+      speechChunkIndex
+    ];
 
 
   const utterance =
     new SpeechSynthesisUtterance(
-      testText
+      text
     );
 
 
-  utterance.lang =
-    "en-US";
+  const voice =
+    findBestVoice(
+      text
+    );
+
+
+  const language =
+    getSpeechLanguage(
+      text
+    );
+
+
+  if (voice) {
+
+    utterance.voice =
+      voice;
+
+
+    utterance.lang =
+      voice.lang;
+
+  } else {
+
+    utterance.lang =
+      language;
+
+  }
 
 
   utterance.rate =
-    1;
+    Number(
+      voiceSettings.rate
+    ) || 1;
 
 
   utterance.pitch =
@@ -2168,16 +2814,33 @@ function toggleSpeech(
     1;
 
 
+  currentSpeech =
+    utterance;
+
+
   utterance.onstart =
     () => {
 
+      if (
+        sessionId !==
+        speechSessionId
+      ) {
+
+        return;
+
+      }
+
+
       console.log(
-        "Emogigs AI: TEST VOICE STARTED."
+        "Emogigs AI: Voice started."
       );
 
-      if (button) {
 
-        button.classList.add(
+      if (
+        currentSpeechButton
+      ) {
+
+        currentSpeechButton.classList.add(
           "speaking"
         );
 
@@ -2189,19 +2852,38 @@ function toggleSpeech(
   utterance.onend =
     () => {
 
-      console.log(
-        "Emogigs AI: TEST VOICE FINISHED."
-      );
+      if (
+        sessionId !==
+        speechSessionId
+      ) {
 
-      currentSpeech = null;
-
-      if (button) {
-
-        button.classList.remove(
-          "speaking"
-        );
+        return;
 
       }
+
+
+      speechChunkIndex++;
+
+
+      currentSpeech =
+        null;
+
+
+      /*
+        Small delay between chunks
+        improves Android stability.
+      */
+
+      setTimeout(
+        () => {
+
+          speakNextChunk(
+            sessionId
+          );
+
+        },
+        40
+      );
 
     };
 
@@ -2209,34 +2891,306 @@ function toggleSpeech(
   utterance.onerror =
     error => {
 
+      if (
+        sessionId !==
+        speechSessionId
+      ) {
+
+        return;
+
+      }
+
+
       console.error(
-        "Emogigs AI: TEST VOICE ERROR:",
+        "Emogigs AI voice error:",
         error
       );
 
-      currentSpeech = null;
 
-      if (button) {
+      currentSpeech =
+        null;
 
-        button.classList.remove(
-          "speaking"
-        );
+
+      resetVoiceButtons();
+
+
+      /*
+        Ignore normal cancellation.
+      */
+
+      if (
+        error &&
+        error.error ===
+          "canceled"
+      ) {
+
+        return;
 
       }
+
+
+      if (
+        error &&
+        error.error ===
+          "interrupted"
+      ) {
+
+        return;
+
+      }
+
+
+      showToast(
+        "Voice playback could not continue."
+      );
 
     };
 
 
-  currentSpeech =
-    utterance;
+  window.speechSynthesis.speak(
+    utterance
+  );
+
+}
+
+
+/* =========================================================
+   SPEAK TEXT
+   PRODUCTION VERSION
+========================================================= */
+
+function speakText(
+  text,
+  button = null
+) {
+
+  if (
+    !text ||
+    !String(text).trim()
+  ) {
+
+    return;
+
+  }
+
+
+  if (
+    !(
+      "speechSynthesis" in
+      window
+    )
+  ) {
+
+    showToast(
+      "Voice playback is not supported on this browser."
+    );
+
+
+    return;
+
+  }
 
 
   /*
-    START SPEECH DIRECTLY
+    Stop previous speech.
   */
 
-  window.speechSynthesis.speak(
-    utterance
+  stopSpeaking();
+
+
+  /*
+    Remember button.
+  */
+
+  currentSpeechButton =
+    button;
+
+
+  /*
+    Create new session.
+  */
+
+  const sessionId =
+    speechSessionId;
+
+
+  /*
+    Split long response.
+  */
+
+  speechChunks =
+    splitSpeechText(
+      text
+    );
+
+
+  speechChunkIndex =
+    0;
+
+
+  if (
+    speechChunks.length ===
+    0
+  ) {
+
+    return;
+
+  }
+
+
+  /*
+    Refresh voices.
+  */
+
+  loadAvailableVoices();
+
+
+  /*
+    Android may load voices
+    asynchronously.
+  */
+
+  const startSpeech =
+    () => {
+
+      if (
+        sessionId !==
+        speechSessionId
+      ) {
+
+        return;
+
+      }
+
+
+      loadAvailableVoices();
+
+
+      speakNextChunk(
+        sessionId
+      );
+
+    };
+
+
+  const voices =
+    window.speechSynthesis
+      .getVoices();
+
+
+  if (
+    voices &&
+    voices.length > 0
+  ) {
+
+    startSpeech();
+
+  } else {
+
+    /*
+      Wait for Android voices.
+    */
+
+    let started =
+      false;
+
+
+    const startOnce =
+      () => {
+
+        if (started) {
+          return;
+        }
+
+
+        started =
+          true;
+
+
+        window.speechSynthesis
+          .removeEventListener(
+            "voiceschanged",
+            startOnce
+          );
+
+
+        startSpeech();
+
+      };
+
+
+    window.speechSynthesis
+      .addEventListener(
+        "voiceschanged",
+        startOnce
+      );
+
+
+    /*
+      Fallback.
+    */
+
+    setTimeout(
+      () => {
+
+        startOnce();
+
+      },
+      600
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   TOGGLE SPEECH
+   REAL AI RESPONSE
+========================================================= */
+
+function toggleSpeech(
+  text,
+  button
+) {
+
+  console.log(
+    "Emogigs AI: Voice button clicked."
+  );
+
+
+  /*
+    If this exact button is currently
+    speaking, stop it.
+  */
+
+  if (
+    currentSpeech &&
+    currentSpeechButton ===
+      button
+  ) {
+
+    stopSpeaking();
+
+
+    showToast(
+      "Voice stopped."
+    );
+
+
+    return;
+
+  }
+
+
+  /*
+    Otherwise speak the actual
+    AI response.
+  */
+
+  speakText(
+    text,
+    button
   );
 
 }
@@ -2253,6 +3207,7 @@ function updateVoiceRateDisplay() {
       "voiceRate"
     );
 
+
   const rateValue =
     document.getElementById(
       "voiceRateValue"
@@ -2267,7 +3222,8 @@ function updateVoiceRateDisplay() {
     rateValue.textContent =
       Number(
         rateInput.value
-      ).toFixed(2) + "×";
+      ).toFixed(2) +
+      "×";
 
   }
 
@@ -2285,20 +3241,24 @@ function applyVoiceSettingsToUI() {
       "voiceGender"
     );
 
+
   const language =
     document.getElementById(
       "voiceLanguage"
     );
+
 
   const rate =
     document.getElementById(
       "voiceRate"
     );
 
+
   const autoSpeak =
     document.getElementById(
       "voiceAutoSpeak"
     );
+
 
   const conversation =
     document.getElementById(
@@ -2373,6 +3333,7 @@ function initializeVoiceSettings() {
       "Voice settings panel not found."
     );
 
+
     return;
 
   }
@@ -2383,20 +3344,24 @@ function initializeVoiceSettings() {
       "voiceGender"
     );
 
+
   const language =
     document.getElementById(
       "voiceLanguage"
     );
+
 
   const rate =
     document.getElementById(
       "voiceRate"
     );
 
+
   const autoSpeak =
     document.getElementById(
       "voiceAutoSpeak"
     );
+
 
   const conversation =
     document.getElementById(
@@ -2413,7 +3378,9 @@ function initializeVoiceSettings() {
         voiceSettings.gender =
           gender.value;
 
+
         saveVoiceSettings();
+
 
         stopSpeaking();
 
@@ -2432,9 +3399,19 @@ function initializeVoiceSettings() {
         voiceSettings.language =
           language.value;
 
+
         saveVoiceSettings();
 
+
         stopSpeaking();
+
+
+        /*
+          Recreate recognition
+          with new language.
+        */
+
+        initializeSpeechRecognition();
 
       }
     );
@@ -2453,7 +3430,9 @@ function initializeVoiceSettings() {
             rate.value
           );
 
+
         updateVoiceRateDisplay();
+
 
         saveVoiceSettings();
 
@@ -2470,7 +3449,9 @@ function initializeVoiceSettings() {
       () => {
 
         voiceSettings.autoSpeak =
-          autoSpeak.value === "on";
+          autoSpeak.value ===
+          "on";
+
 
         saveVoiceSettings();
 
@@ -2487,7 +3468,9 @@ function initializeVoiceSettings() {
       () => {
 
         voiceSettings.conversation =
-          conversation.value === "on";
+          conversation.value ===
+          "on";
+
 
         saveVoiceSettings();
 
@@ -2520,6 +3503,7 @@ function toggleVoiceSettingsPanel() {
       "Voice settings are not available."
     );
 
+
     return;
 
   }
@@ -2533,7 +3517,8 @@ function toggleVoiceSettingsPanel() {
 
 
 /* =========================================================
-   SPEECH RECOGNITION — FINAL VOICE ASSISTANT
+   SPEECH RECOGNITION
+   FINAL VERSION
 ========================================================= */
 
 function initializeSpeechRecognition() {
@@ -2543,17 +3528,16 @@ function initializeSpeechRecognition() {
     window.webkitSpeechRecognition;
 
 
-  /*
-    Browser support check
-  */
-
   if (!Recognition) {
 
     console.warn(
       "Emogigs AI: Speech recognition is not supported."
     );
 
-    speechRecognition = null;
+
+    speechRecognition =
+      null;
+
 
     return;
 
@@ -2561,36 +3545,72 @@ function initializeSpeechRecognition() {
 
 
   /*
-    Create recognition instance
+    Stop old recognition instance.
   */
+
+  if (
+    speechRecognition
+  ) {
+
+    try {
+
+      speechRecognition.abort();
+
+    } catch (error) {
+
+      console.log(
+        "Old recognition instance closed."
+      );
+
+    }
+
+  }
+
 
   speechRecognition =
     new Recognition();
 
 
-  /*
-    Recognition settings
-  */
-
   speechRecognition.continuous =
     false;
 
+
   speechRecognition.interimResults =
     false;
+
 
   speechRecognition.maxAlternatives =
     1;
 
 
   /*
-    Language
+    Recognition language.
   */
 
-  speechRecognition.lang =
+  if (
     voiceSettings.language &&
-    voiceSettings.language !== "auto"
-      ? voiceSettings.language
-      : "en-US";
+    voiceSettings.language !==
+      "auto"
+  ) {
+
+    speechRecognition.lang =
+      voiceSettings.language;
+
+  } else {
+
+    /*
+      Web Speech API cannot truly
+      auto-detect multiple languages
+      during one recognition session.
+      
+      English is used as the safe
+      browser fallback.
+    */
+
+    speechRecognition.lang =
+      "en-US";
+
+  }
 
 
   /* =======================================================
@@ -2633,25 +3653,28 @@ function initializeSpeechRecognition() {
       );
 
 
-      let transcript = "";
+      let transcript =
+        "";
 
-
-      /*
-        Collect the final transcript
-      */
 
       for (
-        let i = event.resultIndex;
-        i < event.results.length;
+        let i =
+          event.resultIndex;
+
+        i <
+          event.results.length;
+
         i++
       ) {
 
         if (
-          event.results[i].isFinal
+          event.results[i]
+            .isFinal
         ) {
 
           transcript +=
-            event.results[i][0].transcript;
+            event.results[i][0]
+              .transcript;
 
         }
 
@@ -2668,15 +3691,12 @@ function initializeSpeechRecognition() {
       );
 
 
-      /*
-        Nothing recognized
-      */
-
       if (!transcript) {
 
         showToast(
           "I couldn't hear anything. Please try again."
         );
+
 
         return;
 
@@ -2684,7 +3704,8 @@ function initializeSpeechRecognition() {
 
 
       /*
-        Put recognized text into chat input
+        Put recognized text
+        into chat input.
       */
 
       const input =
@@ -2698,6 +3719,7 @@ function initializeSpeechRecognition() {
         input.value =
           transcript;
 
+
         autoResize(
           input
         );
@@ -2706,7 +3728,7 @@ function initializeSpeechRecognition() {
 
 
       /*
-        Send voice message to Emogigs AI
+        Send to Emogigs AI.
       */
 
       sendMessage(
@@ -2739,10 +3761,6 @@ function initializeSpeechRecognition() {
       );
 
 
-      /*
-        Permission denied
-      */
-
       if (
         event.error ===
         "not-allowed"
@@ -2752,14 +3770,11 @@ function initializeSpeechRecognition() {
           "🎙️ Microphone permission was denied. Please allow microphone access."
         );
 
+
         return;
 
       }
 
-
-      /*
-        Microphone unavailable
-      */
 
       if (
         event.error ===
@@ -2770,14 +3785,11 @@ function initializeSpeechRecognition() {
           "🎙️ Microphone could not be accessed."
         );
 
+
         return;
 
       }
 
-
-      /*
-        Nothing heard
-      */
 
       if (
         event.error ===
@@ -2788,14 +3800,11 @@ function initializeSpeechRecognition() {
           "🎙️ I didn't hear anything. Please try again."
         );
 
+
         return;
 
       }
 
-
-      /*
-        Network problem
-      */
 
       if (
         event.error ===
@@ -2806,14 +3815,21 @@ function initializeSpeechRecognition() {
           "Voice recognition network error. Please try again."
         );
 
+
         return;
 
       }
 
 
-      /*
-        Generic error
-      */
+      if (
+        event.error ===
+        "aborted"
+      ) {
+
+        return;
+
+      }
+
 
       showToast(
         "Voice Assistant could not start. Please try again."
@@ -2853,14 +3869,10 @@ function initializeSpeechRecognition() {
 
 
 /* =========================================================
-   START VOICE INPUT — FINAL
+   START VOICE INPUT
 ========================================================= */
 
 function startVoiceInput() {
-
-  /*
-    Check browser support
-  */
 
   const Recognition =
     window.SpeechRecognition ||
@@ -2873,18 +3885,16 @@ function startVoiceInput() {
       "Voice input is not supported on this browser."
     );
 
+
     console.error(
       "Emogigs AI: Speech Recognition is not supported."
     );
+
 
     return;
 
   }
 
-
-  /*
-    Initialize recognition if needed
-  */
 
   if (!speechRecognition) {
 
@@ -2899,14 +3909,14 @@ function startVoiceInput() {
       "Could not start the voice assistant."
     );
 
+
     return;
 
   }
 
 
   /*
-    If already listening,
-    stop listening.
+    Toggle listening.
   */
 
   if (isVoiceListening) {
@@ -2924,13 +3934,14 @@ function startVoiceInput() {
 
     }
 
+
     return;
 
   }
 
 
   /*
-    Stop any AI voice currently speaking.
+    Stop AI speech before microphone.
   */
 
   stopSpeaking();
@@ -2942,20 +3953,14 @@ function startVoiceInput() {
 
   if (
     voiceSettings.language &&
-    voiceSettings.language !== "auto"
+    voiceSettings.language !==
+      "auto"
   ) {
 
     speechRecognition.lang =
       voiceSettings.language;
 
   } else {
-
-    /*
-      Default language.
-      We will improve automatic
-      Bangla/English detection
-      in the next step.
-    */
 
     speechRecognition.lang =
       "en-US";
@@ -2971,9 +3976,11 @@ function startVoiceInput() {
 
     speechRecognition.start();
 
+
     console.log(
       "Emogigs AI: Voice Assistant starting..."
     );
+
 
   } catch (error) {
 
@@ -2983,11 +3990,6 @@ function startVoiceInput() {
     );
 
 
-    /*
-      Avoid showing an error when
-      recognition is already running.
-    */
-
     if (
       error.name ===
       "InvalidStateError"
@@ -2996,6 +3998,7 @@ function startVoiceInput() {
       showToast(
         "Voice Assistant is already listening."
       );
+
 
       return;
 
@@ -3023,34 +4026,38 @@ function updateVoiceListeningUI(
     .querySelectorAll(
       ".voice-mic-button"
     )
-    .forEach(button => {
+    .forEach(
+      button => {
 
-      button.classList.toggle(
-        "listening",
-        listening
-      );
+        button.classList.toggle(
+          "listening",
+          listening
+        );
 
-    });
+      }
+    );
 
 
   document
     .querySelectorAll(
       ".voice-status"
     )
-    .forEach(status => {
+    .forEach(
+      status => {
 
-      status.classList.toggle(
-        "active",
-        listening
-      );
+        status.classList.toggle(
+          "active",
+          listening
+        );
 
 
-      status.textContent =
-        listening
-          ? "🎙️ Listening..."
-          : "Voice ready";
+        status.textContent =
+          listening
+            ? "🎙️ Listening..."
+            : "Voice ready";
 
-    });
+      }
+    );
 
 }
 
@@ -3073,6 +4080,10 @@ function createVoiceButton(
   button.classList.add(
     "voice-action-button"
   );
+
+
+  button.type =
+    "button";
 
 
   button.onclick =
@@ -3108,16 +4119,12 @@ function autoSpeakResponse(
   }
 
 
-  /*
-    Small delay makes the UI feel
-    more natural after the response
-    appears.
-  */
-
   setTimeout(
     () => {
 
-      speakText(text);
+      speakText(
+        text
+      );
 
     },
     250
@@ -3133,7 +4140,9 @@ function autoSpeakResponse(
 function checkVoiceSupport() {
 
   const speech =
-    "speechSynthesis" in window;
+    "speechSynthesis" in
+    window;
+
 
   const recognition =
     !!(
@@ -3145,13 +4154,20 @@ function checkVoiceSupport() {
   console.log(
     "Emogigs AI Voice Support:",
     {
-      speechSynthesis: speech,
-      speechRecognition: recognition
+
+      speechSynthesis:
+        speech,
+
+      speechRecognition:
+        recognition
+
     }
   );
 
 }
-  /* =========================================================
+
+
+/* =========================================================
    DOM READY
 ========================================================= */
 
@@ -3160,7 +4176,7 @@ document.addEventListener(
   () => {
 
     console.log(
-      "Emogigs AI Step 18C frontend loaded."
+      "Emogigs AI Step 18D frontend loaded."
     );
 
 
@@ -3170,21 +4186,33 @@ document.addEventListener(
 
     loadVoiceSettings();
 
+
     loadAvailableVoices();
 
+
     if (
-      "speechSynthesis" in window &&
-      "onvoiceschanged" in speechSynthesis
+      "speechSynthesis" in
+      window
     ) {
 
-      speechSynthesis.onvoiceschanged =
-        loadAvailableVoices;
+      /*
+        Android / Chrome voice loading.
+      */
+
+      window.speechSynthesis
+        .addEventListener(
+          "voiceschanged",
+          loadAvailableVoices
+        );
 
     }
 
+
     initializeVoiceSettings();
 
+
     initializeSpeechRecognition();
+
 
     checkVoiceSupport();
 
@@ -3197,7 +4225,8 @@ document.addEventListener(
 
 
     if (
-      conversations.length === 0
+      conversations.length ===
+      0
     ) {
 
       createConversation();
@@ -3205,8 +4234,19 @@ document.addEventListener(
     }
 
 
-    currentConversationId =
-      conversations[0].id;
+    if (
+      !currentConversationId ||
+      !conversations.some(
+        conversation =>
+          conversation.id ===
+          currentConversationId
+      )
+    ) {
+
+      currentConversationId =
+        conversations[0].id;
+
+    }
 
 
     renderRecentChats();
@@ -3220,51 +4260,56 @@ document.addEventListener(
       .querySelectorAll(
         ".nav-btn"
       )
-      .forEach(button => {
-
-        button.addEventListener(
-          "click",
-          () => {
-
-            const screen =
-              button.dataset.screen;
-
-            showScreen(
-              screen
-            );
-
-          }
-        );
-
-      });
-
-
-    document
-      .querySelectorAll(
-        "[data-screen]"
-      )
-      .forEach(button => {
-
-        if (
-          !button.classList.contains(
-            "nav-btn"
-          )
-        ) {
+      .forEach(
+        button => {
 
           button.addEventListener(
             "click",
             () => {
 
+              const screen =
+                button.dataset.screen;
+
+
               showScreen(
-                button.dataset.screen
+                screen
               );
 
             }
           );
 
         }
+      );
 
-      });
+
+    document
+      .querySelectorAll(
+        "[data-screen]"
+      )
+      .forEach(
+        button => {
+
+          if (
+            !button.classList.contains(
+              "nav-btn"
+            )
+          ) {
+
+            button.addEventListener(
+              "click",
+              () => {
+
+                showScreen(
+                  button.dataset.screen
+                );
+
+              }
+            );
+
+          }
+
+        }
+      );
 
 
     /* =================================================
@@ -3275,6 +4320,7 @@ document.addEventListener(
       document.getElementById(
         "headerNewChat"
       );
+
 
     if (newChatButton) {
 
@@ -3295,11 +4341,15 @@ document.addEventListener(
         "chatBack"
       );
 
+
     if (chatBack) {
 
       chatBack.addEventListener(
         "click",
         () => {
+
+          stopSpeaking();
+
 
           showScreen(
             "homeScreen"
@@ -3320,6 +4370,7 @@ document.addEventListener(
         "chatSend"
       );
 
+
     const chatInput =
       document.getElementById(
         "chatInput"
@@ -3330,7 +4381,8 @@ document.addEventListener(
 
       chatSend.addEventListener(
         "click",
-        () => sendMessage()
+        () =>
+          sendMessage()
       );
 
     }
@@ -3352,11 +4404,13 @@ document.addEventListener(
         event => {
 
           if (
-            event.key === "Enter" &&
+            event.key ===
+              "Enter" &&
             !event.shiftKey
           ) {
 
             event.preventDefault();
+
 
             sendMessage();
 
@@ -3377,6 +4431,7 @@ document.addEventListener(
         "homeSend"
       );
 
+
     const homeInput =
       document.getElementById(
         "homeInput"
@@ -3390,7 +4445,10 @@ document.addEventListener(
         () => {
 
           const text =
-            homeInput.value.trim();
+            homeInput
+              ? homeInput.value.trim()
+              : "";
+
 
           if (text) {
 
@@ -3422,14 +4480,17 @@ document.addEventListener(
         event => {
 
           if (
-            event.key === "Enter" &&
+            event.key ===
+              "Enter" &&
             !event.shiftKey
           ) {
 
             event.preventDefault();
 
+
             const text =
               homeInput.value.trim();
+
 
             if (text) {
 
@@ -3455,20 +4516,22 @@ document.addEventListener(
       .querySelectorAll(
         "[data-template]"
       )
-      .forEach(button => {
+      .forEach(
+        button => {
 
-        button.addEventListener(
-          "click",
-          () => {
+          button.addEventListener(
+            "click",
+            () => {
 
-            useTemplate(
-              button.dataset.template
-            );
+              useTemplate(
+                button.dataset.template
+              );
 
-          }
-        );
+            }
+          );
 
-      });
+        }
+      );
 
 
     /* =================================================
@@ -3477,6 +4540,10 @@ document.addEventListener(
 
     renderCurrentChat();
 
+
+    console.log(
+      "Emogigs AI: Step 18D ready."
+    );
+
   }
 );
-
