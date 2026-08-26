@@ -1,20 +1,178 @@
 /* =========================================================
    EMOGIGS AI
-   STEP 18D — PRODUCTION APP ENGINE
-   Conversation + AI Chat + Voice Engine
+   FINAL PRODUCTION FRONTEND
+   Chat + History + Voice + Speech Recognition
+========================================================= */
+
+"use strict";
+
+
+/* =========================================================
+   GLOBAL STATE
 ========================================================= */
 
 let isSending = false;
 
-const STORAGE_KEY =
-  "emogigs_conversations_v2";
-
 let conversations = [];
+
 let currentConversationId = null;
+
+let toastTimer = null;
 
 
 /* =========================================================
    STORAGE
+========================================================= */
+
+const STORAGE_KEY =
+  "emogigs_conversations_v3";
+
+const VOICE_STORAGE_KEY =
+  "emogigs_voice_settings_v3";
+
+
+/* =========================================================
+   VOICE STATE
+========================================================= */
+
+let voiceSettings = {
+
+  gender: "natural",
+
+  language: "auto",
+
+  rate: 1,
+
+  autoSpeak: true,
+
+  conversation: false
+
+};
+
+
+let availableVoices = [];
+
+let currentSpeech = null;
+
+let currentSpeechButton = null;
+
+let speechChunks = [];
+
+let speechChunkIndex = 0;
+
+let speechSessionId = 0;
+
+let speechRecognition = null;
+
+let isVoiceListening = false;
+
+
+/* =========================================================
+   INITIALIZATION
+========================================================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  initializeApp
+);
+
+
+function initializeApp() {
+
+  console.log(
+    "Emogigs AI: Final frontend loading..."
+  );
+
+
+  loadConversations();
+
+  loadVoiceSettings();
+
+
+  if (
+    conversations.length === 0
+  ) {
+
+    createConversation();
+
+  }
+
+
+  if (
+    !currentConversationId ||
+    !conversations.some(
+      conversation =>
+        conversation.id ===
+        currentConversationId
+    )
+  ) {
+
+    currentConversationId =
+      conversations[0].id;
+
+  }
+
+
+  loadAvailableVoices();
+
+  initializeVoiceSettings();
+
+  initializeSpeechRecognition();
+
+  initializeNavigation();
+
+  initializeHome();
+
+  initializeChat();
+
+  initializeVoiceControls();
+
+  renderRecentChats();
+
+  renderCurrentChat();
+
+  checkVoiceSupport();
+
+
+  if (
+    "speechSynthesis" in window
+  ) {
+
+    window.speechSynthesis
+      .addEventListener(
+        "voiceschanged",
+        loadAvailableVoices
+      );
+
+  }
+
+
+  console.log(
+    "Emogigs AI: Final frontend ready."
+  );
+
+}
+
+
+/* =========================================================
+   ID
+========================================================= */
+
+function createId() {
+
+  return (
+    Date.now().toString(36) +
+    "-" +
+    Math.random()
+      .toString(36)
+      .substring(2, 10)
+  );
+
+}
+
+
+/* =========================================================
+   CONVERSATIONS
 ========================================================= */
 
 function loadConversations() {
@@ -26,21 +184,41 @@ function loadConversations() {
         STORAGE_KEY
       );
 
-    if (saved) {
 
-      conversations =
-        JSON.parse(saved);
+    if (!saved) {
 
-      if (!Array.isArray(conversations)) {
-        conversations = [];
-      }
+      conversations = [];
+
+      return;
 
     }
+
+
+    const parsed =
+      JSON.parse(saved);
+
+
+    conversations =
+      Array.isArray(parsed)
+        ? parsed
+        : [];
+
+
+    conversations =
+      conversations.filter(
+        conversation =>
+          conversation &&
+          typeof conversation.id ===
+            "string" &&
+          Array.isArray(
+            conversation.messages
+          )
+      );
 
   } catch (error) {
 
     console.error(
-      "Emogigs AI: Could not load conversations.",
+      "Emogigs AI: Conversation load error:",
       error
     );
 
@@ -65,27 +243,11 @@ function saveConversations() {
   } catch (error) {
 
     console.error(
-      "Emogigs AI: Could not save conversations.",
+      "Emogigs AI: Conversation save error:",
       error
     );
 
   }
-
-}
-
-
-/* =========================================================
-   ID
-========================================================= */
-
-function createId() {
-
-  return (
-    Date.now().toString(36) +
-    Math.random()
-      .toString(36)
-      .slice(2)
-  );
 
 }
 
@@ -111,11 +273,14 @@ function createConversation() {
 
     id: createId(),
 
-    title: "New conversation",
+    title:
+      "New conversation",
 
-    createdAt: Date.now(),
+    createdAt:
+      Date.now(),
 
-    updatedAt: Date.now(),
+    updatedAt:
+      Date.now(),
 
     messages: []
 
@@ -139,10 +304,6 @@ function createConversation() {
 }
 
 
-/* =========================================================
-   GET OR CREATE CHAT
-========================================================= */
-
 function ensureConversation() {
 
   let conversation =
@@ -163,7 +324,7 @@ function ensureConversation() {
 
 
 /* =========================================================
-   ADD MESSAGE
+   MESSAGE STORAGE
 ========================================================= */
 
 function addConversationMessage(
@@ -175,25 +336,27 @@ function addConversationMessage(
     ensureConversation();
 
 
-  conversation.messages.push({
+  const message = {
 
-    role: role,
+    role,
 
-    content: content,
+    content:
+      String(content),
 
-    timestamp: Date.now()
+    timestamp:
+      Date.now()
 
-  });
+  };
+
+
+  conversation.messages.push(
+    message
+  );
 
 
   conversation.updatedAt =
     Date.now();
 
-
-  /*
-    Automatically create a useful title
-    from the first user message.
-  */
 
   if (
     role === "user" &&
@@ -201,10 +364,16 @@ function addConversationMessage(
       "New conversation"
   ) {
 
+    const clean =
+      String(content)
+        .replace(/\s+/g, " ")
+        .trim();
+
+
     conversation.title =
-      content.length > 42
-        ? content.substring(0, 42) + "..."
-        : content;
+      clean.length > 48
+        ? clean.substring(0, 48) + "..."
+        : clean;
 
   }
 
@@ -215,28 +384,26 @@ function addConversationMessage(
 
 
 /* =========================================================
-   SCREEN NAVIGATION
+   NAVIGATION
 ========================================================= */
 
 function showScreen(
   screenId
 ) {
 
-  const screens =
-    document.querySelectorAll(
+  document
+    .querySelectorAll(
       ".screen"
+    )
+    .forEach(
+      screen => {
+
+        screen.classList.remove(
+          "active"
+        );
+
+      }
     );
-
-
-  screens.forEach(
-    screen => {
-
-      screen.classList.remove(
-        "active"
-      );
-
-    }
-  );
 
 
   const target =
@@ -254,31 +421,26 @@ function showScreen(
   }
 
 
-  const navButtons =
-    document.querySelectorAll(
+  document
+    .querySelectorAll(
       ".nav-btn"
+    )
+    .forEach(
+      button => {
+
+        button.classList.toggle(
+          "active",
+          button.dataset.screen ===
+            screenId
+        );
+
+      }
     );
 
 
-  navButtons.forEach(
-    button => {
-
-      button.classList.toggle(
-        "active",
-        button.dataset.screen ===
-          screenId
-      );
-
-    }
-  );
-
-
   window.scrollTo({
-
     top: 0,
-
     behavior: "smooth"
-
   });
 
 
@@ -304,40 +466,28 @@ function showScreen(
 }
 
 
-/* =========================================================
-   OPEN CHAT
-========================================================= */
+function initializeNavigation() {
 
-function openChat(
-  conversationId
-) {
+  document
+    .querySelectorAll(
+      ".nav-btn"
+    )
+    .forEach(
+      button => {
 
-  const conversation =
-    conversations.find(
-      item =>
-        item.id ===
-        conversationId
+        button.addEventListener(
+          "click",
+          () => {
+
+            showScreen(
+              button.dataset.screen
+            );
+
+          }
+        );
+
+      }
     );
-
-
-  if (!conversation) {
-    return;
-  }
-
-
-  currentConversationId =
-    conversationId;
-
-
-  stopSpeaking();
-
-
-  showScreen(
-    "chatScreen"
-  );
-
-
-  renderCurrentChat();
 
 }
 
@@ -385,6 +535,66 @@ function startNewChat() {
 
 
 /* =========================================================
+   OPEN CHAT
+========================================================= */
+
+function openChat(
+  conversationId
+) {
+
+  const conversation =
+    conversations.find(
+      item =>
+        item.id ===
+        conversationId
+    );
+
+
+  if (!conversation) {
+
+    return;
+
+  }
+
+
+  currentConversationId =
+    conversationId;
+
+
+  stopSpeaking();
+
+
+  showScreen(
+    "chatScreen"
+  );
+
+
+  renderCurrentChat();
+
+
+  setTimeout(
+    () => {
+
+      const input =
+        document.getElementById(
+          "chatInput"
+        );
+
+
+      if (input) {
+
+        input.focus();
+
+      }
+
+    },
+    100
+  );
+
+}
+
+
+/* =========================================================
    RENDER CURRENT CHAT
 ========================================================= */
 
@@ -397,11 +607,14 @@ function renderCurrentChat() {
 
 
   if (!container) {
+
     return;
+
   }
 
 
-  container.innerHTML = "";
+  container.innerHTML =
+    "";
 
 
   const conversation =
@@ -413,7 +626,8 @@ function renderCurrentChat() {
     !Array.isArray(
       conversation.messages
     ) ||
-    conversation.messages.length === 0
+    conversation.messages.length ===
+      0
   ) {
 
     renderChatWelcome();
@@ -441,7 +655,7 @@ function renderCurrentChat() {
 
 
 /* =========================================================
-   CHAT WELCOME
+   WELCOME
 ========================================================= */
 
 function renderChatWelcome() {
@@ -453,7 +667,9 @@ function renderChatWelcome() {
 
 
   if (!container) {
+
     return;
+
   }
 
 
@@ -503,10 +719,10 @@ function renderChatWelcome() {
 
   bubble.textContent =
     "Hello! I'm Emogigs AI. ✨\n\n" +
-    "I can help you learn, plan, work, " +
-    "create and grow. Tell me what you " +
-    "want to achieve, and we'll take it " +
-    "step by step.";
+    "I can help you learn, plan, " +
+    "work, create and grow.\n\n" +
+    "Tell me what you want to achieve " +
+    "and we'll take it step by step.";
 
 
   messageWrap.appendChild(
@@ -547,7 +763,9 @@ function renderMessage(
 
 
   if (!container) {
+
     return;
+
   }
 
 
@@ -556,10 +774,6 @@ function renderMessage(
       "div"
     );
 
-
-  /* =======================================================
-     USER MESSAGE
-  ======================================================= */
 
   if (role === "user") {
 
@@ -586,13 +800,7 @@ function renderMessage(
     );
 
 
-  }
-
-  /* =======================================================
-     AI MESSAGE
-  ======================================================= */
-
-  else {
+  } else {
 
     wrapper.className =
       "chat-message ai";
@@ -635,10 +843,6 @@ function renderMessage(
     bubble.textContent =
       content;
 
-
-    /* =====================================================
-       MESSAGE ACTIONS
-    ===================================================== */
 
     const actions =
       document.createElement(
@@ -807,6 +1011,10 @@ function createActionButton(
     );
 
 
+  button.type =
+    "button";
+
+
   button.className =
     "message-action";
 
@@ -817,10 +1025,6 @@ function createActionButton(
 
   button.title =
     label;
-
-
-  button.type =
-    "button";
 
 
   return button;
@@ -841,7 +1045,9 @@ function showThinking() {
 
 
   if (!container) {
+
     return null;
+
   }
 
 
@@ -960,7 +1166,9 @@ async function sendMessage(
 ) {
 
   if (isSending) {
+
     return;
+
   }
 
 
@@ -976,20 +1184,37 @@ async function sendMessage(
     );
 
 
-  let text =
-    customText !== null
-      ? String(customText).trim()
-      : chatInput
-        ? chatInput.value.trim()
-        : "";
+  let text;
 
 
-  if (!text) {
-    return;
+  if (customText !== null) {
+
+    text =
+      String(
+        customText
+      ).trim();
+
+  } else if (chatInput) {
+
+    text =
+      chatInput.value.trim();
+
+  } else {
+
+    text = "";
+
   }
 
 
-  isSending = true;
+  if (!text) {
+
+    return;
+
+  }
+
+
+  isSending =
+    true;
 
 
   ensureConversation();
@@ -1007,12 +1232,28 @@ async function sendMessage(
 
 
   if (chatInput) {
-    chatInput.value = "";
+
+    chatInput.value =
+      "";
+
+
+    autoResize(
+      chatInput
+    );
+
   }
 
 
   if (homeInput) {
-    homeInput.value = "";
+
+    homeInput.value =
+      "";
+
+
+    autoResize(
+      homeInput
+    );
+
   }
 
 
@@ -1040,16 +1281,17 @@ async function sendMessage(
   try {
 
     console.log(
-      "Emogigs AI: Sending request..."
+      "Emogigs AI: Request starting..."
     );
 
 
-    const res =
+    const response =
       await fetch(
         "/api/chat",
         {
 
-          method: "POST",
+          method:
+            "POST",
 
           headers: {
 
@@ -1061,7 +1303,8 @@ async function sendMessage(
           body:
             JSON.stringify({
 
-              message: text
+              message:
+                text
 
             })
 
@@ -1069,45 +1312,42 @@ async function sendMessage(
       );
 
 
-    console.log(
-      "Emogigs AI:",
-      res.status
-    );
-
-
-    let data;
+    let data = null;
 
 
     try {
 
       data =
-        await res.json();
+        await response.json();
 
-    } catch (jsonError) {
+    } catch (error) {
 
       throw new Error(
-        "Invalid server response."
+        "The server returned an invalid response."
       );
 
     }
 
 
-    if (!res.ok) {
+    if (!response.ok) {
 
       throw new Error(
-        data.error ||
-        "Server returned an error."
+        data?.error ||
+        `Server error: ${response.status}`
       );
 
     }
 
 
     const reply =
-      data.reply ||
-      "I couldn't generate a response.";
+      extractReply(
+        data
+      );
 
 
-    if (thinkingElement) {
+    if (
+      thinkingElement
+    ) {
 
       thinkingElement.remove();
 
@@ -1123,10 +1363,6 @@ async function sendMessage(
     renderCurrentChat();
 
 
-    /*
-      Automatically speak the real AI response.
-    */
-
     autoSpeakResponse(
       reply
     );
@@ -1135,30 +1371,37 @@ async function sendMessage(
     scrollChatToBottom();
 
 
+    console.log(
+      "Emogigs AI: Response received."
+    );
+
+
   } catch (error) {
 
     console.error(
-      "EMOGIGS AI ERROR:",
+      "Emogigs AI ERROR:",
       error
     );
 
 
-    if (thinkingElement) {
+    if (
+      thinkingElement
+    ) {
 
       thinkingElement.remove();
 
     }
 
 
-    const errorMessage =
-      "I'm sorry, I couldn't connect " +
-      "to Emogigs AI right now. " +
-      "Please try again in a moment.";
+    const message =
+      createFriendlyErrorMessage(
+        error
+      );
 
 
     addConversationMessage(
       "assistant",
-      errorMessage
+      message
     );
 
 
@@ -1188,6 +1431,117 @@ async function sendMessage(
 
 
 /* =========================================================
+   RESPONSE PARSER
+========================================================= */
+
+function extractReply(
+  data
+) {
+
+  if (!data) {
+
+    return "I couldn't generate a response.";
+
+  }
+
+
+  if (
+    typeof data.reply ===
+    "string" &&
+    data.reply.trim()
+  ) {
+
+    return data.reply.trim();
+
+  }
+
+
+  if (
+    typeof data.message ===
+    "string" &&
+    data.message.trim()
+  ) {
+
+    return data.message.trim();
+
+  }
+
+
+  if (
+    typeof data.content ===
+    "string" &&
+    data.content.trim()
+  ) {
+
+    return data.content.trim();
+
+  }
+
+
+  if (
+    data.choices &&
+    data.choices[0] &&
+    data.choices[0].message &&
+    typeof data.choices[0].message.content ===
+      "string"
+  ) {
+
+    return data.choices[0]
+      .message
+      .content
+      .trim();
+
+  }
+
+
+  return (
+    "I received the server response, " +
+    "but couldn't find the AI message."
+  );
+
+}
+
+
+/* =========================================================
+   ERROR MESSAGE
+========================================================= */
+
+function createFriendlyErrorMessage(
+  error
+) {
+
+  const message =
+    String(
+      error?.message ||
+      ""
+    );
+
+
+  if (
+    message.toLowerCase()
+      .includes("failed to fetch")
+  ) {
+
+    return (
+      "I'm sorry, I couldn't connect " +
+      "to the Emogigs AI server right now.\n\n" +
+      "Please check your internet connection " +
+      "and try again."
+    );
+
+  }
+
+
+  return (
+    "I'm sorry, something went wrong " +
+    "while connecting to Emogigs AI.\n\n" +
+    "Please try again in a moment."
+  );
+
+}
+
+
+/* =========================================================
    SCROLL
 ========================================================= */
 
@@ -1200,29 +1554,265 @@ function scrollChatToBottom() {
 
 
   if (!container) {
+
     return;
+
   }
 
 
-  setTimeout(
+  requestAnimationFrame(
     () => {
 
       container.scrollTop =
         container.scrollHeight;
 
+    }
+  );
 
-      window.scrollTo({
+}
 
-        top:
-          document.body.scrollHeight,
 
-        behavior:
-          "smooth"
+/* =========================================================
+   HOME
+========================================================= */
 
-      });
+function initializeHome() {
+
+  const send =
+    document.getElementById(
+      "homeSend"
+    );
+
+
+  const input =
+    document.getElementById(
+      "homeInput"
+    );
+
+
+  if (send) {
+
+    send.addEventListener(
+      "click",
+      () => {
+
+        sendMessage(
+          input
+            ? input.value
+            : ""
+        );
+
+      }
+    );
+
+  }
+
+
+  if (input) {
+
+    input.addEventListener(
+      "input",
+      () =>
+        autoResize(
+          input
+        )
+    );
+
+
+    input.addEventListener(
+      "keydown",
+      event => {
+
+        if (
+          event.key ===
+            "Enter" &&
+          !event.shiftKey
+        ) {
+
+          event.preventDefault();
+
+
+          sendMessage(
+            input.value
+          );
+
+        }
+
+      }
+    );
+
+  }
+
+
+  document
+    .querySelectorAll(
+      "[data-template]"
+    )
+    .forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            useTemplate(
+              button.dataset.template
+            );
+
+          }
+        );
+
+      }
+    );
+
+}
+
+
+/* =========================================================
+   CHAT
+========================================================= */
+
+function initializeChat() {
+
+  const newChat =
+    document.getElementById(
+      "headerNewChat"
+    );
+
+
+  if (newChat) {
+
+    newChat.addEventListener(
+      "click",
+      startNewChat
+    );
+
+  }
+
+
+  const back =
+    document.getElementById(
+      "chatBack"
+    );
+
+
+  if (back) {
+
+    back.addEventListener(
+      "click",
+      () => {
+
+        stopSpeaking();
+
+        showScreen(
+          "homeScreen"
+        );
+
+      }
+    );
+
+  }
+
+
+  const send =
+    document.getElementById(
+      "chatSend"
+    );
+
+
+  const input =
+    document.getElementById(
+      "chatInput"
+    );
+
+
+  if (send) {
+
+    send.addEventListener(
+      "click",
+      () =>
+        sendMessage()
+    );
+
+  }
+
+
+  if (input) {
+
+    input.addEventListener(
+      "input",
+      () =>
+        autoResize(
+          input
+        )
+    );
+
+
+    input.addEventListener(
+      "keydown",
+      event => {
+
+        if (
+          event.key ===
+            "Enter" &&
+          !event.shiftKey
+        ) {
+
+          event.preventDefault();
+
+
+          sendMessage();
+
+        }
+
+      }
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   TEMPLATE
+========================================================= */
+
+function useTemplate(
+  text
+) {
+
+  startNewChat();
+
+
+  setTimeout(
+    () => {
+
+      const input =
+        document.getElementById(
+          "chatInput"
+        );
+
+
+      if (!input) {
+
+        return;
+
+      }
+
+
+      input.value =
+        text;
+
+
+      autoResize(
+        input
+      );
+
+
+      input.focus();
 
     },
-    50
+    120
   );
 
 }
@@ -1241,7 +1831,9 @@ function renderHistory() {
 
 
   if (!list) {
+
     return;
+
   }
 
 
@@ -1249,8 +1841,18 @@ function renderHistory() {
     "";
 
 
+  const sorted =
+    conversations
+      .slice()
+      .sort(
+        (a, b) =>
+          b.updatedAt -
+          a.updatedAt
+      );
+
+
   if (
-    conversations.length ===
+    sorted.length ===
     0
   ) {
 
@@ -1266,169 +1868,165 @@ function renderHistory() {
   }
 
 
-  conversations
-    .slice()
-    .sort(
-      (a, b) =>
-        b.updatedAt -
-        a.updatedAt
-    )
-    .forEach(
-      conversation => {
+  sorted.forEach(
+    conversation => {
 
-        const item =
-          document.createElement(
-            "div"
-          );
-
-
-        item.className =
-          "history-item";
-
-
-        item.onclick =
-          event => {
-
-            if (
-              event.target.closest(
-                ".history-delete"
-              )
-            ) {
-
-              return;
-
-            }
-
-
-            openChat(
-              conversation.id
-            );
-
-          };
-
-
-        const icon =
-          document.createElement(
-            "div"
-          );
-
-
-        icon.className =
-          "history-icon";
-
-
-        icon.textContent =
-          "▣";
-
-
-        const info =
-          document.createElement(
-            "div"
-          );
-
-
-        info.className =
-          "history-info";
-
-
-        const title =
-          document.createElement(
-            "div"
-          );
-
-
-        title.className =
-          "history-title";
-
-
-        title.textContent =
-          conversation.title;
-
-
-        const preview =
-          document.createElement(
-            "div"
-          );
-
-
-        preview.className =
-          "history-preview";
-
-
-        const lastMessage =
-          conversation.messages[
-            conversation.messages.length - 1
-          ];
-
-
-        preview.textContent =
-          lastMessage
-            ? lastMessage.content
-            : "Empty conversation";
-
-
-        info.appendChild(
-          title
+      const item =
+        document.createElement(
+          "div"
         );
 
 
-        info.appendChild(
-          preview
+      item.className =
+        "history-item";
+
+
+      item.addEventListener(
+        "click",
+        () =>
+          openChat(
+            conversation.id
+          )
+      );
+
+
+      const icon =
+        document.createElement(
+          "div"
         );
 
 
-        const deleteButton =
-          document.createElement(
-            "button"
+      icon.className =
+        "history-icon";
+
+
+      icon.textContent =
+        "▣";
+
+
+      const info =
+        document.createElement(
+          "div"
+        );
+
+
+      info.className =
+        "history-info";
+
+
+      const title =
+        document.createElement(
+          "div"
+        );
+
+
+      title.className =
+        "history-title";
+
+
+      title.textContent =
+        conversation.title ||
+        "New conversation";
+
+
+      const preview =
+        document.createElement(
+          "div"
+        );
+
+
+      preview.className =
+        "history-preview";
+
+
+      const messages =
+        Array.isArray(
+          conversation.messages
+        )
+          ? conversation.messages
+          : [];
+
+
+      const last =
+        messages[
+          messages.length - 1
+        ];
+
+
+      preview.textContent =
+        last
+          ? last.content
+          : "Empty conversation";
+
+
+      info.appendChild(
+        title
+      );
+
+
+      info.appendChild(
+        preview
+      );
+
+
+      const deleteButton =
+        document.createElement(
+          "button"
+        );
+
+
+      deleteButton.type =
+        "button";
+
+
+      deleteButton.className =
+        "history-delete";
+
+
+      deleteButton.textContent =
+        "🗑";
+
+
+      deleteButton.title =
+        "Delete conversation";
+
+
+      deleteButton.addEventListener(
+        "click",
+        event => {
+
+          event.stopPropagation();
+
+
+          deleteConversation(
+            conversation.id
           );
 
-
-        deleteButton.className =
-          "history-delete";
-
-
-        deleteButton.textContent =
-          "🗑";
+        }
+      );
 
 
-        deleteButton.type =
-          "button";
+      item.appendChild(
+        icon
+      );
 
 
-        deleteButton.onclick =
-          event => {
-
-            event.stopPropagation();
-
-
-            deleteConversation(
-              conversation.id
-            );
-
-          };
+      item.appendChild(
+        info
+      );
 
 
-        item.appendChild(
-          icon
-        );
+      item.appendChild(
+        deleteButton
+      );
 
 
-        item.appendChild(
-          info
-        );
+      list.appendChild(
+        item
+      );
 
-
-        item.appendChild(
-          deleteButton
-        );
-
-
-        list.appendChild(
-          item
-        );
-
-      }
-    );
+    }
+  );
 
 }
 
@@ -1446,7 +2044,9 @@ function renderRecentChats() {
 
 
   if (!list) {
+
     return;
+
   }
 
 
@@ -1464,7 +2064,7 @@ function renderRecentChats() {
       )
       .slice(
         0,
-        4
+        5
       );
 
 
@@ -1494,34 +2094,81 @@ function renderRecentChats() {
         );
 
 
-      button.className =
-        "recent-item";
-
-
       button.type =
         "button";
 
 
-      button.onclick =
+      button.className =
+        "recent-item";
+
+
+      button.addEventListener(
+        "click",
         () =>
           openChat(
             conversation.id
-          );
+          )
+      );
 
 
-      button.innerHTML = `
-        <div class="recent-icon">▣</div>
-        <div class="recent-title">
-          ${escapeHTML(
-            conversation.title
-          )}
-        </div>
-        <div class="recent-time">
-          ${formatTime(
-            conversation.updatedAt
-          )}
-        </div>
-      `;
+      const icon =
+        document.createElement(
+          "div"
+        );
+
+
+      icon.className =
+        "recent-icon";
+
+
+      icon.textContent =
+        "▣";
+
+
+      const title =
+        document.createElement(
+          "div"
+        );
+
+
+      title.className =
+        "recent-title";
+
+
+      title.textContent =
+        conversation.title ||
+        "New conversation";
+
+
+      const time =
+        document.createElement(
+          "div"
+        );
+
+
+      time.className =
+        "recent-time";
+
+
+      time.textContent =
+        formatTime(
+          conversation.updatedAt
+        );
+
+
+      button.appendChild(
+        icon
+      );
+
+
+      button.appendChild(
+        title
+      );
+
+
+      button.appendChild(
+        time
+      );
 
 
       list.appendChild(
@@ -1535,7 +2182,7 @@ function renderRecentChats() {
 
 
 /* =========================================================
-   DELETE CONVERSATION
+   DELETE
 ========================================================= */
 
 function deleteConversation(
@@ -1581,57 +2228,13 @@ function deleteConversation(
 
   saveConversations();
 
-
   renderHistory();
-
 
   renderRecentChats();
 
 
   showToast(
     "Conversation deleted."
-  );
-
-}
-
-
-/* =========================================================
-   TEMPLATE
-========================================================= */
-
-function useTemplate(
-  text
-) {
-
-  startNewChat();
-
-
-  setTimeout(
-    () => {
-
-      const input =
-        document.getElementById(
-          "chatInput"
-        );
-
-
-      if (input) {
-
-        input.value =
-          text;
-
-
-        input.focus();
-
-
-        autoResize(
-          input
-        );
-
-      }
-
-    },
-    100
   );
 
 }
@@ -1681,6 +2284,8 @@ async function copyText(
       );
 
 
+      textarea.focus();
+
       textarea.select();
 
 
@@ -1697,7 +2302,6 @@ async function copyText(
     showToast(
       "Response copied."
     );
-
 
   } catch (error) {
 
@@ -1735,8 +2339,7 @@ async function shareText(
         title:
           "Emogigs AI",
 
-        text:
-          text
+        text
 
       });
 
@@ -1768,9 +2371,6 @@ async function shareText(
    TOAST
 ========================================================= */
 
-let toastTimer;
-
-
 function showToast(
   message
 ) {
@@ -1782,7 +2382,9 @@ function showToast(
 
 
   if (!toast) {
+
     return;
+
   }
 
 
@@ -1809,45 +2411,7 @@ function showToast(
         );
 
       },
-      2200
-    );
-
-}
-
-
-/* =========================================================
-   ESCAPE HTML
-========================================================= */
-
-function escapeHTML(
-  text
-) {
-
-  return String(text)
-
-    .replace(
-      /&/g,
-      "&amp;"
-    )
-
-    .replace(
-      /</g,
-      "&lt;"
-    )
-
-    .replace(
-      />/g,
-      "&gt;"
-    )
-
-    .replace(
-      /"/g,
-      "&quot;"
-    )
-
-    .replace(
-      /'/g,
-      "&#039;"
+      2400
     );
 
 }
@@ -1872,8 +2436,11 @@ function formatTime(
 
 
   const difference =
-    now.getTime() -
-    date.getTime();
+    Math.max(
+      0,
+      now.getTime() -
+      date.getTime()
+    );
 
 
   const minutes =
@@ -1883,14 +2450,18 @@ function formatTime(
     );
 
 
-  if (minutes < 1) {
+  if (
+    minutes < 1
+  ) {
 
     return "now";
 
   }
 
 
-  if (minutes < 60) {
+  if (
+    minutes < 60
+  ) {
 
     return `${minutes}m`;
 
@@ -1904,7 +2475,9 @@ function formatTime(
     );
 
 
-  if (hours < 24) {
+  if (
+    hours < 24
+  ) {
 
     return `${hours}h`;
 
@@ -1918,7 +2491,9 @@ function formatTime(
     );
 
 
-  if (days < 7) {
+  if (
+    days < 7
+  ) {
 
     return `${days}d`;
 
@@ -1939,7 +2514,9 @@ function autoResize(
 ) {
 
   if (!textarea) {
+
     return;
+
   }
 
 
@@ -1957,63 +2534,7 @@ function autoResize(
 
 
 /* =========================================================
-   EMOGIGS AI
-   STEP 18D — VOICE ENGINE
-========================================================= */
-
-const VOICE_STORAGE_KEY =
-  "emogigs_voice_settings_v2";
-
-
-let voiceSettings = {
-
-  gender:
-    "natural",
-
-  language:
-    "auto",
-
-  rate:
-    1,
-
-  autoSpeak:
-    true,
-
-  conversation:
-    false
-
-};
-
-
-let availableVoices = [];
-
-
-/*
-  Current speech state
-*/
-
-let currentSpeech = null;
-
-let speechChunks = [];
-
-let speechChunkIndex = 0;
-
-let currentSpeechButton = null;
-
-let speechSessionId = 0;
-
-
-/*
-  Voice recognition
-*/
-
-let speechRecognition = null;
-
-let isVoiceListening = false;
-
-
-/* =========================================================
-   LOAD VOICE SETTINGS
+   VOICE SETTINGS
 ========================================================= */
 
 function loadVoiceSettings() {
@@ -2026,36 +2547,39 @@ function loadVoiceSettings() {
       );
 
 
-    if (saved) {
+    if (!saved) {
 
-      const parsed =
-        JSON.parse(
-          saved
-        );
+      return;
+
+    }
 
 
-      if (
-        parsed &&
-        typeof parsed ===
-          "object"
-      ) {
+    const parsed =
+      JSON.parse(
+        saved
+      );
 
-        voiceSettings = {
 
-          ...voiceSettings,
+    if (
+      parsed &&
+      typeof parsed ===
+        "object"
+    ) {
 
-          ...parsed
+      voiceSettings = {
 
-        };
+        ...voiceSettings,
 
-      }
+        ...parsed
+
+      };
 
     }
 
   } catch (error) {
 
     console.error(
-      "Emogigs AI: Could not load voice settings.",
+      "Voice settings load error:",
       error
     );
 
@@ -2063,29 +2587,22 @@ function loadVoiceSettings() {
 
 }
 
-
-/* =========================================================
-   SAVE VOICE SETTINGS
-========================================================= */
 
 function saveVoiceSettings() {
 
   try {
 
     localStorage.setItem(
-
       VOICE_STORAGE_KEY,
-
       JSON.stringify(
         voiceSettings
       )
-
     );
 
   } catch (error) {
 
     console.error(
-      "Emogigs AI: Could not save voice settings.",
+      "Voice settings save error:",
       error
     );
 
@@ -2095,7 +2612,266 @@ function saveVoiceSettings() {
 
 
 /* =========================================================
-   LOAD BROWSER VOICES
+   VOICE UI
+========================================================= */
+
+function initializeVoiceSettings() {
+
+  const gender =
+    document.getElementById(
+      "voiceGender"
+    );
+
+
+  const language =
+    document.getElementById(
+      "voiceLanguage"
+    );
+
+
+  const rate =
+    document.getElementById(
+      "voiceRate"
+    );
+
+
+  const autoSpeak =
+    document.getElementById(
+      "voiceAutoSpeak"
+    );
+
+
+  const conversation =
+    document.getElementById(
+      "voiceConversation"
+    );
+
+
+  if (gender) {
+
+    gender.value =
+      voiceSettings.gender;
+
+
+    gender.addEventListener(
+      "change",
+      () => {
+
+        voiceSettings.gender =
+          gender.value;
+
+
+        saveVoiceSettings();
+
+        stopSpeaking();
+
+      }
+    );
+
+  }
+
+
+  if (language) {
+
+    language.value =
+      voiceSettings.language;
+
+
+    language.addEventListener(
+      "change",
+      () => {
+
+        voiceSettings.language =
+          language.value;
+
+
+        saveVoiceSettings();
+
+        stopSpeaking();
+
+        initializeSpeechRecognition();
+
+      }
+    );
+
+  }
+
+
+  if (rate) {
+
+    rate.value =
+      voiceSettings.rate;
+
+
+    rate.addEventListener(
+      "input",
+      () => {
+
+        voiceSettings.rate =
+          Number(
+            rate.value
+          );
+
+
+        updateVoiceRateDisplay();
+
+        saveVoiceSettings();
+
+      }
+    );
+
+  }
+
+
+  if (autoSpeak) {
+
+    autoSpeak.value =
+      voiceSettings.autoSpeak
+        ? "on"
+        : "off";
+
+
+    autoSpeak.addEventListener(
+      "change",
+      () => {
+
+        voiceSettings.autoSpeak =
+          autoSpeak.value ===
+          "on";
+
+
+        saveVoiceSettings();
+
+      }
+    );
+
+  }
+
+
+  if (conversation) {
+
+    conversation.value =
+      voiceSettings.conversation
+        ? "on"
+        : "off";
+
+
+    conversation.addEventListener(
+      "change",
+      () => {
+
+        voiceSettings.conversation =
+          conversation.value ===
+          "on";
+
+
+        saveVoiceSettings();
+
+      }
+    );
+
+  }
+
+
+  updateVoiceRateDisplay();
+
+}
+
+
+function updateVoiceRateDisplay() {
+
+  const rate =
+    document.getElementById(
+      "voiceRate"
+    );
+
+
+  const display =
+    document.getElementById(
+      "voiceRateValue"
+    );
+
+
+  if (
+    rate &&
+    display
+  ) {
+
+    display.textContent =
+      Number(
+        rate.value
+      ).toFixed(2) +
+      "×";
+
+  }
+
+}
+
+
+/* =========================================================
+   VOICE SETTINGS BUTTON
+========================================================= */
+
+function initializeVoiceControls() {
+
+  const settingsButton =
+    document.getElementById(
+      "voiceSettingsButton"
+    );
+
+
+  if (settingsButton) {
+
+    settingsButton.addEventListener(
+      "click",
+      toggleVoiceSettingsPanel
+    );
+
+  }
+
+
+  const micButton =
+    document.getElementById(
+      "voiceMicButton"
+    );
+
+
+  if (micButton) {
+
+    micButton.addEventListener(
+      "click",
+      startVoiceInput
+    );
+
+  }
+
+}
+
+
+function toggleVoiceSettingsPanel() {
+
+  const panel =
+    document.getElementById(
+      "voiceSettingsPanel"
+    );
+
+
+  if (!panel) {
+
+    return;
+
+  }
+
+
+  panel.classList.toggle(
+    "show"
+  );
+
+}
+
+
+/* =========================================================
+   LOAD VOICES
 ========================================================= */
 
 function loadAvailableVoices() {
@@ -2107,14 +2883,7 @@ function loadAvailableVoices() {
     )
   ) {
 
-    console.warn(
-      "Speech synthesis is not supported."
-    );
-
-
-    availableVoices =
-      [];
-
+    availableVoices = [];
 
     return;
 
@@ -2125,38 +2894,11 @@ function loadAvailableVoices() {
     window.speechSynthesis
       .getVoices();
 
-
-  console.log(
-    "Emogigs AI voices loaded:",
-    availableVoices.length
-  );
-
 }
 
 
 /* =========================================================
-   GET LANGUAGE CODE
-========================================================= */
-
-function getLanguageCode() {
-
-  if (
-    voiceSettings.language ===
-    "auto"
-  ) {
-
-    return null;
-
-  }
-
-
-  return voiceSettings.language;
-
-}
-
-
-/* =========================================================
-   DETECT TEXT LANGUAGE
+   LANGUAGE
 ========================================================= */
 
 function detectTextLanguage(
@@ -2167,114 +2909,76 @@ function detectTextLanguage(
     String(text || "");
 
 
-  /*
-    Bengali Unicode range:
-    U+0980 — U+09FF
-  */
-
-  const bengaliMatches =
+  const bengali =
     value.match(
       /[\u0980-\u09FF]/g
     );
 
 
-  const englishMatches =
+  const english =
     value.match(
       /[A-Za-z]/g
     );
 
 
   const bengaliCount =
-    bengaliMatches
-      ? bengaliMatches.length
+    bengali
+      ? bengali.length
       : 0;
 
 
   const englishCount =
-    englishMatches
-      ? englishMatches.length
+    english
+      ? english.length
       : 0;
 
 
-  if (
+  return (
     bengaliCount >
     englishCount
-  ) {
-
-    return "bn";
-
-  }
-
-
-  return "en";
+  )
+    ? "bn"
+    : "en";
 
 }
 
-
-/* =========================================================
-   GET SPEECH LANGUAGE
-========================================================= */
 
 function getSpeechLanguage(
   text
 ) {
 
-  const configured =
-    getLanguageCode();
-
-
-  if (configured) {
-
-    return configured;
-
-  }
-
-
-  /*
-    Auto language mode.
-    Browser speech synthesis cannot
-    truly auto-detect every language,
-    so we detect Bengali vs English
-    from the response text.
-  */
-
-  const detected =
-    detectTextLanguage(
-      text
-    );
-
-
   if (
-    detected ===
-    "bn"
+    voiceSettings.language !==
+    "auto"
   ) {
 
-    return "bn-BD";
+    return voiceSettings.language;
 
   }
 
 
-  return "en-US";
+  return detectTextLanguage(
+    text
+  ) === "bn"
+    ? "bn-BD"
+    : "en-US";
 
 }
 
 
 /* =========================================================
-   FIND BEST VOICE
+   BEST VOICE
 ========================================================= */
 
 function findBestVoice(
-  text = ""
+  text
 ) {
 
   if (
-    !availableVoices.length &&
-    "speechSynthesis" in window
+    !availableVoices.length
   ) {
 
-    availableVoices =
-      window.speechSynthesis
-        .getVoices();
+    loadAvailableVoices();
 
   }
 
@@ -2294,220 +2998,93 @@ function findBestVoice(
     );
 
 
-  const languagePrefix =
+  const prefix =
     language
       .toLowerCase()
       .split("-")[0];
 
 
   let voices =
-    availableVoices.slice();
-
-
-  /*
-    First try exact language.
-  */
-
-  let languageVoices =
-    voices.filter(
+    availableVoices.filter(
       voice =>
         voice.lang
           .toLowerCase()
-          ===
-          language.toLowerCase()
+          .startsWith(
+            prefix
+          )
     );
 
 
-  /*
-    Then try language prefix.
-  */
-
   if (
-    languageVoices.length ===
+    voices.length ===
     0
   ) {
 
-    languageVoices =
-      voices.filter(
-        voice =>
-          voice.lang
-            .toLowerCase()
-            .startsWith(
-              languagePrefix
-            )
-      );
-
-  }
-
-
-  if (
-    languageVoices.length
-  ) {
-
     voices =
-      languageVoices;
+      availableVoices.slice();
 
   }
 
-
-  /*
-    Female voice preference
-  */
 
   if (
     voiceSettings.gender ===
     "female"
   ) {
 
-    const femaleVoice =
+    const female =
       voices.find(
-        voice => {
-
-          const name =
-            voice.name
-              .toLowerCase();
-
-
-          return (
-
-            name.includes(
-              "female"
-            ) ||
-
-            name.includes(
-              "woman"
-            ) ||
-
-            name.includes(
-              "zira"
-            ) ||
-
-            name.includes(
-              "samantha"
-            ) ||
-
-            name.includes(
-              "susan"
-            ) ||
-
-            name.includes(
-              "karen"
-            ) ||
-
-            name.includes(
-              "victoria"
-            ) ||
-
-            name.includes(
-              "google uk english female"
-            ) ||
-
-            name.includes(
-              "google us english"
+        voice =>
+          /female|woman|zira|samantha|susan|karen|victoria/i
+            .test(
+              voice.name
             )
-
-          );
-
-        }
       );
 
 
-    if (femaleVoice) {
+    if (female) {
 
-      return femaleVoice;
+      return female;
 
     }
 
   }
 
-
-  /*
-    Male voice preference
-  */
 
   if (
     voiceSettings.gender ===
     "male"
   ) {
 
-    const maleVoice =
+    const male =
       voices.find(
-        voice => {
-
-          const name =
-            voice.name
-              .toLowerCase();
-
-
-          return (
-
-            name.includes(
-              "male"
-            ) ||
-
-            name.includes(
-              "man"
-            ) ||
-
-            name.includes(
-              "david"
-            ) ||
-
-            name.includes(
-              "daniel"
-            ) ||
-
-            name.includes(
-              "alex"
-            ) ||
-
-            name.includes(
-              "george"
-            ) ||
-
-            name.includes(
-              "mark"
-            ) ||
-
-            name.includes(
-              "google uk english male"
+        voice =>
+          /male|man|david|daniel|alex|george|mark/i
+            .test(
+              voice.name
             )
-
-          );
-
-        }
       );
 
 
-    if (maleVoice) {
+    if (male) {
 
-      return maleVoice;
+      return male;
 
     }
 
   }
 
 
-  /*
-    Natural/default voice
-  */
-
-  const defaultVoice =
+  const preferred =
     voices.find(
       voice =>
         voice.default
     );
 
 
-  if (defaultVoice) {
-
-    return defaultVoice;
-
-  }
-
-
   return (
+    preferred ||
     voices[0] ||
+    availableVoices[0] ||
     null
   );
 
@@ -2515,7 +3092,7 @@ function findBestVoice(
 
 
 /* =========================================================
-   SPLIT TEXT FOR ANDROID
+   SPLIT SPEECH
 ========================================================= */
 
 function splitSpeechText(
@@ -2545,10 +3122,6 @@ function splitSpeechText(
   }
 
 
-  /*
-    Split by sentences first.
-  */
-
   const sentences =
     clean.split(
       /(?<=[.!?।！？])\s+/u
@@ -2560,83 +3133,81 @@ function splitSpeechText(
   let current = "";
 
 
-  sentences.forEach(
-    sentence => {
+  for (
+    const sentenceRaw of
+    sentences
+  ) {
 
-      sentence =
-        sentence.trim();
-
-
-      if (!sentence) {
-        return;
-      }
+    const sentence =
+      sentenceRaw.trim();
 
 
-      if (
-        (
-          current.length +
-          sentence.length +
-          1
-        ) <=
-        maxLength
-      ) {
+    if (!sentence) {
 
-        current =
-          current
-            ? current +
-              " " +
-              sentence
-            : sentence;
-
-      } else {
-
-        if (current) {
-
-          chunks.push(
-            current
-          );
-
-        }
-
-
-        /*
-          Very long sentence.
-        */
-
-        if (
-          sentence.length >
-          maxLength
-        ) {
-
-          for (
-            let i = 0;
-            i < sentence.length;
-            i += maxLength
-          ) {
-
-            chunks.push(
-              sentence.substring(
-                i,
-                i + maxLength
-              )
-            );
-
-          }
-
-
-          current = "";
-
-        } else {
-
-          current =
-            sentence;
-
-        }
-
-      }
+      continue;
 
     }
-  );
+
+
+    if (
+      current.length +
+      sentence.length +
+      1 <=
+      maxLength
+    ) {
+
+      current =
+        current
+          ? current +
+            " " +
+            sentence
+          : sentence;
+
+      continue;
+
+    }
+
+
+    if (current) {
+
+      chunks.push(
+        current
+      );
+
+    }
+
+
+    if (
+      sentence.length >
+      maxLength
+    ) {
+
+      for (
+        let i = 0;
+        i < sentence.length;
+        i += maxLength
+      ) {
+
+        chunks.push(
+          sentence.substring(
+            i,
+            i + maxLength
+          )
+        );
+
+      }
+
+
+      current = "";
+
+    } else {
+
+      current =
+        sentence;
+
+    }
+
+  }
 
 
   if (current) {
@@ -2682,10 +3253,6 @@ function resetVoiceButtons() {
 
 function stopSpeaking() {
 
-  /*
-    Invalidate current speech session.
-  */
-
   speechSessionId++;
 
 
@@ -2703,16 +3270,16 @@ function stopSpeaking() {
     null;
 
 
+  currentSpeechButton =
+    null;
+
+
   speechChunks =
     [];
 
 
   speechChunkIndex =
     0;
-
-
-  currentSpeechButton =
-    null;
 
 
   resetVoiceButtons();
@@ -2727,10 +3294,6 @@ function stopSpeaking() {
 function speakNextChunk(
   sessionId
 ) {
-
-  /*
-    Session is no longer active.
-  */
 
   if (
     sessionId !==
@@ -2777,17 +3340,10 @@ function speakNextChunk(
     );
 
 
-  const language =
-    getSpeechLanguage(
-      text
-    );
-
-
   if (voice) {
 
     utterance.voice =
       voice;
-
 
     utterance.lang =
       voice.lang;
@@ -2795,7 +3351,9 @@ function speakNextChunk(
   } else {
 
     utterance.lang =
-      language;
+      getSpeechLanguage(
+        text
+      );
 
   }
 
@@ -2831,11 +3389,6 @@ function speakNextChunk(
       }
 
 
-      console.log(
-        "Emogigs AI: Voice started."
-      );
-
-
       if (
         currentSpeechButton
       ) {
@@ -2869,27 +3422,19 @@ function speakNextChunk(
         null;
 
 
-      /*
-        Small delay between chunks
-        improves Android stability.
-      */
-
       setTimeout(
-        () => {
-
+        () =>
           speakNextChunk(
             sessionId
-          );
-
-        },
-        40
+          ),
+        50
       );
 
     };
 
 
   utterance.onerror =
-    error => {
+    event => {
 
       if (
         sessionId !==
@@ -2902,8 +3447,8 @@ function speakNextChunk(
 
 
       console.error(
-        "Emogigs AI voice error:",
-        error
+        "Speech error:",
+        event
       );
 
 
@@ -2914,25 +3459,14 @@ function speakNextChunk(
       resetVoiceButtons();
 
 
-      /*
-        Ignore normal cancellation.
-      */
-
       if (
-        error &&
-        error.error ===
-          "canceled"
-      ) {
-
-        return;
-
-      }
-
-
-      if (
-        error &&
-        error.error ===
-          "interrupted"
+        event &&
+        (
+          event.error ===
+            "canceled" ||
+          event.error ===
+            "interrupted"
+        )
       ) {
 
         return;
@@ -2956,7 +3490,6 @@ function speakNextChunk(
 
 /* =========================================================
    SPEAK TEXT
-   PRODUCTION VERSION
 ========================================================= */
 
 function speakText(
@@ -2982,7 +3515,7 @@ function speakText(
   ) {
 
     showToast(
-      "Voice playback is not supported on this browser."
+      "Voice playback is not supported."
     );
 
 
@@ -2991,32 +3524,12 @@ function speakText(
   }
 
 
-  /*
-    Stop previous speech.
-  */
-
   stopSpeaking();
 
-
-  /*
-    Remember button.
-  */
 
   currentSpeechButton =
     button;
 
-
-  /*
-    Create new session.
-  */
-
-  const sessionId =
-    speechSessionId;
-
-
-  /*
-    Split long response.
-  */
 
   speechChunks =
     splitSpeechText(
@@ -3038,19 +3551,14 @@ function speakText(
   }
 
 
-  /*
-    Refresh voices.
-  */
-
   loadAvailableVoices();
 
 
-  /*
-    Android may load voices
-    asynchronously.
-  */
+  const sessionId =
+    speechSessionId;
 
-  const startSpeech =
+
+  const start =
     () => {
 
       if (
@@ -3073,96 +3581,70 @@ function speakText(
     };
 
 
-  const voices =
-    window.speechSynthesis
-      .getVoices();
-
-
   if (
-    voices &&
-    voices.length > 0
+    availableVoices.length
   ) {
 
-    startSpeech();
+    start();
 
-  } else {
-
-    /*
-      Wait for Android voices.
-    */
-
-    let started =
-      false;
-
-
-    const startOnce =
-      () => {
-
-        if (started) {
-          return;
-        }
-
-
-        started =
-          true;
-
-
-        window.speechSynthesis
-          .removeEventListener(
-            "voiceschanged",
-            startOnce
-          );
-
-
-        startSpeech();
-
-      };
-
-
-    window.speechSynthesis
-      .addEventListener(
-        "voiceschanged",
-        startOnce
-      );
-
-
-    /*
-      Fallback.
-    */
-
-    setTimeout(
-      () => {
-
-        startOnce();
-
-      },
-      600
-    );
+    return;
 
   }
+
+
+  let started =
+    false;
+
+
+  const startOnce =
+    () => {
+
+      if (started) {
+
+        return;
+
+      }
+
+
+      started =
+        true;
+
+
+      window.speechSynthesis
+        .removeEventListener(
+          "voiceschanged",
+          startOnce
+        );
+
+
+      start();
+
+    };
+
+
+  window.speechSynthesis
+    .addEventListener(
+      "voiceschanged",
+      startOnce
+    );
+
+
+  setTimeout(
+    startOnce,
+    700
+  );
 
 }
 
 
 /* =========================================================
    TOGGLE SPEECH
-   REAL AI RESPONSE
 ========================================================= */
 
 function toggleSpeech(
   text,
   button
 ) {
-
-  console.log(
-    "Emogigs AI: Voice button clicked."
-  );
-
-
-  /*
-    If this exact button is currently
-    speaking, stop it.
-  */
 
   if (
     currentSpeech &&
@@ -3183,11 +3665,6 @@ function toggleSpeech(
   }
 
 
-  /*
-    Otherwise speak the actual
-    AI response.
-  */
-
   speakText(
     text,
     button
@@ -3197,320 +3674,73 @@ function toggleSpeech(
 
 
 /* =========================================================
-   UPDATE VOICE RATE DISPLAY
+   CREATE VOICE BUTTON
 ========================================================= */
 
-function updateVoiceRateDisplay() {
+function createVoiceButton(
+  text
+) {
 
-  const rateInput =
-    document.getElementById(
-      "voiceRate"
+  const button =
+    createActionButton(
+      "🔊",
+      "Listen"
     );
 
 
-  const rateValue =
-    document.getElementById(
-      "voiceRateValue"
-    );
+  button.classList.add(
+    "voice-action-button"
+  );
 
+
+  button.addEventListener(
+    "click",
+    () => {
+
+      toggleSpeech(
+        text,
+        button
+      );
+
+    }
+  );
+
+
+  return button;
+
+}
+
+
+/* =========================================================
+   AUTO SPEAK
+========================================================= */
+
+function autoSpeakResponse(
+  text
+) {
 
   if (
-    rateInput &&
-    rateValue
+    !voiceSettings.autoSpeak
   ) {
 
-    rateValue.textContent =
-      Number(
-        rateInput.value
-      ).toFixed(2) +
-      "×";
-
-  }
-
-}
-
-
-/* =========================================================
-   APPLY VOICE SETTINGS TO UI
-========================================================= */
-
-function applyVoiceSettingsToUI() {
-
-  const gender =
-    document.getElementById(
-      "voiceGender"
-    );
-
-
-  const language =
-    document.getElementById(
-      "voiceLanguage"
-    );
-
-
-  const rate =
-    document.getElementById(
-      "voiceRate"
-    );
-
-
-  const autoSpeak =
-    document.getElementById(
-      "voiceAutoSpeak"
-    );
-
-
-  const conversation =
-    document.getElementById(
-      "voiceConversation"
-    );
-
-
-  if (gender) {
-
-    gender.value =
-      voiceSettings.gender;
-
-  }
-
-
-  if (language) {
-
-    language.value =
-      voiceSettings.language;
-
-  }
-
-
-  if (rate) {
-
-    rate.value =
-      voiceSettings.rate;
-
-  }
-
-
-  if (autoSpeak) {
-
-    autoSpeak.value =
-      voiceSettings.autoSpeak
-        ? "on"
-        : "off";
-
-  }
-
-
-  if (conversation) {
-
-    conversation.value =
-      voiceSettings.conversation
-        ? "on"
-        : "off";
-
-  }
-
-
-  updateVoiceRateDisplay();
-
-}
-
-
-/* =========================================================
-   VOICE SETTINGS EVENTS
-========================================================= */
-
-function initializeVoiceSettings() {
-
-  const panel =
-    document.getElementById(
-      "voiceSettingsPanel"
-    );
-
-
-  if (!panel) {
-
-    console.warn(
-      "Voice settings panel not found."
-    );
-
-
     return;
 
   }
 
 
-  const gender =
-    document.getElementById(
-      "voiceGender"
-    );
+  setTimeout(
+    () => {
 
+      if (!isSending) {
 
-  const language =
-    document.getElementById(
-      "voiceLanguage"
-    );
-
-
-  const rate =
-    document.getElementById(
-      "voiceRate"
-    );
-
-
-  const autoSpeak =
-    document.getElementById(
-      "voiceAutoSpeak"
-    );
-
-
-  const conversation =
-    document.getElementById(
-      "voiceConversation"
-    );
-
-
-  if (gender) {
-
-    gender.addEventListener(
-      "change",
-      () => {
-
-        voiceSettings.gender =
-          gender.value;
-
-
-        saveVoiceSettings();
-
-
-        stopSpeaking();
+        speakText(
+          text
+        );
 
       }
-    );
 
-  }
-
-
-  if (language) {
-
-    language.addEventListener(
-      "change",
-      () => {
-
-        voiceSettings.language =
-          language.value;
-
-
-        saveVoiceSettings();
-
-
-        stopSpeaking();
-
-
-        /*
-          Recreate recognition
-          with new language.
-        */
-
-        initializeSpeechRecognition();
-
-      }
-    );
-
-  }
-
-
-  if (rate) {
-
-    rate.addEventListener(
-      "input",
-      () => {
-
-        voiceSettings.rate =
-          Number(
-            rate.value
-          );
-
-
-        updateVoiceRateDisplay();
-
-
-        saveVoiceSettings();
-
-      }
-    );
-
-  }
-
-
-  if (autoSpeak) {
-
-    autoSpeak.addEventListener(
-      "change",
-      () => {
-
-        voiceSettings.autoSpeak =
-          autoSpeak.value ===
-          "on";
-
-
-        saveVoiceSettings();
-
-      }
-    );
-
-  }
-
-
-  if (conversation) {
-
-    conversation.addEventListener(
-      "change",
-      () => {
-
-        voiceSettings.conversation =
-          conversation.value ===
-          "on";
-
-
-        saveVoiceSettings();
-
-      }
-    );
-
-  }
-
-
-  applyVoiceSettingsToUI();
-
-}
-
-
-/* =========================================================
-   VOICE SETTINGS PANEL TOGGLE
-========================================================= */
-
-function toggleVoiceSettingsPanel() {
-
-  const panel =
-    document.getElementById(
-      "voiceSettingsPanel"
-    );
-
-
-  if (!panel) {
-
-    showToast(
-      "Voice settings are not available."
-    );
-
-
-    return;
-
-  }
-
-
-  panel.classList.toggle(
-    "show"
+    },
+    300
   );
 
 }
@@ -3518,7 +3748,6 @@ function toggleVoiceSettingsPanel() {
 
 /* =========================================================
    SPEECH RECOGNITION
-   FINAL VERSION
 ========================================================= */
 
 function initializeSpeechRecognition() {
@@ -3530,11 +3759,6 @@ function initializeSpeechRecognition() {
 
   if (!Recognition) {
 
-    console.warn(
-      "Emogigs AI: Speech recognition is not supported."
-    );
-
-
     speechRecognition =
       null;
 
@@ -3543,10 +3767,6 @@ function initializeSpeechRecognition() {
 
   }
 
-
-  /*
-    Stop old recognition instance.
-  */
 
   if (
     speechRecognition
@@ -3559,7 +3779,7 @@ function initializeSpeechRecognition() {
     } catch (error) {
 
       console.log(
-        "Old recognition instance closed."
+        "Previous recognition closed."
       );
 
     }
@@ -3583,47 +3803,15 @@ function initializeSpeechRecognition() {
     1;
 
 
-  /*
-    Recognition language.
-  */
-
-  if (
-    voiceSettings.language &&
+  speechRecognition.lang =
     voiceSettings.language !==
       "auto"
-  ) {
+      ? voiceSettings.language
+      : "en-US";
 
-    speechRecognition.lang =
-      voiceSettings.language;
-
-  } else {
-
-    /*
-      Web Speech API cannot truly
-      auto-detect multiple languages
-      during one recognition session.
-      
-      English is used as the safe
-      browser fallback.
-    */
-
-    speechRecognition.lang =
-      "en-US";
-
-  }
-
-
-  /* =======================================================
-     START
-  ======================================================= */
 
   speechRecognition.onstart =
     () => {
-
-      console.log(
-        "Emogigs AI: 🎙️ Voice Assistant is listening."
-      );
-
 
       isVoiceListening =
         true;
@@ -3641,17 +3829,8 @@ function initializeSpeechRecognition() {
     };
 
 
-  /* =======================================================
-     RESULT
-  ======================================================= */
-
   speechRecognition.onresult =
     event => {
-
-      console.log(
-        "Emogigs AI: Voice result received."
-      );
-
 
       let transcript =
         "";
@@ -3685,16 +3864,10 @@ function initializeSpeechRecognition() {
         transcript.trim();
 
 
-      console.log(
-        "Emogigs AI: Voice transcript:",
-        transcript
-      );
-
-
       if (!transcript) {
 
         showToast(
-          "I couldn't hear anything. Please try again."
+          "I couldn't hear anything."
         );
 
 
@@ -3702,11 +3875,6 @@ function initializeSpeechRecognition() {
 
       }
 
-
-      /*
-        Put recognized text
-        into chat input.
-      */
 
       const input =
         document.getElementById(
@@ -3727,10 +3895,6 @@ function initializeSpeechRecognition() {
       }
 
 
-      /*
-        Send to Emogigs AI.
-      */
-
       sendMessage(
         transcript
       );
@@ -3738,17 +3902,12 @@ function initializeSpeechRecognition() {
     };
 
 
-  /* =======================================================
-     ERROR
-  ======================================================= */
-
   speechRecognition.onerror =
     event => {
 
       console.error(
-        "Emogigs AI Voice Recognition Error:",
-        event.error,
-        event
+        "Voice recognition error:",
+        event.error
       );
 
 
@@ -3761,95 +3920,65 @@ function initializeSpeechRecognition() {
       );
 
 
-      if (
-        event.error ===
-        "not-allowed"
+      switch (
+        event.error
       ) {
 
-        showToast(
-          "🎙️ Microphone permission was denied. Please allow microphone access."
-        );
+        case "not-allowed":
+
+          showToast(
+            "🎙️ Microphone permission was denied."
+          );
+
+          break;
 
 
-        return;
+        case "audio-capture":
 
-      }
+          showToast(
+            "🎙️ Microphone could not be accessed."
+          );
 
-
-      if (
-        event.error ===
-        "audio-capture"
-      ) {
-
-        showToast(
-          "🎙️ Microphone could not be accessed."
-        );
+          break;
 
 
-        return;
+        case "no-speech":
 
-      }
+          showToast(
+            "🎙️ I didn't hear anything."
+          );
 
-
-      if (
-        event.error ===
-        "no-speech"
-      ) {
-
-        showToast(
-          "🎙️ I didn't hear anything. Please try again."
-        );
+          break;
 
 
-        return;
+        case "network":
 
-      }
+          showToast(
+            "Voice recognition network error."
+          );
 
-
-      if (
-        event.error ===
-        "network"
-      ) {
-
-        showToast(
-          "Voice recognition network error. Please try again."
-        );
+          break;
 
 
-        return;
+        case "aborted":
+
+          break;
+
+
+        default:
+
+          showToast(
+            "Voice Assistant could not start."
+          );
 
       }
-
-
-      if (
-        event.error ===
-        "aborted"
-      ) {
-
-        return;
-
-      }
-
-
-      showToast(
-        "Voice Assistant could not start. Please try again."
-      );
 
     };
 
-
-  /* =======================================================
-     END
-  ======================================================= */
 
   speechRecognition.onend =
     () => {
 
-      console.log(
-        "Emogigs AI: 🎙️ Voice Assistant stopped."
-      );
-
-
       isVoiceListening =
         false;
 
@@ -3859,11 +3988,6 @@ function initializeSpeechRecognition() {
       );
 
     };
-
-
-  console.log(
-    "Emogigs AI: Voice Assistant initialized successfully."
-  );
 
 }
 
@@ -3886,11 +4010,6 @@ function startVoiceInput() {
     );
 
 
-    console.error(
-      "Emogigs AI: Speech Recognition is not supported."
-    );
-
-
     return;
 
   }
@@ -3905,21 +4024,14 @@ function startVoiceInput() {
 
   if (!speechRecognition) {
 
-    showToast(
-      "Could not start the voice assistant."
-    );
-
-
     return;
 
   }
 
 
-  /*
-    Toggle listening.
-  */
-
-  if (isVoiceListening) {
+  if (
+    isVoiceListening
+  ) {
 
     try {
 
@@ -3928,7 +4040,6 @@ function startVoiceInput() {
     } catch (error) {
 
       console.error(
-        "Emogigs AI: Could not stop voice recognition.",
         error
       );
 
@@ -3940,52 +4051,24 @@ function startVoiceInput() {
   }
 
 
-  /*
-    Stop AI speech before microphone.
-  */
-
   stopSpeaking();
 
 
-  /*
-    Set recognition language.
-  */
-
-  if (
-    voiceSettings.language &&
+  speechRecognition.lang =
     voiceSettings.language !==
       "auto"
-  ) {
+      ? voiceSettings.language
+      : "en-US";
 
-    speechRecognition.lang =
-      voiceSettings.language;
-
-  } else {
-
-    speechRecognition.lang =
-      "en-US";
-
-  }
-
-
-  /*
-    Start microphone.
-  */
 
   try {
 
     speechRecognition.start();
 
-
-    console.log(
-      "Emogigs AI: Voice Assistant starting..."
-    );
-
-
   } catch (error) {
 
     console.error(
-      "Emogigs AI: Could not start voice recognition:",
+      "Recognition start error:",
       error
     );
 
@@ -3999,14 +4082,13 @@ function startVoiceInput() {
         "Voice Assistant is already listening."
       );
 
-
       return;
 
     }
 
 
     showToast(
-      "Please allow microphone access and try again."
+      "Please allow microphone access."
     );
 
   }
@@ -4015,7 +4097,7 @@ function startVoiceInput() {
 
 
 /* =========================================================
-   VOICE LISTENING UI
+   VOICE UI
 ========================================================= */
 
 function updateVoiceListeningUI(
@@ -4038,108 +4120,37 @@ function updateVoiceListeningUI(
     );
 
 
-  document
-    .querySelectorAll(
-      ".voice-status"
-    )
-    .forEach(
-      status => {
-
-        status.classList.toggle(
-          "active",
-          listening
-        );
-
-
-        status.textContent =
-          listening
-            ? "🎙️ Listening..."
-            : "Voice ready";
-
-      }
-    );
-
-}
-
-
-/* =========================================================
-   VOICE ACTION BUTTON
-========================================================= */
-
-function createVoiceButton(
-  text
-) {
-
-  const button =
-    createActionButton(
-      "🔊",
-      "Listen to response"
+  const status =
+    document.getElementById(
+      "voiceStatus"
     );
 
 
-  button.classList.add(
-    "voice-action-button"
-  );
+  if (status) {
+
+    status.textContent =
+      listening
+        ? "🎙️ Listening..."
+        : "Voice ready";
 
 
-  button.type =
-    "button";
-
-
-  button.onclick =
-    () => {
-
-      toggleSpeech(
-        text,
-        button
-      );
-
-    };
-
-
-  return button;
-
-}
-
-
-/* =========================================================
-   AUTO SPEAK AI RESPONSE
-========================================================= */
-
-function autoSpeakResponse(
-  text
-) {
-
-  if (
-    !voiceSettings.autoSpeak
-  ) {
-
-    return;
+    status.classList.toggle(
+      "active",
+      listening
+    );
 
   }
 
-
-  setTimeout(
-    () => {
-
-      speakText(
-        text
-      );
-
-    },
-    250
-  );
-
 }
 
 
 /* =========================================================
-   VOICE SUPPORT CHECK
+   VOICE SUPPORT
 ========================================================= */
 
 function checkVoiceSupport() {
 
-  const speech =
+  const synthesis =
     "speechSynthesis" in
     window;
 
@@ -4154,396 +4165,12 @@ function checkVoiceSupport() {
   console.log(
     "Emogigs AI Voice Support:",
     {
-
       speechSynthesis:
-        speech,
+        synthesis,
 
       speechRecognition:
         recognition
-
     }
   );
 
 }
-
-
-/* =========================================================
-   DOM READY
-========================================================= */
-
-document.addEventListener(
-  "DOMContentLoaded",
-  () => {
-
-    console.log(
-      "Emogigs AI Step 18D frontend loaded."
-    );
-
-
-    /* =================================================
-       VOICE INITIALIZATION
-    ================================================= */
-
-    loadVoiceSettings();
-
-
-    loadAvailableVoices();
-
-
-    if (
-      "speechSynthesis" in
-      window
-    ) {
-
-      /*
-        Android / Chrome voice loading.
-      */
-
-      window.speechSynthesis
-        .addEventListener(
-          "voiceschanged",
-          loadAvailableVoices
-        );
-
-    }
-
-
-    initializeVoiceSettings();
-
-
-    initializeSpeechRecognition();
-
-
-    checkVoiceSupport();
-
-
-    /* =================================================
-       CONVERSATION STORAGE
-    ================================================= */
-
-    loadConversations();
-
-
-    if (
-      conversations.length ===
-      0
-    ) {
-
-      createConversation();
-
-    }
-
-
-    if (
-      !currentConversationId ||
-      !conversations.some(
-        conversation =>
-          conversation.id ===
-          currentConversationId
-      )
-    ) {
-
-      currentConversationId =
-        conversations[0].id;
-
-    }
-
-
-    renderRecentChats();
-
-
-    /* =================================================
-       NAVIGATION
-    ================================================= */
-
-    document
-      .querySelectorAll(
-        ".nav-btn"
-      )
-      .forEach(
-        button => {
-
-          button.addEventListener(
-            "click",
-            () => {
-
-              const screen =
-                button.dataset.screen;
-
-
-              showScreen(
-                screen
-              );
-
-            }
-          );
-
-        }
-      );
-
-
-    document
-      .querySelectorAll(
-        "[data-screen]"
-      )
-      .forEach(
-        button => {
-
-          if (
-            !button.classList.contains(
-              "nav-btn"
-            )
-          ) {
-
-            button.addEventListener(
-              "click",
-              () => {
-
-                showScreen(
-                  button.dataset.screen
-                );
-
-              }
-            );
-
-          }
-
-        }
-      );
-
-
-    /* =================================================
-       NEW CHAT
-    ================================================= */
-
-    const newChatButton =
-      document.getElementById(
-        "headerNewChat"
-      );
-
-
-    if (newChatButton) {
-
-      newChatButton.addEventListener(
-        "click",
-        startNewChat
-      );
-
-    }
-
-
-    /* =================================================
-       CHAT BACK
-    ================================================= */
-
-    const chatBack =
-      document.getElementById(
-        "chatBack"
-      );
-
-
-    if (chatBack) {
-
-      chatBack.addEventListener(
-        "click",
-        () => {
-
-          stopSpeaking();
-
-
-          showScreen(
-            "homeScreen"
-          );
-
-        }
-      );
-
-    }
-
-
-    /* =================================================
-       CHAT SEND
-    ================================================= */
-
-    const chatSend =
-      document.getElementById(
-        "chatSend"
-      );
-
-
-    const chatInput =
-      document.getElementById(
-        "chatInput"
-      );
-
-
-    if (chatSend) {
-
-      chatSend.addEventListener(
-        "click",
-        () =>
-          sendMessage()
-      );
-
-    }
-
-
-    if (chatInput) {
-
-      chatInput.addEventListener(
-        "input",
-        () =>
-          autoResize(
-            chatInput
-          )
-      );
-
-
-      chatInput.addEventListener(
-        "keydown",
-        event => {
-
-          if (
-            event.key ===
-              "Enter" &&
-            !event.shiftKey
-          ) {
-
-            event.preventDefault();
-
-
-            sendMessage();
-
-          }
-
-        }
-      );
-
-    }
-
-
-    /* =================================================
-       HOME SEND
-    ================================================= */
-
-    const homeSend =
-      document.getElementById(
-        "homeSend"
-      );
-
-
-    const homeInput =
-      document.getElementById(
-        "homeInput"
-      );
-
-
-    if (homeSend) {
-
-      homeSend.addEventListener(
-        "click",
-        () => {
-
-          const text =
-            homeInput
-              ? homeInput.value.trim()
-              : "";
-
-
-          if (text) {
-
-            sendMessage(
-              text
-            );
-
-          }
-
-        }
-      );
-
-    }
-
-
-    if (homeInput) {
-
-      homeInput.addEventListener(
-        "input",
-        () =>
-          autoResize(
-            homeInput
-          )
-      );
-
-
-      homeInput.addEventListener(
-        "keydown",
-        event => {
-
-          if (
-            event.key ===
-              "Enter" &&
-            !event.shiftKey
-          ) {
-
-            event.preventDefault();
-
-
-            const text =
-              homeInput.value.trim();
-
-
-            if (text) {
-
-              sendMessage(
-                text
-              );
-
-            }
-
-          }
-
-        }
-      );
-
-    }
-
-
-    /* =================================================
-       QUICK TOOLS + TEMPLATES
-    ================================================= */
-
-    document
-      .querySelectorAll(
-        "[data-template]"
-      )
-      .forEach(
-        button => {
-
-          button.addEventListener(
-            "click",
-            () => {
-
-              useTemplate(
-                button.dataset.template
-              );
-
-            }
-          );
-
-        }
-      );
-
-
-    /* =================================================
-       INITIAL CHAT
-    ================================================= */
-
-    renderCurrentChat();
-
-
-    console.log(
-      "Emogigs AI: Step 18D ready."
-    );
-
-  }
-);
