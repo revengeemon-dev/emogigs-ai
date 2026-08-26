@@ -2661,10 +2661,38 @@ function initializeSpeechRecognition() {
 
 
 /* =========================================================
-   START VOICE INPUT
+   START VOICE INPUT — FINAL
 ========================================================= */
 
 function startVoiceInput() {
+
+  /*
+    Check browser support
+  */
+
+  const Recognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+
+  if (!Recognition) {
+
+    showToast(
+      "Voice input is not supported on this browser."
+    );
+
+    console.error(
+      "Emogigs AI: Speech Recognition is not supported."
+    );
+
+    return;
+
+  }
+
+
+  /*
+    Initialize recognition if needed
+  */
 
   if (!speechRecognition) {
 
@@ -2676,7 +2704,7 @@ function startVoiceInput() {
   if (!speechRecognition) {
 
     showToast(
-      "Microphone voice input is not supported on this browser."
+      "Could not start the voice assistant."
     );
 
     return;
@@ -2684,34 +2712,106 @@ function startVoiceInput() {
   }
 
 
+  /*
+    If already listening,
+    stop listening.
+  */
+
   if (isVoiceListening) {
 
-    speechRecognition.stop();
+    try {
+
+      speechRecognition.stop();
+
+    } catch (error) {
+
+      console.error(
+        "Emogigs AI: Could not stop voice recognition.",
+        error
+      );
+
+    }
 
     return;
 
   }
 
 
+  /*
+    Stop any AI voice currently speaking.
+  */
+
   stopSpeaking();
 
 
-  speechRecognition.lang =
-    voiceSettings.language ===
-    "auto"
-      ? "en-US"
-      : voiceSettings.language;
+  /*
+    Set recognition language.
+  */
 
+  if (
+    voiceSettings.language &&
+    voiceSettings.language !== "auto"
+  ) {
+
+    speechRecognition.lang =
+      voiceSettings.language;
+
+  } else {
+
+    /*
+      Default language.
+      We will improve automatic
+      Bangla/English detection
+      in the next step.
+    */
+
+    speechRecognition.lang =
+      "en-US";
+
+  }
+
+
+  /*
+    Start microphone.
+  */
 
   try {
 
     speechRecognition.start();
 
+    console.log(
+      "Emogigs AI: Voice Assistant starting..."
+    );
+
   } catch (error) {
 
     console.error(
-      "Could not start voice recognition:",
+      "Emogigs AI: Could not start voice recognition:",
       error
+    );
+
+
+    /*
+      Avoid showing an error when
+      recognition is already running.
+    */
+
+    if (
+      error.name ===
+      "InvalidStateError"
+    ) {
+
+      showToast(
+        "Voice Assistant is already listening."
+      );
+
+      return;
+
+    }
+
+
+    showToast(
+      "Please allow microphone access and try again."
     );
 
   }
