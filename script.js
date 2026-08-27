@@ -211,8 +211,178 @@
   }
 
 
-    /* =========================================================
-     VOICE RECOGNITION — STEP 17 FIX
+      /* =========================================================
+     VOICE RECOGNITION — STEP 17B
+     Fresh recognition instance on every start
+  ========================================================== */
+
+  function createVoiceRecognition() {
+
+    const SpeechRecognition =
+      window.SpeechRecognition ||
+      window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      return null;
+    }
+
+    const rec = new SpeechRecognition();
+
+    rec.lang = "bn-BD";
+    rec.continuous = false;
+    rec.interimResults = true;
+    rec.maxAlternatives = 1;
+
+    rec.onstart = () => {
+
+      console.log("VOICE: STARTED");
+
+      isListening = true;
+
+      micBtn.classList.add("listening");
+
+      micBtn.textContent = "⏹";
+
+      voiceStatus.classList.add("show");
+
+      voiceStatusText.textContent =
+        "🎙️ শুনছি... কথা বলুন";
+
+    };
+
+
+    rec.onresult = event => {
+
+      console.log("VOICE: RESULT");
+
+      let finalText = "";
+      let interimText = "";
+
+      for (
+        let i = event.resultIndex;
+        i < event.results.length;
+        i++
+      ) {
+
+        const text =
+          event.results[i][0].transcript;
+
+        if (event.results[i].isFinal) {
+
+          finalText += text;
+
+        } else {
+
+          interimText += text;
+
+        }
+
+      }
+
+
+      if (interimText) {
+
+        voiceStatusText.textContent =
+          "🎙️ " + interimText;
+
+      }
+
+
+      if (finalText.trim()) {
+
+        const oldText =
+          messageInput.value.trim();
+
+        messageInput.value =
+          oldText
+            ? oldText + " " + finalText.trim()
+            : finalText.trim();
+
+        messageInput.dispatchEvent(
+          new Event("input")
+        );
+
+        voiceStatusText.textContent =
+          "✓ লেখা পাওয়া গেছে";
+
+      }
+
+    };
+
+
+    rec.onerror = event => {
+
+      console.error(
+        "VOICE ERROR:",
+        event.error
+      );
+
+      isListening = false;
+
+      stopVoiceUI();
+
+
+      if (event.error === "not-allowed") {
+
+        showToast(
+          "🎙️ Microphone permission denied."
+        );
+
+      }
+
+      else if (event.error === "no-speech") {
+
+        showToast(
+          "🎙️ কোনো কথা শোনা যায়নি। আবার চেষ্টা করুন।"
+        );
+
+      }
+
+      else if (event.error === "audio-capture") {
+
+        showToast(
+          "🎙️ Microphone পাওয়া যাচ্ছে না।"
+        );
+
+      }
+
+      else if (event.error === "network") {
+
+        showToast(
+          "🌐 Voice service connection সমস্যা।"
+        );
+
+      }
+
+      else if (event.error !== "aborted") {
+
+        showToast(
+          "🎙️ Voice input চালু করা যায়নি।"
+        );
+
+      }
+
+    };
+
+
+    rec.onend = () => {
+
+      console.log("VOICE: ENDED");
+
+      isListening = false;
+
+      stopVoiceUI();
+
+    };
+
+
+    return rec;
+
+  }
+
+
+  /* =========================================================
+     VOICE SETUP
   ========================================================== */
 
   function setupVoiceRecognition() {
@@ -221,244 +391,30 @@
       window.SpeechRecognition ||
       window.webkitSpeechRecognition;
 
-    /* Browser support check */
 
     if (!SpeechRecognition) {
 
       console.log(
-        "Speech Recognition is NOT supported."
+        "Speech Recognition NOT supported."
       );
 
-      micBtn.addEventListener("click", () => {
-
-        showToast(
-          "Voice input is not supported in this browser."
-        );
-
-      });
+      recognition = null;
 
       return;
 
     }
 
+
     console.log(
       "Speech Recognition supported."
     );
 
-
-    /* Create recognition */
-
-    recognition =
-      new SpeechRecognition();
-
-
     /*
-      Bengali first.
-      If you mainly speak English,
-      change this to "en-US".
+      Don't create one permanent recognition object.
+      A fresh one will be created every time.
     */
 
-    recognition.lang = "bn-BD";
-
-    recognition.continuous = false;
-
-    recognition.interimResults = true;
-
-    recognition.maxAlternatives = 1;
-
-
-    /* =========================
-       START
-    ========================== */
-
-    recognition.onstart = () => {
-
-      console.log(
-        "VOICE: started"
-      );
-
-      isListening = true;
-
-      micBtn.classList.add(
-        "listening"
-      );
-
-      micBtn.textContent = "⏹";
-
-      voiceStatus.classList.add(
-        "show"
-      );
-
-      voiceStatusText.textContent =
-        "🎙️ শুনছি... কথা বলুন";
-
-    };
-
-
-    /* =========================
-       RESULT
-    ========================== */
-
-    recognition.onresult = event => {
-
-      console.log(
-        "VOICE: result received"
-      );
-
-
-      let finalText = "";
-
-      let interimText = "";
-
-
-      for (
-        let i = event.resultIndex;
-        i < event.results.length;
-        i++
-      ) {
-
-        const transcript =
-          event.results[i][0].transcript;
-
-
-        if (
-          event.results[i].isFinal
-        ) {
-
-          finalText += transcript;
-
-        } else {
-
-          interimText += transcript;
-
-        }
-
-      }
-
-
-      /* Show live listening status */
-
-      if (interimText) {
-
-        voiceStatusText.textContent =
-          `🎙️ ${interimText}`;
-
-      }
-
-
-      /* Put final speech into input */
-
-      if (finalText.trim()) {
-
-        const existing =
-          messageInput.value.trim();
-
-
-        messageInput.value =
-          existing
-            ? existing + " " + finalText.trim()
-            : finalText.trim();
-
-
-        messageInput.dispatchEvent(
-          new Event("input")
-        );
-
-
-        voiceStatusText.textContent =
-          "✓ Voice captured";
-
-      }
-
-    };
-
-
-    /* =========================
-       ERROR
-    ========================== */
-
-    recognition.onerror = event => {
-
-      console.error(
-        "VOICE ERROR:",
-        event.error
-      );
-
-
-      stopVoiceUI();
-
-
-      switch (event.error) {
-
-        case "not-allowed":
-
-          showToast(
-            "🎙️ Microphone permission denied."
-          );
-
-          break;
-
-
-        case "audio-capture":
-
-          showToast(
-            "🎙️ Microphone পাওয়া যাচ্ছে না।"
-          );
-
-          break;
-
-
-        case "no-speech":
-
-          showToast(
-            "🎙️ কোনো কথা শোনা যায়নি। আবার চেষ্টা করুন।"
-          );
-
-          break;
-
-
-        case "network":
-
-          showToast(
-            "🌐 Voice service-এর সাথে connection সমস্যা।"
-          );
-
-          break;
-
-
-        case "aborted":
-
-          showToast(
-            "Voice input stopped."
-          );
-
-          break;
-
-
-        default:
-
-          showToast(
-            "🎙️ Voice input চালু করা যায়নি।"
-          );
-
-      }
-
-    };
-
-
-    /* =========================
-       END
-    ========================== */
-
-    recognition.onend = () => {
-
-      console.log(
-        "VOICE: ended"
-      );
-
-      stopVoiceUI();
-
-    };
+    recognition = null;
 
   }
 
@@ -474,84 +430,100 @@
     );
 
 
-    /* Browser support */
-
-    if (!recognition) {
-
-      showToast(
-        "Voice recognition এই browser-এ available নয়."
-      );
-
-      return;
-
-    }
-
-
-    /* Already listening */
+    /* Stop current recognition */
 
     if (isListening) {
 
       console.log(
-        "VOICE: stopping"
+        "Stopping current voice..."
       );
 
       try {
 
-        recognition.stop();
+        if (recognition) {
+          recognition.stop();
+        }
 
       } catch (error) {
 
-        console.error(
-          "VOICE STOP ERROR:",
+        console.log(
+          "Stop error:",
           error
         );
 
-        stopVoiceUI();
-
       }
+
+      stopVoiceUI();
 
       return;
 
     }
 
 
-    /* Start recognition */
+    /*
+      Create a completely NEW recognition
+      object every time.
+    */
+
+    const newRecognition =
+      createVoiceRecognition();
+
+
+    if (!newRecognition) {
+
+      showToast(
+        "এই browser-এ Voice Recognition support নেই।"
+      );
+
+      return;
+
+    }
+
+
+    recognition =
+      newRecognition;
+
 
     try {
 
       console.log(
-        "VOICE: starting..."
+        "Starting NEW voice recognition..."
       );
-
 
       recognition.start();
 
+    }
 
-    } catch (error) {
+    catch (error) {
 
       console.error(
         "VOICE START ERROR:",
         error
       );
 
+      stopVoiceUI();
 
-      /*
-        Sometimes recognition is already running.
-        Reset UI instead of silently failing.
-      */
 
       if (
         error.name ===
         "InvalidStateError"
       ) {
 
-        stopVoiceUI();
+        /*
+          Wait and automatically reset.
+        */
+
+        recognition = null;
 
         showToast(
-          "Voice system busy. আবার 🎙️ চাপুন।"
+          "Voice engine reset হচ্ছে। আবার 🎙️ চাপুন।"
         );
 
-      } else {
+      }
+
+      else {
+
+        recognition = null;
 
         showToast(
           "🎙️ Voice input শুরু করা যায়নি।"
