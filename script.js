@@ -211,8 +211,8 @@
   }
 
 
-  /* =========================================================
-     VOICE RECOGNITION
+    /* =========================================================
+     VOICE RECOGNITION — STEP 17 FIX
   ========================================================== */
 
   function setupVoiceRecognition() {
@@ -221,7 +221,13 @@
       window.SpeechRecognition ||
       window.webkitSpeechRecognition;
 
+    /* Browser support check */
+
     if (!SpeechRecognition) {
+
+      console.log(
+        "Speech Recognition is NOT supported."
+      );
 
       micBtn.addEventListener("click", () => {
 
@@ -235,13 +241,24 @@
 
     }
 
+    console.log(
+      "Speech Recognition supported."
+    );
+
+
+    /* Create recognition */
 
     recognition =
       new SpeechRecognition();
 
 
-    recognition.lang =
-      navigator.language || "en-US";
+    /*
+      Bengali first.
+      If you mainly speak English,
+      change this to "en-US".
+    */
+
+    recognition.lang = "bn-BD";
 
     recognition.continuous = false;
 
@@ -250,23 +267,44 @@
     recognition.maxAlternatives = 1;
 
 
+    /* =========================
+       START
+    ========================== */
+
     recognition.onstart = () => {
+
+      console.log(
+        "VOICE: started"
+      );
 
       isListening = true;
 
-      micBtn.classList.add("listening");
+      micBtn.classList.add(
+        "listening"
+      );
 
       micBtn.textContent = "⏹";
 
-      voiceStatus.classList.add("show");
+      voiceStatus.classList.add(
+        "show"
+      );
 
       voiceStatusText.textContent =
-        "Listening... speak now";
+        "🎙️ শুনছি... কথা বলুন";
 
     };
 
 
+    /* =========================
+       RESULT
+    ========================== */
+
     recognition.onresult = event => {
+
+      console.log(
+        "VOICE: result received"
+      );
+
 
       let finalText = "";
 
@@ -282,7 +320,10 @@
         const transcript =
           event.results[i][0].transcript;
 
-        if (event.results[i].isFinal) {
+
+        if (
+          event.results[i].isFinal
+        ) {
 
           finalText += transcript;
 
@@ -295,66 +336,125 @@
       }
 
 
-      if (finalText) {
+      /* Show live listening status */
+
+      if (interimText) {
+
+        voiceStatusText.textContent =
+          `🎙️ ${interimText}`;
+
+      }
+
+
+      /* Put final speech into input */
+
+      if (finalText.trim()) {
+
+        const existing =
+          messageInput.value.trim();
+
 
         messageInput.value =
-          (
-            messageInput.value
-              ? messageInput.value + " "
-              : ""
-          ) + finalText;
+          existing
+            ? existing + " " + finalText.trim()
+            : finalText.trim();
+
 
         messageInput.dispatchEvent(
           new Event("input")
         );
 
-        voiceStatusText.textContent =
-          "Voice captured";
-
-      } else if (interimText) {
 
         voiceStatusText.textContent =
-          `Listening: ${interimText}`;
+          "✓ Voice captured";
 
       }
 
     };
 
 
+    /* =========================
+       ERROR
+    ========================== */
+
     recognition.onerror = event => {
 
-      console.log(
-        "Speech recognition error:",
+      console.error(
+        "VOICE ERROR:",
         event.error
       );
+
 
       stopVoiceUI();
 
 
-      if (event.error === "not-allowed") {
+      switch (event.error) {
 
-        showToast(
-          "Microphone permission was denied."
-        );
+        case "not-allowed":
 
-      } else if (event.error === "no-speech") {
+          showToast(
+            "🎙️ Microphone permission denied."
+          );
 
-        showToast(
-          "I couldn't hear anything."
-        );
+          break;
 
-      } else {
 
-        showToast(
-          "Voice input couldn't start."
-        );
+        case "audio-capture":
+
+          showToast(
+            "🎙️ Microphone পাওয়া যাচ্ছে না।"
+          );
+
+          break;
+
+
+        case "no-speech":
+
+          showToast(
+            "🎙️ কোনো কথা শোনা যায়নি। আবার চেষ্টা করুন।"
+          );
+
+          break;
+
+
+        case "network":
+
+          showToast(
+            "🌐 Voice service-এর সাথে connection সমস্যা।"
+          );
+
+          break;
+
+
+        case "aborted":
+
+          showToast(
+            "Voice input stopped."
+          );
+
+          break;
+
+
+        default:
+
+          showToast(
+            "🎙️ Voice input চালু করা যায়নি।"
+          );
 
       }
 
     };
 
 
+    /* =========================
+       END
+    ========================== */
+
     recognition.onend = () => {
+
+      console.log(
+        "VOICE: ended"
+      );
 
       stopVoiceUI();
 
@@ -369,10 +469,17 @@
 
   function toggleVoiceInput() {
 
+    console.log(
+      "MIC BUTTON CLICKED"
+    );
+
+
+    /* Browser support */
+
     if (!recognition) {
 
       showToast(
-        "Your browser doesn't support voice input."
+        "Voice recognition এই browser-এ available নয়."
       );
 
       return;
@@ -380,37 +487,101 @@
     }
 
 
+    /* Already listening */
+
     if (isListening) {
 
-      recognition.stop();
+      console.log(
+        "VOICE: stopping"
+      );
+
+      try {
+
+        recognition.stop();
+
+      } catch (error) {
+
+        console.error(
+          "VOICE STOP ERROR:",
+          error
+        );
+
+        stopVoiceUI();
+
+      }
 
       return;
 
     }
 
 
+    /* Start recognition */
+
     try {
+
+      console.log(
+        "VOICE: starting..."
+      );
+
 
       recognition.start();
 
+
     } catch (error) {
 
-      console.log(error);
+      console.error(
+        "VOICE START ERROR:",
+        error
+      );
+
+
+      /*
+        Sometimes recognition is already running.
+        Reset UI instead of silently failing.
+      */
+
+      if (
+        error.name ===
+        "InvalidStateError"
+      ) {
+
+        stopVoiceUI();
+
+        showToast(
+          "Voice system busy. আবার 🎙️ চাপুন।"
+        );
+
+      } else {
+
+        showToast(
+          "🎙️ Voice input শুরু করা যায়নি।"
+        );
+
+      }
 
     }
 
   }
 
 
+  /* =========================================================
+     STOP VOICE UI
+  ========================================================== */
+
   function stopVoiceUI() {
 
     isListening = false;
 
-    micBtn.classList.remove("listening");
+    micBtn.classList.remove(
+      "listening"
+    );
 
-    micBtn.textContent = "🎙️";
+    micBtn.textContent =
+      "🎙️";
 
-    voiceStatus.classList.remove("show");
+    voiceStatus.classList.remove(
+      "show"
+    );
 
   }
 
