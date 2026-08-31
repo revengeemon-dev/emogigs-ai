@@ -1,17 +1,17 @@
 /* =========================================================
    EMOGIGS AI
    Mobile AI Life OS
-   Voice + Chat + Read Aloud + Creative Tools
+   CHAT + VOICE INPUT + READ ALOUD
+   REBUILT VOICE SYSTEM
 ========================================================= */
 
 (() => {
 
   "use strict";
 
-
   /* =========================================================
      CONFIG
-  ========================================================= */
+  ========================================================== */
 
   const API_URL = "/api/chat";
 
@@ -27,10 +27,14 @@
 
   let conversation = [];
 
+  let voiceStarting = false;
+
+  let microphoneStream = null;
+
 
   /* =========================================================
      DOM
-  ========================================================= */
+  ========================================================== */
 
   const messageInput =
     document.getElementById("messageInput");
@@ -78,11 +82,11 @@
 
     setupQuickTools();
 
+    setupButtons();
+
     setupVoiceRecognition();
 
     loadConversation();
-
-    setupButtons();
 
   });
 
@@ -93,38 +97,57 @@
 
   function setupButtons() {
 
-    sendBtn.addEventListener("click", () => {
+    if (sendBtn) {
 
-      sendMessage();
-
-    });
-
-
-    micBtn.addEventListener("click", () => {
-
-      toggleVoiceInput();
-
-    });
-
-
-    newChatBtn.addEventListener("click", () => {
-
-      startNewChat();
-
-    });
-
-
-    messageInput.addEventListener("keydown", event => {
-
-      if (event.key === "Enter" && !event.shiftKey) {
-
-        event.preventDefault();
+      sendBtn.addEventListener("click", () => {
 
         sendMessage();
 
-      }
+      });
 
-    });
+    }
+
+
+    if (micBtn) {
+
+      micBtn.addEventListener("click", () => {
+
+        toggleVoiceInput();
+
+      });
+
+    }
+
+
+    if (newChatBtn) {
+
+      newChatBtn.addEventListener("click", () => {
+
+        startNewChat();
+
+      });
+
+    }
+
+
+    if (messageInput) {
+
+      messageInput.addEventListener("keydown", event => {
+
+        if (
+          event.key === "Enter" &&
+          !event.shiftKey
+        ) {
+
+          event.preventDefault();
+
+          sendMessage();
+
+        }
+
+      });
+
+    }
 
   }
 
@@ -135,12 +158,17 @@
 
   function setupTextarea() {
 
+    if (!messageInput) return;
+
     messageInput.addEventListener("input", () => {
 
       messageInput.style.height = "auto";
 
       messageInput.style.height =
-        Math.min(messageInput.scrollHeight, 130) + "px";
+        Math.min(
+          messageInput.scrollHeight,
+          130
+        ) + "px";
 
     });
 
@@ -160,9 +188,11 @@
 
       button.addEventListener("click", () => {
 
-        modes.forEach(item =>
-          item.classList.remove("active")
-        );
+        modes.forEach(item => {
+
+          item.classList.remove("active");
+
+        });
 
         button.classList.add("active");
 
@@ -196,6 +226,8 @@
         const prompt =
           card.dataset.prompt || "";
 
+        if (!messageInput) return;
+
         messageInput.value = prompt;
 
         messageInput.dispatchEvent(
@@ -211,178 +243,8 @@
   }
 
 
-      /* =========================================================
-     VOICE RECOGNITION — STEP 17B
-     Fresh recognition instance on every start
-  ========================================================== */
-
-  function createVoiceRecognition() {
-
-    const SpeechRecognition =
-      window.SpeechRecognition ||
-      window.webkitSpeechRecognition;
-
-    if (!SpeechRecognition) {
-      return null;
-    }
-
-    const rec = new SpeechRecognition();
-
-    rec.lang = "bn-BD";
-    rec.continuous = false;
-    rec.interimResults = true;
-    rec.maxAlternatives = 1;
-
-    rec.onstart = () => {
-
-      console.log("VOICE: STARTED");
-
-      isListening = true;
-
-      micBtn.classList.add("listening");
-
-      micBtn.textContent = "⏹";
-
-      voiceStatus.classList.add("show");
-
-      voiceStatusText.textContent =
-        "🎙️ শুনছি... কথা বলুন";
-
-    };
-
-
-    rec.onresult = event => {
-
-      console.log("VOICE: RESULT");
-
-      let finalText = "";
-      let interimText = "";
-
-      for (
-        let i = event.resultIndex;
-        i < event.results.length;
-        i++
-      ) {
-
-        const text =
-          event.results[i][0].transcript;
-
-        if (event.results[i].isFinal) {
-
-          finalText += text;
-
-        } else {
-
-          interimText += text;
-
-        }
-
-      }
-
-
-      if (interimText) {
-
-        voiceStatusText.textContent =
-          "🎙️ " + interimText;
-
-      }
-
-
-      if (finalText.trim()) {
-
-        const oldText =
-          messageInput.value.trim();
-
-        messageInput.value =
-          oldText
-            ? oldText + " " + finalText.trim()
-            : finalText.trim();
-
-        messageInput.dispatchEvent(
-          new Event("input")
-        );
-
-        voiceStatusText.textContent =
-          "✓ লেখা পাওয়া গেছে";
-
-      }
-
-    };
-
-
-    rec.onerror = event => {
-
-      console.error(
-        "VOICE ERROR:",
-        event.error
-      );
-
-      isListening = false;
-
-      stopVoiceUI();
-
-
-      if (event.error === "not-allowed") {
-
-        showToast(
-          "🎙️ Microphone permission denied."
-        );
-
-      }
-
-      else if (event.error === "no-speech") {
-
-        showToast(
-          "🎙️ কোনো কথা শোনা যায়নি। আবার চেষ্টা করুন।"
-        );
-
-      }
-
-      else if (event.error === "audio-capture") {
-
-        showToast(
-          "🎙️ Microphone পাওয়া যাচ্ছে না।"
-        );
-
-      }
-
-      else if (event.error === "network") {
-
-        showToast(
-          "🌐 Voice service connection সমস্যা।"
-        );
-
-      }
-
-      else if (event.error !== "aborted") {
-
-        showToast(
-          "🎙️ Voice input চালু করা যায়নি।"
-        );
-
-      }
-
-    };
-
-
-    rec.onend = () => {
-
-      console.log("VOICE: ENDED");
-
-      isListening = false;
-
-      stopVoiceUI();
-
-    };
-
-
-    return rec;
-
-  }
-
-
   /* =========================================================
-     VOICE SETUP
+     VOICE RECOGNITION
   ========================================================== */
 
   function setupVoiceRecognition() {
@@ -392,87 +254,14 @@
       window.webkitSpeechRecognition;
 
 
+    /* -------------------------------------------------------
+       Browser support check
+    ------------------------------------------------------- */
+
     if (!SpeechRecognition) {
 
       console.log(
-        "Speech Recognition NOT supported."
-      );
-
-      recognition = null;
-
-      return;
-
-    }
-
-
-    console.log(
-      "Speech Recognition supported."
-    );
-
-    /*
-      Don't create one permanent recognition object.
-      A fresh one will be created every time.
-    */
-
-    recognition = null;
-
-  }
-
-
-  /* =========================================================
-     VOICE TOGGLE
-  ========================================================== */
-
-  function toggleVoiceInput() {
-
-    console.log(
-      "MIC BUTTON CLICKED"
-    );
-
-
-    /* Stop current recognition */
-
-    if (isListening) {
-
-      console.log(
-        "Stopping current voice..."
-      );
-
-      try {
-
-        if (recognition) {
-          recognition.stop();
-        }
-
-      } catch (error) {
-
-        console.log(
-          "Stop error:",
-          error
-        );
-
-      }
-
-      stopVoiceUI();
-
-      return;
-
-    }
-
-
-    /*
-      Create a completely NEW recognition
-      object every time.
-    */
-
-    const newRecognition =
-      createVoiceRecognition();
-
-
-    if (!newRecognition) {
-
-      showToast(
-        "এই browser-এ Voice Recognition support নেই।"
+        "SpeechRecognition is not supported."
       );
 
       return;
@@ -481,55 +270,569 @@
 
 
     recognition =
-      newRecognition;
+      new SpeechRecognition();
 
 
-    try {
+    /* -------------------------------------------------------
+       LANGUAGE
+       Bengali first because Emogigs is being used in
+       Bengali environment.
+    ------------------------------------------------------- */
+
+    recognition.lang = "bn-BD";
+
+
+    recognition.continuous = false;
+
+    recognition.interimResults = true;
+
+    recognition.maxAlternatives = 1;
+
+
+    /* -------------------------------------------------------
+       START
+    ------------------------------------------------------- */
+
+    recognition.onstart = () => {
 
       console.log(
-        "Starting NEW voice recognition..."
+        "Emogigs voice recognition started."
       );
 
-      recognition.start();
+      voiceStarting = false;
 
-    }
+      isListening = true;
 
-    catch (error) {
+      micBtn.classList.add("listening");
 
-      console.error(
-        "VOICE START ERROR:",
-        error
+      micBtn.textContent = "⏹";
+
+      micBtn.setAttribute(
+        "aria-label",
+        "Stop voice input"
+      );
+
+      voiceStatus.classList.add("show");
+
+      voiceStatusText.textContent =
+        "Listening... speak now";
+
+    };
+
+
+    /* -------------------------------------------------------
+       RESULT
+    ------------------------------------------------------- */
+
+    recognition.onresult = event => {
+
+      let finalText = "";
+
+      let interimText = "";
+
+
+      for (
+        let i = event.resultIndex;
+        i < event.results.length;
+        i++
+      ) {
+
+        const result =
+          event.results[i];
+
+        const transcript =
+          result[0].transcript;
+
+
+        if (result.isFinal) {
+
+          finalText += transcript;
+
+        } else {
+
+          interimText += transcript;
+
+        }
+
+      }
+
+
+      /* -----------------------------------------------------
+         Final voice text
+      ----------------------------------------------------- */
+
+      if (finalText.trim()) {
+
+        const cleanText =
+          finalText.trim();
+
+
+        if (messageInput) {
+
+          const oldText =
+            messageInput.value.trim();
+
+
+          messageInput.value =
+            oldText
+              ? oldText + " " + cleanText
+              : cleanText;
+
+
+          messageInput.dispatchEvent(
+            new Event("input")
+          );
+
+        }
+
+
+        voiceStatusText.textContent =
+          "Voice captured ✓";
+
+
+        /* Small delay so user can see captured state */
+
+        setTimeout(() => {
+
+          if (!isListening) {
+
+            voiceStatus.classList.remove(
+              "show"
+            );
+
+          }
+
+        }, 700);
+
+      }
+
+
+      /* -----------------------------------------------------
+         Interim voice text
+      ----------------------------------------------------- */
+
+      else if (interimText.trim()) {
+
+        voiceStatusText.textContent =
+          "Listening: " +
+          interimText.trim();
+
+      }
+
+    };
+
+
+    /* -------------------------------------------------------
+       ERROR
+    ------------------------------------------------------- */
+
+    recognition.onerror = event => {
+
+      console.log(
+        "Emogigs SpeechRecognition error:",
+        event.error
+      );
+
+
+      voiceStarting = false;
+
+
+      switch (event.error) {
+
+        case "not-allowed":
+
+          stopVoiceUI();
+
+          showToast(
+            "Microphone permission denied. Check Chrome microphone permission."
+          );
+
+          break;
+
+
+        case "permission-denied":
+
+          stopVoiceUI();
+
+          showToast(
+            "Microphone permission denied."
+          );
+
+          break;
+
+
+        case "no-speech":
+
+          stopVoiceUI();
+
+          showToast(
+            "No speech detected. Please speak closer to the microphone."
+          );
+
+          break;
+
+
+        case "audio-capture":
+
+          stopVoiceUI();
+
+          showToast(
+            "Microphone is unavailable. Check your phone microphone."
+          );
+
+          break;
+
+
+        case "network":
+
+          stopVoiceUI();
+
+          showToast(
+            "Voice service needs an internet connection."
+          );
+
+          break;
+
+
+        case "aborted":
+
+          stopVoiceUI();
+
+          break;
+
+
+        case "service-not-allowed":
+
+          stopVoiceUI();
+
+          showToast(
+            "Chrome voice service is unavailable."
+          );
+
+          break;
+
+
+        default:
+
+          stopVoiceUI();
+
+          showToast(
+            "Voice input could not start. Please try again."
+          );
+
+      }
+
+    };
+
+
+    /* -------------------------------------------------------
+       END
+    ------------------------------------------------------- */
+
+    recognition.onend = () => {
+
+      console.log(
+        "Emogigs SpeechRecognition ended."
       );
 
       stopVoiceUI();
 
+    };
+
+  }
+
+
+  /* =========================================================
+     MICROPHONE TEST
+  ========================================================== */
+
+  async function requestMicrophoneAccess() {
+
+    if (
+      !navigator.mediaDevices ||
+      !navigator.mediaDevices.getUserMedia
+    ) {
+
+      throw new Error(
+        "MICROPHONE_API_NOT_SUPPORTED"
+      );
+
+    }
+
+
+    try {
+
+      microphoneStream =
+        await navigator.mediaDevices.getUserMedia({
+          audio: true
+        });
+
+
+      console.log(
+        "Microphone access granted."
+      );
+
+
+      return true;
+
+    } catch (error) {
+
+      console.error(
+        "Microphone access error:",
+        error
+      );
+
+
+      throw error;
+
+    }
+
+  }
+
+
+  /* =========================================================
+     STOP MICROPHONE TEST STREAM
+  ========================================================== */
+
+  function releaseMicrophone() {
+
+    if (!microphoneStream) {
+
+      return;
+
+    }
+
+
+    microphoneStream
+      .getTracks()
+      .forEach(track => {
+
+        track.stop();
+
+      });
+
+
+    microphoneStream = null;
+
+  }
+
+
+  /* =========================================================
+     VOICE TOGGLE
+  ========================================================== */
+
+  async function toggleVoiceInput() {
+
+    if (!recognition) {
+
+      showToast(
+        "Voice input is not supported by this browser."
+      );
+
+      return;
+
+    }
+
+
+    /* -------------------------------------------------------
+       Already listening
+    ------------------------------------------------------- */
+
+    if (isListening) {
+
+      try {
+
+        recognition.stop();
+
+      } catch (error) {
+
+        console.log(error);
+
+      }
+
+      return;
+
+    }
+
+
+    /* -------------------------------------------------------
+       Prevent double click / busy state
+    ------------------------------------------------------- */
+
+    if (voiceStarting) {
+
+      showToast(
+        "Voice system is starting. Please wait..."
+      );
+
+      return;
+
+    }
+
+
+    voiceStarting = true;
+
+
+    try {
+
+      /* -----------------------------------------------------
+         First test actual microphone permission
+      ----------------------------------------------------- */
+
+      voiceStatus.classList.add("show");
+
+      voiceStatusText.textContent =
+        "Checking microphone...";
+
+
+      await requestMicrophoneAccess();
+
+
+      /*
+        Release getUserMedia stream before starting
+        SpeechRecognition.
+      */
+
+      releaseMicrophone();
+
+
+      /* -----------------------------------------------------
+         Start speech recognition
+      ----------------------------------------------------- */
+
+      voiceStatusText.textContent =
+        "Starting voice input...";
+
+
+      /*
+        Small delay helps Chrome Android switch
+        from microphone permission handling to
+        SpeechRecognition.
+      */
+
+      await new Promise(resolve => {
+
+        setTimeout(resolve, 150);
+
+      });
+
+
+      try {
+
+        recognition.start();
+
+      } catch (startError) {
+
+        console.error(
+          "SpeechRecognition start error:",
+          startError
+        );
+
+
+        voiceStarting = false;
+
+        stopVoiceUI();
+
+        showToast(
+          "Voice system is busy. Please wait and try again."
+        );
+
+      }
+
+    } catch (error) {
+
+      console.error(
+        "Microphone permission failed:",
+        error
+      );
+
+
+      voiceStarting = false;
+
+      releaseMicrophone();
+
+      stopVoiceUI();
+
+
+      /* -----------------------------------------------------
+         Permission denied
+      ----------------------------------------------------- */
 
       if (
-        error.name ===
-        "InvalidStateError"
+        error &&
+        (
+          error.name === "NotAllowedError" ||
+          error.name === "PermissionDeniedError"
+        )
       ) {
 
-        /*
-          Wait and automatically reset.
-        */
-
-        recognition = null;
-
         showToast(
-          "Voice engine reset হচ্ছে। আবার 🎙️ চাপুন।"
+          "Microphone permission denied. Allow microphone for Chrome."
         );
+
+        return;
 
       }
 
-      else {
 
-        recognition = null;
+      /* -----------------------------------------------------
+         Microphone not found
+      ----------------------------------------------------- */
+
+      if (
+        error &&
+        error.name === "NotFoundError"
+      ) {
 
         showToast(
-          "🎙️ Voice input শুরু করা যায়নি।"
+          "No microphone was found on this device."
         );
 
+        return;
+
       }
+
+
+      /* -----------------------------------------------------
+         Microphone already busy
+      ----------------------------------------------------- */
+
+      if (
+        error &&
+        error.name === "NotReadableError"
+      ) {
+
+        showToast(
+          "Microphone is being used by another app."
+        );
+
+        return;
+
+      }
+
+
+      /* -----------------------------------------------------
+         Browser doesn't support microphone API
+      ----------------------------------------------------- */
+
+      if (
+        error &&
+        error.message ===
+        "MICROPHONE_API_NOT_SUPPORTED"
+      ) {
+
+        showToast(
+          "This browser cannot access the microphone."
+        );
+
+        return;
+
+      }
+
+
+      showToast(
+        "Could not access the microphone."
+      );
 
     }
 
@@ -544,16 +847,35 @@
 
     isListening = false;
 
-    micBtn.classList.remove(
-      "listening"
-    );
+    voiceStarting = false;
 
-    micBtn.textContent =
-      "🎙️";
 
-    voiceStatus.classList.remove(
-      "show"
-    );
+    if (micBtn) {
+
+      micBtn.classList.remove(
+        "listening"
+      );
+
+      micBtn.textContent = "🎙️";
+
+      micBtn.setAttribute(
+        "aria-label",
+        "Voice input"
+      );
+
+    }
+
+
+    if (voiceStatus) {
+
+      voiceStatus.classList.remove(
+        "show"
+      );
+
+    }
+
+
+    releaseMicrophone();
 
   }
 
@@ -563,6 +885,9 @@
   ========================================================== */
 
   async function sendMessage() {
+
+    if (!messageInput) return;
+
 
     const text =
       messageInput.value.trim();
@@ -575,25 +900,66 @@
     }
 
 
-    /* Stop any currently playing speech */
-
     stopSpeaking();
 
 
-    /* Hide home UI */
+    /* -------------------------------------------------------
+       Stop voice if currently listening
+    ------------------------------------------------------- */
 
-    hero.style.display = "none";
+    if (
+      recognition &&
+      isListening
+    ) {
 
-    quickTools.style.display = "none";
+      try {
 
-    modeRow.style.display = "flex";
+        recognition.stop();
+
+      } catch (error) {
+
+        console.log(error);
+
+      }
+
+    }
 
 
-    chatArea.classList.add("visible");
+    /* -------------------------------------------------------
+       Hide home UI
+    ------------------------------------------------------- */
+
+    if (hero) {
+
+      hero.style.display = "none";
+
+    }
+
+
+    if (quickTools) {
+
+      quickTools.style.display = "none";
+
+    }
+
+
+    if (modeRow) {
+
+      modeRow.style.display = "flex";
+
+    }
+
+
+    if (chatArea) {
+
+      chatArea.classList.add("visible");
+
+    }
 
 
     const empty =
       document.getElementById("emptyChat");
+
 
     if (empty) {
 
@@ -602,7 +968,9 @@
     }
 
 
-    /* Add user message */
+    /* -------------------------------------------------------
+       User message
+    ------------------------------------------------------- */
 
     addMessage(
       "user",
@@ -622,14 +990,18 @@
     saveConversation();
 
 
-    /* Clear input */
+    /* -------------------------------------------------------
+       Clear input
+    ------------------------------------------------------- */
 
     messageInput.value = "";
 
     messageInput.style.height = "auto";
 
 
-    /* Typing indicator */
+    /* -------------------------------------------------------
+       Typing indicator
+    ------------------------------------------------------- */
 
     const typingId =
       addTyping();
@@ -657,7 +1029,8 @@
 
             mode: currentMode,
 
-            history: conversation.slice(-12)
+            history:
+              conversation.slice(-12)
 
           })
 
@@ -693,8 +1066,6 @@
       }
 
 
-      /* Add AI message */
-
       addMessage(
         "assistant",
         answer
@@ -712,7 +1083,6 @@
 
       saveConversation();
 
-
     } catch (error) {
 
       console.error(
@@ -724,13 +1094,9 @@
       removeTyping(typingId);
 
 
-      const errorMessage =
-        "Sorry, I couldn't connect to Emogigs AI right now. Please try again.";
-
-
       addMessage(
         "assistant",
-        errorMessage
+        "Sorry, I couldn't connect to Emogigs AI right now. Please try again."
       );
 
     }
@@ -751,9 +1117,9 @@
     }
 
 
-    /* Most common */
-
-    if (typeof data === "string") {
+    if (
+      typeof data === "string"
+    ) {
 
       return data;
 
@@ -791,6 +1157,7 @@
 
       }
 
+
       if (data.message.content) {
 
         return data.message.content;
@@ -799,8 +1166,6 @@
 
     }
 
-
-    /* OpenAI / Groq style */
 
     if (
       Array.isArray(data.choices) &&
@@ -841,6 +1206,9 @@
     text
   ) {
 
+    if (!chatArea) return null;
+
+
     const message =
       document.createElement("div");
 
@@ -852,7 +1220,10 @@
     const avatar =
       document.createElement("div");
 
-    avatar.className = "avatar";
+
+    avatar.className =
+      "avatar";
+
 
     avatar.textContent =
       role === "assistant"
@@ -863,12 +1234,14 @@
     const wrap =
       document.createElement("div");
 
+
     wrap.className =
       "bubble-wrap";
 
 
     const bubble =
       document.createElement("div");
+
 
     bubble.className =
       "bubble";
@@ -878,21 +1251,28 @@
       text;
 
 
-    wrap.appendChild(bubble);
+    wrap.appendChild(
+      bubble
+    );
 
 
-    /* Actions */
+    /* -------------------------------------------------------
+       ACTIONS
+    ------------------------------------------------------- */
 
     const actions =
       document.createElement("div");
+
 
     actions.className =
       "message-actions";
 
 
-    if (role === "assistant") {
+    if (
+      role === "assistant"
+    ) {
 
-      /* Read aloud */
+      /* READ ALOUD */
 
       const speakBtn =
         createActionButton(
@@ -914,7 +1294,7 @@
       );
 
 
-      /* Copy */
+      /* COPY */
 
       const copyBtn =
         createActionButton(
@@ -931,6 +1311,7 @@
 
           copyBtn.textContent = "✓";
 
+
           setTimeout(() => {
 
             copyBtn.textContent = "📋";
@@ -941,7 +1322,7 @@
       );
 
 
-      /* Regenerate */
+      /* REGENERATE */
 
       const regenerateBtn =
         createActionButton(
@@ -964,9 +1345,11 @@
         speakBtn
       );
 
+
       actions.appendChild(
         copyBtn
       );
+
 
       actions.appendChild(
         regenerateBtn
@@ -975,15 +1358,24 @@
     }
 
 
-    wrap.appendChild(actions);
+    wrap.appendChild(
+      actions
+    );
 
 
-    message.appendChild(avatar);
+    message.appendChild(
+      avatar
+    );
 
-    message.appendChild(wrap);
+
+    message.appendChild(
+      wrap
+    );
 
 
-    chatArea.appendChild(message);
+    chatArea.appendChild(
+      message
+    );
 
 
     scrollToBottom();
@@ -1052,9 +1444,6 @@
     }
 
 
-    /* If THIS message is currently speaking,
-       stop it. */
-
     if (
       currentSpeakingButton === button
     ) {
@@ -1066,8 +1455,6 @@
     }
 
 
-    /* Stop previous speech */
-
     stopSpeaking();
 
 
@@ -1077,27 +1464,31 @@
       );
 
 
-    /*
-      Automatically choose a good voice.
-      Browser decides available language.
-    */
-
     const voices =
       window.speechSynthesis.getVoices();
 
 
     const preferredVoice =
       voices.find(
-        voice =>
-          voice.lang &&
-          (
-            voice.lang
-              .toLowerCase()
-              .startsWith("en") ||
-            voice.lang
-              .toLowerCase()
-              .startsWith("bn")
-          )
+        voice => {
+
+          if (!voice.lang) {
+
+            return false;
+
+          }
+
+
+          const lang =
+            voice.lang.toLowerCase();
+
+
+          return (
+            lang.startsWith("bn") ||
+            lang.startsWith("en")
+          );
+
+        }
       );
 
 
@@ -1121,9 +1512,11 @@
       currentSpeakingButton =
         button;
 
+
       button.classList.add(
         "speaking"
       );
+
 
       button.textContent =
         "⏹";
@@ -1141,9 +1534,11 @@
         currentSpeakingButton =
           null;
 
+
         button.classList.remove(
           "speaking"
         );
+
 
         button.textContent =
           "🔊";
@@ -1163,9 +1558,11 @@
         currentSpeakingButton =
           null;
 
+
         button.classList.remove(
           "speaking"
         );
+
 
         button.textContent =
           "🔊";
@@ -1205,6 +1602,7 @@
         "speaking"
       );
 
+
       currentSpeakingButton.textContent =
         "🔊";
 
@@ -1225,15 +1623,57 @@
 
     try {
 
-      await navigator.clipboard.writeText(
-        text
+      if (
+        navigator.clipboard
+      ) {
+
+        await navigator.clipboard.writeText(
+          text
+        );
+
+        showToast(
+          "Copied to clipboard"
+        );
+
+        return;
+
+      }
+
+
+      /* Fallback */
+
+      const textarea =
+        document.createElement("textarea");
+
+
+      textarea.value = text;
+
+      textarea.style.position =
+        "fixed";
+
+      textarea.style.opacity = "0";
+
+
+      document.body.appendChild(
+        textarea
       );
+
+
+      textarea.select();
+
+      document.execCommand("copy");
+
+
+      textarea.remove();
+
 
       showToast(
         "Copied to clipboard"
       );
 
-    } catch {
+    } catch (error) {
+
+      console.error(error);
 
       showToast(
         "Copy failed"
@@ -1270,8 +1710,10 @@
     const avatar =
       document.createElement("div");
 
+
     avatar.className =
       "avatar";
+
 
     avatar.textContent =
       "✦";
@@ -1280,12 +1722,14 @@
     const wrap =
       document.createElement("div");
 
+
     wrap.className =
       "bubble-wrap";
 
 
     const typing =
       document.createElement("div");
+
 
     typing.className =
       "bubble typing";
@@ -1303,6 +1747,7 @@
     message.appendChild(
       avatar
     );
+
 
     message.appendChild(
       wrap
@@ -1362,8 +1807,7 @@
     ) {
 
       if (
-        conversation[i].role ===
-        "user"
+        conversation[i].role === "user"
       ) {
 
         lastUserMessage =
@@ -1387,7 +1831,10 @@
       lastUserMessage;
 
 
-    /* Remove latest assistant message */
+    messageInput.dispatchEvent(
+      new Event("input")
+    );
+
 
     const messages =
       chatArea.querySelectorAll(
@@ -1403,8 +1850,6 @@
 
     }
 
-
-    /* Remove last assistant from history */
 
     if (
       conversation[
@@ -1430,7 +1875,27 @@
 
     stopSpeaking();
 
+
+    if (
+      recognition &&
+      isListening
+    ) {
+
+      try {
+
+        recognition.stop();
+
+      } catch (error) {
+
+        console.log(error);
+
+      }
+
+    }
+
+
     conversation = [];
+
 
     localStorage.removeItem(
       STORAGE_KEY
@@ -1438,8 +1903,12 @@
 
 
     chatArea.innerHTML = `
+
       <div class="empty-chat" id="emptyChat">
-        <div class="empty-chat-icon">✦</div>
+
+        <div class="empty-chat-icon">
+          ✦
+        </div>
 
         <strong>
           Emogigs AI is ready
@@ -1447,7 +1916,9 @@
 
         Ask anything, type a message,
         or use your microphone.
+
       </div>
+
     `;
 
 
@@ -1470,6 +1941,7 @@
 
     messageInput.value =
       "";
+
 
     messageInput.style.height =
       "auto";
@@ -1573,8 +2045,11 @@
       conversation.forEach(item => {
 
         if (
-          item.role === "user" ||
-          item.role === "assistant"
+          (
+            item.role === "user" ||
+            item.role === "assistant"
+          ) &&
+          typeof item.content === "string"
         ) {
 
           addMessage(
@@ -1585,7 +2060,6 @@
         }
 
       });
-
 
     } catch (error) {
 
@@ -1629,9 +2103,10 @@
   let toastTimer;
 
 
-  function showToast(
-    message
-  ) {
+  function showToast(message) {
+
+    if (!toast) return;
+
 
     toast.textContent =
       message;
@@ -1654,13 +2129,13 @@
           "show"
         );
 
-      }, 2200);
+      }, 3000);
 
   }
 
 
   /* =========================================================
-     LOAD SPEECH VOICES
+     SPEECH VOICES
   ========================================================== */
 
   if (
