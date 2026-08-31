@@ -1,467 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
   <meta charset="UTF-8">
+
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0, viewport-fit=cover"
   >
 
-  <meta name="theme-color" content="#08080d">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta
+    name="theme-color"
+    content="#08080d"
+  >
+
+  <meta
+    name="mobile-web-app-capable"
+    content="yes"
+  >
+
+  <meta
+    name="apple-mobile-web-app-capable"
+    content="yes"
+  >
 
   <title>Emogigs AI</title>
 
+
   <style>
-/* =========================================================
-   ACCOUNT SYSTEM — STEP 21A
-========================================================= */
-
-.account-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 500;
-
-  display: none;
-  align-items: center;
-  justify-content: center;
-
-  padding: 20px;
-
-  background:
-    rgba(0,0,0,.72);
-
-  backdrop-filter: blur(18px);
-}
-
-.account-overlay.show {
-  display: flex;
-}
-
-.account-modal {
-  position: relative;
-
-  width: 100%;
-  max-width: 430px;
-
-  max-height: 90vh;
-  overflow-y: auto;
-
-  padding: 28px 22px 24px;
-
-  border-radius: 28px;
-
-  background:
-    linear-gradient(
-      145deg,
-      rgba(35,35,44,.98),
-      rgba(18,18,24,.98)
-    );
-
-  border: 1px solid rgba(255,255,255,.10);
-
-  box-shadow:
-    0 30px 100px rgba(0,0,0,.65),
-    0 0 60px rgba(95,75,255,.12);
-
-  animation: accountIn .25s ease;
-}
-
-@keyframes accountIn {
-
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(.96);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-
-}
-
-.account-close {
-
-  position: absolute;
-
-  top: 14px;
-  right: 14px;
-
-  width: 38px;
-  height: 38px;
-
-  border-radius: 50%;
-
-  color: #ddd;
-
-  background:
-    rgba(255,255,255,.07);
-
-  font-size: 25px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-}
-
-.account-logo {
-
-  width: 68px;
-  height: 68px;
-
-  margin: 0 auto 16px;
-
-  border-radius: 21px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-size: 31px;
-
-  background:
-    linear-gradient(
-      135deg,
-      #7657ff,
-      #269eff
-    );
-
-  box-shadow:
-    0 0 40px rgba(90,85,255,.35);
-}
-
-.account-title {
-
-  text-align: center;
-
-  font-size: 21px;
-  font-weight: 800;
-
-  letter-spacing: -.4px;
-
-}
-
-.account-subtitle {
-
-  margin-top: 6px;
-
-  text-align: center;
-
-  color: #858590;
-
-  font-size: 13px;
-
-}
-
-.account-screen {
-
-  margin-top: 25px;
-
-}
-
-.account-profile-card {
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 13px;
-
-  padding: 15px;
-
-  border-radius: 18px;
-
-  background:
-    rgba(255,255,255,.045);
-
-  border:
-    1px solid rgba(255,255,255,.07);
-
-  margin-bottom: 15px;
-
-}
-
-.account-avatar {
-
-  width: 48px;
-  height: 48px;
-
-  border-radius: 16px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background:
-    linear-gradient(
-      135deg,
-      #7256ff,
-      #299eff
-    );
-
-  font-size: 22px;
-
-}
-
-.account-profile-info {
-
-  display: flex;
-
-  flex-direction: column;
-
-  min-width: 0;
-
-}
-
-.account-profile-info strong {
-
-  font-size: 15px;
-
-}
-
-.account-profile-info span {
-
-  margin-top: 3px;
-
-  color: #8a8a96;
-
-  font-size: 11px;
-
-}
-
-.account-main-btn {
-
-  width: 100%;
-
-  min-height: 49px;
-
-  border-radius: 16px;
-
-  color: white;
-
-  background:
-    linear-gradient(
-      135deg,
-      #7155ff,
-      #299fff
-    );
-
-  font-weight: 750;
-
-  box-shadow:
-    0 10px 30px rgba(80,90,255,.18);
-
-  margin-top: 10px;
-
-}
-
-.account-secondary-btn {
-
-  width: 100%;
-
-  min-height: 47px;
-
-  margin-top: 9px;
-
-  border-radius: 16px;
-
-  color: #c7c7d0;
-
-  background:
-    rgba(255,255,255,.055);
-
-  border:
-    1px solid rgba(255,255,255,.07);
-
-}
-
-.account-back-btn {
-
-  width: 100%;
-
-  min-height: 45px;
-
-  margin-top: 9px;
-
-  border-radius: 15px;
-
-  color: #9999a4;
-
-  background:
-    transparent;
-
-}
-
-.account-form {
-
-  display: flex;
-
-  flex-direction: column;
-
-}
-
-.account-form label {
-
-  margin:
-    12px 2px 6px;
-
-  color: #aaaab5;
-
-  font-size: 12px;
-
-  font-weight: 650;
-
-}
-
-.account-form input {
-
-  width: 100%;
-
-  height: 48px;
-
-  padding: 0 14px;
-
-  outline: none;
-
-  border-radius: 14px;
-
-  color: white;
-
-  background:
-    rgba(255,255,255,.055);
-
-  border:
-    1px solid rgba(255,255,255,.08);
-
-}
-
-.account-form input:focus {
-
-  border-color:
-    rgba(125,93,255,.65);
-
-  box-shadow:
-    0 0 0 3px rgba(125,93,255,.09);
-
-}
-
-.success-icon {
-
-  width: 66px;
-  height: 66px;
-
-  margin: 0 auto 15px;
-
-  border-radius: 50%;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  color: white;
-
-  background:
-    linear-gradient(
-      135deg,
-      #39c879,
-      #27a86c
-    );
-
-  font-size: 30px;
-
-  box-shadow:
-    0 0 35px rgba(50,210,125,.2);
-
-}
-
-.account-created h3 {
-
-  text-align: center;
-
-}
-
-#accountCreated h3 {
-
-  text-align: center;
-
-  margin:
-    0 0 7px;
-
-}
-
-.success-text {
-
-  color: #8c8c98;
-
-  text-align: center;
-
-  font-size: 12px;
-
-  line-height: 1.6;
-
-}
-
-.emogigs-id-box {
-
-  margin-top: 20px;
-
-  padding: 18px;
-
-  text-align: center;
-
-  border-radius: 18px;
-
-  background:
-    rgba(110,80,255,.09);
-
-  border:
-    1px solid rgba(125,93,255,.22);
-
-}
-
-.emogigs-id-box span {
-
-  display: block;
-
-  color: #9696a3;
-
-  font-size: 11px;
-
-  margin-bottom: 8px;
-
-}
-
-.emogigs-id-box strong {
-
-  display: block;
-
-  color: white;
-
-  font-size: 21px;
-
-  letter-spacing: 1px;
-
-}
-
-.emogigs-id-box button {
-
-  margin-top: 12px;
-
-  padding: 8px 13px;
-
-  border-radius: 10px;
-
-  color: #bcaeff;
-
-  background:
-    rgba(125,93,255,.12);
-
-  font-size: 12px;
-
-}
 
     /* =====================================================
        RESET
@@ -473,183 +40,20 @@
     }
 
     html,
-<!-- =====================================================
-     EMOGIGS ACCOUNT MODAL — STEP 21A
-===================================================== -->
-
-<div class="account-overlay" id="accountOverlay">
-
-  <div class="account-modal">
-
-    <button
-      class="account-close"
-      id="accountClose"
-      aria-label="Close">
-      ×
-    </button>
-
-    <div class="account-logo">
-      ✦
-    </div>
-
-    <div class="account-title">
-      Welcome to Emogigs AI
-    </div>
-
-    <div class="account-subtitle">
-      Create your personal Emogigs ID
-    </div>
-
-    <!-- ACCOUNT HOME -->
-
-    <div id="accountHome" class="account-screen">
-
-      <div class="account-profile-card">
-
-        <div class="account-avatar" id="accountAvatar">
-          👤
-        </div>
-
-        <div class="account-profile-info">
-
-          <strong id="accountDisplayName">
-            Guest User
-          </strong>
-
-          <span id="accountDisplayId">
-            No Emogigs ID
-          </span>
-
-        </div>
-
-      </div>
-
-      <button
-        class="account-main-btn"
-        id="createAccountBtn">
-        ✨ Create Emogigs ID
-      </button>
-
-      <button
-        class="account-secondary-btn"
-        id="editProfileBtn">
-        ✏️ Edit Profile
-      </button>
-
-    </div>
-
-
-    <!-- CREATE ACCOUNT -->
-
-    <div
-      id="accountCreate"
-      class="account-screen"
-      style="display:none;">
-
-      <div class="account-form">
-
-        <label>
-          Your name
-        </label>
-
-        <input
-          type="text"
-          id="accountName"
-          placeholder="Enter your name"
-          autocomplete="name">
-
-        <label>
-          Email
-        </label>
-
-        <input
-          type="email"
-          id="accountEmail"
-          placeholder="Enter your email"
-          autocomplete="email">
-
-        <label>
-          Username
-        </label>
-
-        <input
-          type="text"
-          id="accountUsername"
-          placeholder="Choose a username"
-          autocomplete="username">
-
-        <button
-          class="account-main-btn"
-          id="saveAccountBtn">
-          🚀 Create My Emogigs ID
-        </button>
-
-        <button
-          class="account-back-btn"
-          id="accountBackBtn">
-          ← Back
-        </button>
-
-      </div>
-
-    </div>
-
-
-    <!-- ACCOUNT CREATED -->
-
-    <div
-      id="accountCreated"
-      class="account-screen"
-      style="display:none;">
-
-      <div class="success-icon">
-        ✓
-      </div>
-
-      <h3>
-        Your Emogigs ID is ready!
-      </h3>
-
-      <p class="success-text">
-        This ID will become your personal identity
-        inside Emogigs AI.
-      </p>
-
-      <div class="emogigs-id-box">
-
-        <span>
-          Your Emogigs ID
-        </span>
-
-        <strong id="generatedEmogigsId">
-          EMO-000000
-        </strong>
-
-        <button
-          id="copyEmogigsId">
-          📋 Copy ID
-        </button>
-
-      </div>
-
-      <button
-        class="account-main-btn"
-        id="continueAccountBtn">
-        Continue to Emogigs AI →
-      </button>
-
-    </div>
-
-  </div>
-
-</div>
     body {
       margin: 0;
       padding: 0;
       width: 100%;
       min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      overflow-x: hidden;
+
       background: #08080d;
       color: #f5f5f7;
+
       font-family:
         Inter,
         system-ui,
@@ -657,11 +61,6 @@
         BlinkMacSystemFont,
         "Segoe UI",
         sans-serif;
-    }
-
-    body {
-      min-height: 100vh;
-      overflow-x: hidden;
     }
 
     button,
@@ -691,18 +90,419 @@
 
 
     /* =====================================================
+       ACCOUNT SYSTEM — STEP 21A
+    ====================================================== */
+
+    .account-overlay {
+      position: fixed;
+      inset: 0;
+
+      z-index: 500;
+
+      display: none;
+
+      align-items: center;
+      justify-content: center;
+
+      padding: 20px;
+
+      background: rgba(0,0,0,.72);
+
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .account-overlay.show {
+      display: flex;
+    }
+
+    .account-modal {
+      position: relative;
+
+      width: 100%;
+      max-width: 430px;
+
+      max-height: 90vh;
+      overflow-y: auto;
+
+      padding: 28px 22px 24px;
+
+      border-radius: 28px;
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(35,35,44,.98),
+          rgba(18,18,24,.98)
+        );
+
+      border: 1px solid rgba(255,255,255,.10);
+
+      box-shadow:
+        0 30px 100px rgba(0,0,0,.65),
+        0 0 60px rgba(95,75,255,.12);
+
+      animation: accountIn .25s ease;
+    }
+
+    @keyframes accountIn {
+
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(.96);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+
+    }
+
+    .account-close {
+      position: absolute;
+
+      top: 14px;
+      right: 14px;
+
+      width: 38px;
+      height: 38px;
+
+      border-radius: 50%;
+
+      color: #ddd;
+
+      background:
+        rgba(255,255,255,.07);
+
+      font-size: 25px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .account-logo {
+      width: 68px;
+      height: 68px;
+
+      margin: 0 auto 16px;
+
+      border-radius: 21px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      font-size: 31px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #7657ff,
+          #269eff
+        );
+
+      box-shadow:
+        0 0 40px rgba(90,85,255,.35);
+    }
+
+    .account-title {
+      text-align: center;
+
+      font-size: 21px;
+      font-weight: 800;
+
+      letter-spacing: -.4px;
+    }
+
+    .account-subtitle {
+      margin-top: 6px;
+
+      text-align: center;
+
+      color: #858590;
+
+      font-size: 13px;
+    }
+
+    .account-screen {
+      margin-top: 25px;
+    }
+
+    .account-profile-card {
+      display: flex;
+
+      align-items: center;
+
+      gap: 13px;
+
+      padding: 15px;
+
+      border-radius: 18px;
+
+      background:
+        rgba(255,255,255,.045);
+
+      border:
+        1px solid rgba(255,255,255,.07);
+
+      margin-bottom: 15px;
+    }
+
+    .account-modal .account-avatar {
+      width: 48px;
+      height: 48px;
+
+      flex: 0 0 48px;
+
+      border-radius: 16px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      background:
+        linear-gradient(
+          135deg,
+          #7256ff,
+          #299eff
+        );
+
+      font-size: 22px;
+    }
+
+    .account-profile-info {
+      display: flex;
+
+      flex-direction: column;
+
+      min-width: 0;
+    }
+
+    .account-profile-info strong {
+      font-size: 15px;
+    }
+
+    .account-profile-info span {
+      margin-top: 3px;
+
+      color: #8a8a96;
+
+      font-size: 11px;
+    }
+
+    .account-main-btn {
+      width: 100%;
+
+      min-height: 49px;
+
+      border-radius: 16px;
+
+      color: white;
+
+      background:
+        linear-gradient(
+          135deg,
+          #7155ff,
+          #299fff
+        );
+
+      font-weight: 750;
+
+      box-shadow:
+        0 10px 30px rgba(80,90,255,.18);
+
+      margin-top: 10px;
+    }
+
+    .account-secondary-btn {
+      width: 100%;
+
+      min-height: 47px;
+
+      margin-top: 9px;
+
+      border-radius: 16px;
+
+      color: #c7c7d0;
+
+      background:
+        rgba(255,255,255,.055);
+
+      border:
+        1px solid rgba(255,255,255,.07);
+    }
+
+    .account-back-btn {
+      width: 100%;
+
+      min-height: 45px;
+
+      margin-top: 9px;
+
+      border-radius: 15px;
+
+      color: #9999a4;
+
+      background: transparent;
+    }
+
+    .account-form {
+      display: flex;
+
+      flex-direction: column;
+    }
+
+    .account-form label {
+      margin:
+        12px 2px 6px;
+
+      color: #aaaab5;
+
+      font-size: 12px;
+
+      font-weight: 650;
+    }
+
+    .account-form input {
+      width: 100%;
+
+      height: 48px;
+
+      padding: 0 14px;
+
+      outline: none;
+
+      border-radius: 14px;
+
+      color: white;
+
+      background:
+        rgba(255,255,255,.055);
+
+      border:
+        1px solid rgba(255,255,255,.08);
+    }
+
+    .account-form input:focus {
+      border-color:
+        rgba(125,93,255,.65);
+
+      box-shadow:
+        0 0 0 3px rgba(125,93,255,.09);
+    }
+
+    .success-icon {
+      width: 66px;
+      height: 66px;
+
+      margin: 0 auto 15px;
+
+      border-radius: 50%;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      color: white;
+
+      background:
+        linear-gradient(
+          135deg,
+          #39c879,
+          #27a86c
+        );
+
+      font-size: 30px;
+
+      box-shadow:
+        0 0 35px rgba(50,210,125,.2);
+    }
+
+    #accountCreated h3 {
+      text-align: center;
+
+      margin:
+        0 0 7px;
+    }
+
+    .success-text {
+      color: #8c8c98;
+
+      text-align: center;
+
+      font-size: 12px;
+
+      line-height: 1.6;
+    }
+
+    .emogigs-id-box {
+      margin-top: 20px;
+
+      padding: 18px;
+
+      text-align: center;
+
+      border-radius: 18px;
+
+      background:
+        rgba(110,80,255,.09);
+
+      border:
+        1px solid rgba(125,93,255,.22);
+    }
+
+    .emogigs-id-box span {
+      display: block;
+
+      color: #9696a3;
+
+      font-size: 11px;
+
+      margin-bottom: 8px;
+    }
+
+    .emogigs-id-box strong {
+      display: block;
+
+      color: white;
+
+      font-size: 21px;
+
+      letter-spacing: 1px;
+    }
+
+    .emogigs-id-box button {
+      margin-top: 12px;
+
+      padding: 8px 13px;
+
+      border-radius: 10px;
+
+      color: #bcaeff;
+
+      background:
+        rgba(125,93,255,.12);
+
+      font-size: 12px;
+    }
+
+
+    /* =====================================================
        APP
     ====================================================== */
 
     .app {
       min-height: 100vh;
+
       display: flex;
       flex-direction: column;
 
       background:
         radial-gradient(
           circle at 50% -10%,
-          rgba(91, 70, 255, 0.18),
+          rgba(91,70,255,.18),
           transparent 38%
         ),
         #08080d;
@@ -729,16 +529,20 @@
         rgba(8,8,13,.92);
 
       backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
 
       position: sticky;
       top: 0;
+
       z-index: 100;
     }
 
     .brand {
       display: flex;
       align-items: center;
+
       gap: 11px;
+
       min-width: 0;
     }
 
@@ -771,13 +575,17 @@
 
     .brand-name {
       font-size: 16px;
+
       font-weight: 750;
+
       letter-spacing: -.2px;
     }
 
     .brand-status {
       margin-top: 2px;
+
       font-size: 11px;
+
       color: #8e8e9a;
     }
 
@@ -799,7 +607,9 @@
 
     .top-actions {
       display: flex;
+
       align-items: center;
+
       gap: 8px;
     }
 
@@ -830,6 +640,7 @@
 
     .profile-btn {
       position: relative;
+
       overflow: hidden;
     }
 
@@ -844,6 +655,7 @@
       justify-content: center;
 
       font-size: 13px;
+
       font-weight: 700;
 
       background:
@@ -870,6 +682,7 @@
 
     .main {
       width: 100%;
+
       max-width: 850px;
 
       margin: 0 auto;
@@ -898,12 +711,15 @@
 
     .eyebrow {
       display: inline-flex;
+
       align-items: center;
+
       gap: 6px;
 
       color: #a98cff;
 
       font-size: 13px;
+
       font-weight: 650;
 
       margin-bottom: 11px;
@@ -949,6 +765,7 @@
       color: #94949f;
 
       font-size: 15px;
+
       line-height: 1.75;
     }
 
@@ -1059,11 +876,13 @@
 
     .feature-icon {
       font-size: 20px;
+
       margin-bottom: 7px;
     }
 
     .feature-title {
       font-size: 12px;
+
       font-weight: 700;
     }
 
@@ -1140,11 +959,13 @@
 
     .quick-icon {
       font-size: 24px;
+
       margin-bottom: 10px;
     }
 
     .quick-title {
       font-size: 14px;
+
       font-weight: 700;
     }
 
@@ -1194,12 +1015,16 @@
 
       from {
         opacity: 0;
-        transform: translateY(7px);
+
+        transform:
+          translateY(7px);
       }
 
       to {
         opacity: 1;
-        transform: translateY(0);
+
+        transform:
+          translateY(0);
       }
 
     }
@@ -1219,7 +1044,9 @@
       border-radius: 11px;
 
       display: flex;
+
       align-items: center;
+
       justify-content: center;
 
       font-size: 14px;
@@ -1383,11 +1210,13 @@
       70%,
       100% {
         transform: translateY(0);
+
         opacity: .35;
       }
 
       35% {
         transform: translateY(-4px);
+
         opacity: 1;
       }
 
@@ -1418,7 +1247,9 @@
         15px;
 
       display: flex;
+
       align-items: center;
+
       justify-content: center;
 
       border-radius: 22px;
@@ -1456,6 +1287,7 @@
       display: none;
 
       width: 100%;
+
       max-width: 850px;
 
       margin:
@@ -1492,6 +1324,7 @@
 
     .voice-bars span {
       width: 3px;
+
       height: 6px;
 
       border-radius: 5px;
@@ -1557,7 +1390,10 @@
     }
 
     .composer {
+      position: relative;
+
       width: 100%;
+
       max-width: 850px;
 
       margin: 0 auto;
@@ -1587,6 +1423,7 @@
         rgba(0,0,0,.4);
 
       backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
     }
 
     .composer textarea {
@@ -1606,6 +1443,7 @@
         9px;
 
       border: 0;
+
       outline: 0;
 
       color: #f2f2f5;
@@ -1636,7 +1474,9 @@
       background: transparent;
 
       display: flex;
+
       align-items: center;
+
       justify-content: center;
 
       font-size: 19px;
@@ -1699,6 +1539,103 @@
 
 
     /* =====================================================
+       ATTACHMENT MENU
+    ====================================================== */
+
+    .attachment-menu {
+      position: absolute;
+
+      right: 8px;
+
+      bottom: 59px;
+
+      width: 180px;
+
+      padding: 7px;
+
+      border-radius: 16px;
+
+      background:
+        #17171e;
+
+      border:
+        1px
+        solid
+        rgba(255,255,255,.09);
+
+      box-shadow:
+        0
+        15px
+        50px
+        rgba(0,0,0,.5);
+
+      opacity: 0;
+
+      pointer-events: none;
+
+      transform:
+        translateY(8px)
+        scale(.97);
+
+      transition: .2s;
+
+      z-index: 150;
+    }
+
+    .attachment-menu.show {
+      opacity: 1;
+
+      pointer-events: auto;
+
+      transform:
+        translateY(0)
+        scale(1);
+    }
+
+    .attachment-option {
+      width: 100%;
+
+      min-height: 40px;
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 9px;
+
+      padding:
+        0
+        10px;
+
+      color: #c4c4cd;
+
+      background: transparent;
+
+      border-radius: 10px;
+
+      text-align: left;
+
+      font-size: 12px;
+    }
+
+    .attachment-option:hover {
+      background:
+        rgba(255,255,255,.06);
+
+      color: white;
+    }
+
+
+    /* =====================================================
+       HIDDEN FILE INPUT
+    ====================================================== */
+
+    #fileInput {
+      display: none;
+    }
+
+
+    /* =====================================================
        TOAST
     ====================================================== */
 
@@ -1706,6 +1643,7 @@
       position: fixed;
 
       left: 50%;
+
       bottom: 105px;
 
       transform:
@@ -1718,7 +1656,7 @@
 
       pointer-events: none;
 
-      z-index: 500;
+      z-index: 600;
 
       padding:
         10px
@@ -1772,6 +1710,7 @@
         rgba(0,0,0,.62);
 
       backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
 
       opacity: 0;
 
@@ -1784,6 +1723,7 @@
 
     .panel-overlay.show {
       opacity: 1;
+
       pointer-events: auto;
     }
 
@@ -1860,10 +1800,13 @@
 
     .panel-header-title {
       display: flex;
+
       align-items: center;
+
       gap: 9px;
 
       font-size: 15px;
+
       font-weight: 750;
     }
 
@@ -1923,7 +1866,7 @@
       gap: 11px;
     }
 
-    .account-avatar {
+    .side-panel .account-avatar {
       width: 44px;
       height: 44px;
 
@@ -1951,6 +1894,7 @@
 
     .account-name {
       font-size: 14px;
+
       font-weight: 700;
     }
 
@@ -2276,6 +2220,7 @@
 
     .modal-title {
       font-size: 17px;
+
       font-weight: 750;
     }
 
@@ -2506,103 +2451,6 @@
 
 
     /* =====================================================
-       ATTACHMENT MENU
-    ====================================================== */
-
-    .attachment-menu {
-      position: absolute;
-
-      right: 8px;
-
-      bottom: 59px;
-
-      width: 180px;
-
-      padding: 7px;
-
-      border-radius: 16px;
-
-      background:
-        #17171e;
-
-      border:
-        1px
-        solid
-        rgba(255,255,255,.09);
-
-      box-shadow:
-        0
-        15px
-        50px
-        rgba(0,0,0,.5);
-
-      opacity: 0;
-
-      pointer-events: none;
-
-      transform:
-        translateY(8px)
-        scale(.97);
-
-      transition: .2s;
-
-      z-index: 150;
-    }
-
-    .attachment-menu.show {
-      opacity: 1;
-
-      pointer-events: auto;
-
-      transform:
-        translateY(0)
-        scale(1);
-    }
-
-    .attachment-option {
-      width: 100%;
-
-      min-height: 40px;
-
-      display: flex;
-
-      align-items: center;
-
-      gap: 9px;
-
-      padding:
-        0
-        10px;
-
-      color: #c4c4cd;
-
-      background: transparent;
-
-      border-radius: 10px;
-
-      text-align: left;
-
-      font-size: 12px;
-    }
-
-    .attachment-option:hover {
-      background:
-        rgba(255,255,255,.06);
-
-      color: white;
-    }
-
-
-    /* =====================================================
-       HIDDEN FILE INPUT
-    ====================================================== */
-
-    #fileInput {
-      display: none;
-    }
-
-
-    /* =====================================================
        DESKTOP
     ====================================================== */
 
@@ -2760,770 +2608,317 @@
     }
 
   </style>
+
 </head>
 
 
 <body>
 
-<div class="app">
-
 
   <!-- ===================================================
-       TOP HEADER
-  ==================================================== -->
-
-  <header class="topbar">
-
-    <div class="brand">
-
-      <div class="brand-logo">
-        ✦
-      </div>
-
-      <div class="brand-info">
-
-        <div class="brand-name">
-          Emogigs AI
-        </div>
-
-        <div class="brand-status">
-
-          <span class="online-dot"></span>
-
-          Your personal AI Life OS
-
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <div class="top-actions">
-
-      <!-- New chat -->
-
-      <button
-        class="icon-btn"
-        id="newChatBtn"
-        title="New chat"
-        aria-label="New chat"
-      >
-        ＋
-      </button>
-
-
-      <!-- Account -->
-
-      <button
-        class="icon-btn profile-btn"
-        id="profileBtn"
-        title="Account"
-        aria-label="Account"
-      >
-
-        <div class="profile-avatar">
-          👤
-        </div>
-
-      </button>
-
-    </div>
-
-  </header>
-
-
-
-  <!-- ===================================================
-       DESKTOP SIDEBAR
-  ==================================================== -->
-
-  <aside class="desktop-sidebar">
-
-    <div class="desktop-sidebar-label">
-      Workspace
-    </div>
-
-    <nav class="desktop-nav">
-
-      <button
-        class="desktop-nav-item active"
-        data-panel="chat"
-      >
-        <span class="desktop-nav-icon">✦</span>
-        <span>AI Chat</span>
-      </button>
-
-      <button
-        class="desktop-nav-item"
-        data-panel="history"
-      >
-        <span class="desktop-nav-icon">🕘</span>
-        <span>History</span>
-      </button>
-
-      <button
-        class="desktop-nav-item"
-        data-panel="projects"
-      >
-        <span class="desktop-nav-icon">📁</span>
-        <span>Projects</span>
-      </button>
-
-      <button
-        class="desktop-nav-item"
-        data-panel="skills"
-      >
-        <span class="desktop-nav-icon">🧠</span>
-        <span>Skills</span>
-      </button>
-
-      <button
-        class="desktop-nav-item"
-        data-panel="teachers"
-      >
-        <span class="desktop-nav-icon">👨‍🏫</span>
-        <span>Teachers</span>
-      </button>
-
-    </nav>
-
-
-    <div class="desktop-sidebar-label">
-      Tools
-    </div>
-
-    <nav class="desktop-nav">
-
-      <button
-        class="desktop-nav-item"
-        data-panel="connectors"
-      >
-        <span class="desktop-nav-icon">🔗</span>
-        <span>Connectors</span>
-      </button>
-
-      <button
-        class="desktop-nav-item"
-        data-panel="automations"
-      >
-        <span class="desktop-nav-icon">⚡</span>
-        <span>Automations</span>
-      </button>
-
-      <button
-        class="desktop-nav-item"
-        data-panel="memory"
-      >
-        <span class="desktop-nav-icon">🧩</span>
-        <span>Memory</span>
-      </button>
-
-    </nav>
-
-
-    <div class="desktop-sidebar-label">
-      Account
-    </div>
-
-    <nav class="desktop-nav">
-
-      <button
-        class="desktop-nav-item"
-        data-panel="privacy"
-      >
-        <span class="desktop-nav-icon">🔒</span>
-        <span>Privacy</span>
-      </button>
-
-      <button
-        class="desktop-nav-item"
-        data-panel="settings"
-      >
-        <span class="desktop-nav-icon">⚙️</span>
-        <span>Settings</span>
-      </button>
-
-    </nav>
-
-  </aside>
-
-
-
-  <!-- ===================================================
-       MAIN
-  ==================================================== -->
-
-  <main class="main">
-
-
-    <!-- HERO -->
-
-    <section
-      class="hero"
-      id="hero"
-    >
-
-      <div class="eyebrow">
-        ✦ AI Life OS
-      </div>
-
-      <h1>
-
-        What can I help you
-
-        <span class="gradient-text">
-          achieve?
-        </span>
-
-      </h1>
-
-      <p>
-
-        Learn new skills, solve problems, plan your goals,
-        create content, find opportunities and grow with
-        Emogigs AI.
-
-      </p>
-
-    </section>
-
-
-
-    <!-- =================================================
-         MODE BAR
-    ================================================== -->
-
-    <div
-      class="mode-row"
-      id="modeRow"
-    >
-
-      <button
-        class="mode-chip active"
-        data-mode="General"
-      >
-        ✦ General
-      </button>
-
-      <button
-        class="mode-chip"
-        data-mode="Learn"
-      >
-        📚 Learn
-      </button>
-
-      <button
-        class="mode-chip"
-        data-mode="Work"
-      >
-        💼 Work
-      </button>
-
-      <button
-        class="mode-chip"
-        data-mode="Plan"
-      >
-        🎯 Plan
-      </button>
-
-      <button
-        class="mode-chip"
-        data-mode="Create"
-      >
-        🎨 Create
-      </button>
-
-      <button
-        class="mode-chip"
-        data-mode="Coach"
-      >
-        🧠 Coach
-      </button>
-
-    </div>
-
-
-
-    <!-- =================================================
-         FEATURE NAVIGATION
-    ================================================== -->
-
-    <section
-      class="feature-nav"
-      id="featureNav"
-    >
-
-      <button
-        class="feature-card"
-        data-panel="history"
-      >
-
-        <div class="feature-icon">
-          🕘
-        </div>
-
-        <div class="feature-title">
-          History
-        </div>
-
-        <div class="feature-desc">
-          Your conversations
-        </div>
-
-      </button>
-
-
-      <button
-        class="feature-card"
-        data-panel="projects"
-      >
-
-        <div class="feature-icon">
-          📁
-        </div>
-
-        <div class="feature-title">
-          Projects
-        </div>
-
-        <div class="feature-desc">
-          Organize your work
-        </div>
-
-      </button>
-
-
-      <button
-        class="feature-card"
-        data-panel="skills"
-      >
-
-        <div class="feature-icon">
-          🧠
-        </div>
-
-        <div class="feature-title">
-          Skills
-        </div>
-
-        <div class="feature-desc">
-          Learn and improve
-        </div>
-
-      </button>
-
-
-      <button
-        class="feature-card"
-        data-panel="teachers"
-      >
-
-        <div class="feature-icon">
-          👨‍🏫
-        </div>
-
-        <div class="feature-title">
-          Teachers
-        </div>
-
-        <div class="feature-desc">
-          AI learning assistants
-        </div>
-
-      </button>
-
-    </section>
-
-
-
-    <!-- =================================================
-         QUICK TOOLS
-    ================================================== -->
-
-    <section id="quickTools">
-
-      <div class="section-title">
-        Quick Tools
-      </div>
-
-
-      <div class="quick-grid">
-
-
-        <button
-          class="quick-card"
-          data-prompt="Teach me a useful skill step by step that I can learn from my phone."
-        >
-
-          <div class="quick-icon">
-            📚
-          </div>
-
-          <div class="quick-title">
-            Learn
-          </div>
-
-          <div class="quick-desc">
-            Build a new skill step by step.
-          </div>
-
-        </button>
-
-
-
-        <button
-          class="quick-card"
-          data-prompt="Help me find realistic online work or income opportunities that match my skills."
-        >
-
-          <div class="quick-icon">
-            💼
-          </div>
-
-          <div class="quick-title">
-            Work
-          </div>
-
-          <div class="quick-desc">
-            Explore skills and opportunities.
-          </div>
-
-        </button>
-
-
-
-        <button
-          class="quick-card"
-          data-prompt="Help me create a practical plan for achieving an important goal."
-        >
-
-          <div class="quick-icon">
-            🎯
-          </div>
-
-          <div class="quick-title">
-            Plan
-          </div>
-
-          <div class="quick-desc">
-            Organize your goals and tasks.
-          </div>
-
-        </button>
-
-
-
-        <button
-          class="quick-card"
-          data-prompt="Give me three creative ideas for something useful, unique and realistic that I can build."
-        >
-
-          <div class="quick-icon">
-            🚀
-          </div>
-
-          <div class="quick-title">
-            Create
-          </div>
-
-          <div class="quick-desc">
-            Turn ideas into something real.
-          </div>
-
-        </button>
-
-
-      </div>
-
-    </section>
-
-
-
-    <!-- =================================================
-         CHAT AREA
-    ================================================== -->
-
-    <section
-      id="chatArea"
-    >
-
-      <div
-        class="empty-chat"
-        id="emptyChat"
-      >
-
-        <div class="empty-chat-icon">
-          ✦
-        </div>
-
-        <strong>
-          Emogigs AI is ready
-        </strong>
-
-        Ask anything, type a message,
-        or use your microphone.
-
-      </div>
-
-    </section>
-
-  </main>
-
-
-
-  <!-- ===================================================
-       VOICE STATUS
+       EMOGIGS ACCOUNT MODAL — STEP 21A
   ==================================================== -->
 
   <div
-    class="voice-status"
-    id="voiceStatus"
+    class="account-overlay"
+    id="accountOverlay"
   >
 
-    <div class="voice-bars">
-
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-
-    </div>
-
-    <span id="voiceStatusText">
-      Listening...
-    </span>
-
-  </div>
-
-
-
-  <!-- ===================================================
-       COMPOSER
-  ==================================================== -->
-
-  <div class="composer-wrap">
-
-    <div
-      class="composer"
-      id="composer"
-    >
-
-
-      <!-- Attachment button -->
+    <div class="account-modal">
 
       <button
-        class="composer-btn"
-        id="attachmentBtn"
-        title="Attach"
-        aria-label="Attach"
-      >
-        ＋
-      </button>
-
-
-      <!-- Message -->
-
-      <textarea
-        id="messageInput"
-        rows="1"
-        placeholder="Ask Emogigs AI anything..."
-        autocomplete="off"
-      ></textarea>
-
-
-      <!-- Microphone -->
-
-      <button
-        class="composer-btn mic-btn"
-        id="micBtn"
-        title="Voice input"
-        aria-label="Voice input"
-      >
-        🎙️
-      </button>
-
-
-      <!-- Send -->
-
-      <button
-        class="composer-btn send-btn"
-        id="sendBtn"
-        title="Send"
-        aria-label="Send"
-      >
-        ↑
-      </button>
-
-
-      <!-- Attachment menu -->
-
-      <div
-        class="attachment-menu"
-        id="attachmentMenu"
-      >
-
-        <button
-          class="attachment-option"
-          id="cameraOption"
-        >
-          📷
-          <span>Camera</span>
-        </button>
-
-        <button
-          class="attachment-option"
-          id="galleryOption"
-        >
-          🖼️
-          <span>Gallery</span>
-        </button>
-
-        <button
-          class="attachment-option"
-          id="fileOption"
-        >
-          📎
-          <span>File</span>
-        </button>
-
-      </div>
-
-    </div>
-
-
-    <input
-      type="file"
-      id="fileInput"
-      accept="*/*"
-    >
-
-  </div>
-
-
-
-  <!-- ===================================================
-       OVERLAY
-  ==================================================== -->
-
-  <div
-    class="panel-overlay"
-    id="panelOverlay"
-  ></div>
-
-
-
-  <!-- ===================================================
-       MOBILE SIDE PANEL
-  ==================================================== -->
-
-  <aside
-    class="side-panel"
-    id="sidePanel"
-  >
-
-    <div class="panel-header">
-
-      <div class="panel-header-title">
-
-        <span>✦</span>
-
-        <span>
-          Emogigs
-        </span>
-
-      </div>
-
-      <button
-        class="panel-close"
-        id="panelClose"
+        class="account-close"
+        id="accountClose"
         aria-label="Close"
       >
         ×
       </button>
 
-    </div>
+
+      <div class="account-logo">
+        ✦
+      </div>
 
 
-    <div class="panel-body">
+      <div class="account-title">
+        Welcome to Emogigs AI
+      </div>
 
 
-      <!-- Account -->
+      <div class="account-subtitle">
+        Create your personal Emogigs ID
+      </div>
 
-      <div class="account-card">
 
-        <div class="account-row">
+      <!-- ACCOUNT HOME -->
 
-          <div class="account-avatar">
+      <div
+        id="accountHome"
+        class="account-screen"
+      >
+
+        <div class="account-profile-card">
+
+          <div
+            class="account-avatar"
+            id="accountAvatar"
+          >
             👤
           </div>
 
-          <div>
 
-            <div class="account-name">
+          <div class="account-profile-info">
+
+            <strong id="accountDisplayName">
               Guest User
-            </div>
+            </strong>
 
-            <div class="account-email">
-              Sign in to sync your workspace
-            </div>
+            <span id="accountDisplayId">
+              No Emogigs ID
+            </span>
 
           </div>
-
-        </div>
-
-
-        <div class="account-status">
-
-          <span>
-            Personal AI Life OS
-          </span>
-
-          <span>
-            Local
-          </span>
 
         </div>
 
 
         <button
-          class="login-btn"
-          id="loginBtn"
+          class="account-main-btn"
+          id="createAccountBtn"
         >
-          Sign in / Create account
+          ✨ Create Emogigs ID
+        </button>
+
+
+        <button
+          class="account-secondary-btn"
+          id="editProfileBtn"
+        >
+          ✏️ Edit Profile
         </button>
 
       </div>
 
 
+      <!-- CREATE ACCOUNT -->
 
-      <!-- Search History -->
-
-      <input
-        class="history-search"
-        id="historySearch"
-        type="search"
-        placeholder="Search chats..."
-        autocomplete="off"
+      <div
+        id="accountCreate"
+        class="account-screen"
+        style="display:none;"
       >
 
+        <div class="account-form">
+
+          <label>
+            Your name
+          </label>
+
+          <input
+            type="text"
+            id="accountName"
+            placeholder="Enter your name"
+            autocomplete="name"
+          >
 
 
-      <!-- Workspace -->
+          <label>
+            Email
+          </label>
 
-      <div class="panel-section-label">
-        Workspace
+          <input
+            type="email"
+            id="accountEmail"
+            placeholder="Enter your email"
+            autocomplete="email"
+          >
+
+
+          <label>
+            Username
+          </label>
+
+          <input
+            type="text"
+            id="accountUsername"
+            placeholder="Choose a username"
+            autocomplete="username"
+          >
+
+
+          <button
+            class="account-main-btn"
+            id="saveAccountBtn"
+          >
+            🚀 Create My Emogigs ID
+          </button>
+
+
+          <button
+            class="account-back-btn"
+            id="accountBackBtn"
+          >
+            ← Back
+          </button>
+
+        </div>
+
       </div>
 
-      <nav class="panel-nav">
+
+      <!-- ACCOUNT CREATED -->
+
+      <div
+        id="accountCreated"
+        class="account-screen"
+        style="display:none;"
+      >
+
+        <div class="success-icon">
+          ✓
+        </div>
+
+
+        <h3>
+          Your Emogigs ID is ready!
+        </h3>
+
+
+        <p class="success-text">
+          This ID will become your personal identity
+          inside Emogigs AI.
+        </p>
+
+
+        <div class="emogigs-id-box">
+
+          <span>
+            Your Emogigs ID
+          </span>
+
+
+          <strong id="generatedEmogigsId">
+            EMO-000000
+          </strong>
+
+
+          <button
+            id="copyEmogigsId"
+          >
+            📋 Copy ID
+          </button>
+
+        </div>
 
 
         <button
-          class="panel-nav-item active"
+          class="account-main-btn"
+          id="continueAccountBtn"
+        >
+          Continue to Emogigs AI →
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+
+  <div class="app">
+
+
+    <!-- ===================================================
+         TOP HEADER
+    ==================================================== -->
+
+    <header class="topbar">
+
+      <div class="brand">
+
+        <div class="brand-logo">
+          ✦
+        </div>
+
+
+        <div class="brand-info">
+
+          <div class="brand-name">
+            Emogigs AI
+          </div>
+
+
+          <div class="brand-status">
+
+            <span class="online-dot"></span>
+
+            Your personal AI Life OS
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="top-actions">
+
+
+        <!-- New chat -->
+
+        <button
+          class="icon-btn"
+          id="newChatBtn"
+          title="New chat"
+          aria-label="New chat"
+        >
+          ＋
+        </button>
+
+
+        <!-- Account -->
+
+        <button
+          class="icon-btn profile-btn"
+          id="profileBtn"
+          title="Account"
+          aria-label="Account"
+        >
+
+          <div class="profile-avatar">
+            👤
+          </div>
+
+        </button>
+
+      </div>
+
+    </header>
+
+
+
+    <!-- ===================================================
+         DESKTOP SIDEBAR
+    ==================================================== -->
+
+    <aside class="desktop-sidebar">
+
+
+      <div class="desktop-sidebar-label">
+        Workspace
+      </div>
+
+
+      <nav class="desktop-nav">
+
+
+        <button
+          class="desktop-nav-item active"
           data-panel="chat"
         >
 
-          <span class="panel-nav-icon">
+          <span class="desktop-nav-icon">
             ✦
           </span>
 
@@ -3535,11 +2930,11 @@
 
 
         <button
-          class="panel-nav-item"
+          class="desktop-nav-item"
           data-panel="history"
         >
 
-          <span class="panel-nav-icon">
+          <span class="desktop-nav-icon">
             🕘
           </span>
 
@@ -3551,11 +2946,11 @@
 
 
         <button
-          class="panel-nav-item"
+          class="desktop-nav-item"
           data-panel="projects"
         >
 
-          <span class="panel-nav-icon">
+          <span class="desktop-nav-icon">
             📁
           </span>
 
@@ -3567,11 +2962,11 @@
 
 
         <button
-          class="panel-nav-item"
+          class="desktop-nav-item"
           data-panel="skills"
         >
 
-          <span class="panel-nav-icon">
+          <span class="desktop-nav-icon">
             🧠
           </span>
 
@@ -3583,11 +2978,11 @@
 
 
         <button
-          class="panel-nav-item"
+          class="desktop-nav-item"
           data-panel="teachers"
         >
 
-          <span class="panel-nav-icon">
+          <span class="desktop-nav-icon">
             👨‍🏫
           </span>
 
@@ -3600,22 +2995,20 @@
       </nav>
 
 
-
-      <!-- Tools -->
-
-      <div class="panel-section-label">
+      <div class="desktop-sidebar-label">
         Tools
       </div>
 
-      <nav class="panel-nav">
+
+      <nav class="desktop-nav">
 
 
         <button
-          class="panel-nav-item"
+          class="desktop-nav-item"
           data-panel="connectors"
         >
 
-          <span class="panel-nav-icon">
+          <span class="desktop-nav-icon">
             🔗
           </span>
 
@@ -3627,11 +3020,11 @@
 
 
         <button
-          class="panel-nav-item"
+          class="desktop-nav-item"
           data-panel="automations"
         >
 
-          <span class="panel-nav-icon">
+          <span class="desktop-nav-icon">
             ⚡
           </span>
 
@@ -3643,11 +3036,11 @@
 
 
         <button
-          class="panel-nav-item"
+          class="desktop-nav-item"
           data-panel="memory"
         >
 
-          <span class="panel-nav-icon">
+          <span class="desktop-nav-icon">
             🧩
           </span>
 
@@ -3660,22 +3053,20 @@
       </nav>
 
 
-
-      <!-- Account -->
-
-      <div class="panel-section-label">
+      <div class="desktop-sidebar-label">
         Account
       </div>
 
-      <nav class="panel-nav">
+
+      <nav class="desktop-nav">
 
 
         <button
-          class="panel-nav-item"
+          class="desktop-nav-item"
           data-panel="privacy"
         >
 
-          <span class="panel-nav-icon">
+          <span class="desktop-nav-icon">
             🔒
           </span>
 
@@ -3687,11 +3078,11 @@
 
 
         <button
-          class="panel-nav-item"
+          class="desktop-nav-item"
           data-panel="settings"
         >
 
-          <span class="panel-nav-icon">
+          <span class="desktop-nav-icon">
             ⚙️
           </span>
 
@@ -3703,202 +3094,1022 @@
 
       </nav>
 
+    </aside>
 
 
-      <!-- Local history -->
 
-      <div class="panel-section-label">
-        Recent chats
-      </div>
+    <!-- ===================================================
+         MAIN
+    ==================================================== -->
 
-      <div
-        class="history-list"
-        id="historyList"
+    <main class="main">
+
+
+      <!-- HERO -->
+
+      <section
+        class="hero"
+        id="hero"
       >
 
-        <div class="empty-history">
-          Your recent conversations will appear here.
+        <div class="eyebrow">
+          ✦ AI Life OS
+        </div>
+
+
+        <h1>
+
+          What can I help you
+
+          <span class="gradient-text">
+            achieve?
+          </span>
+
+        </h1>
+
+
+        <p>
+
+          Learn new skills, solve problems, plan your goals,
+          create content, find opportunities and grow with
+          Emogigs AI.
+
+        </p>
+
+      </section>
+
+
+
+      <!-- =================================================
+           MODE BAR
+      ================================================== -->
+
+      <div
+        class="mode-row"
+        id="modeRow"
+      >
+
+
+        <button
+          class="mode-chip active"
+          data-mode="General"
+        >
+          ✦ General
+        </button>
+
+
+        <button
+          class="mode-chip"
+          data-mode="Learn"
+        >
+          📚 Learn
+        </button>
+
+
+        <button
+          class="mode-chip"
+          data-mode="Work"
+        >
+          💼 Work
+        </button>
+
+
+        <button
+          class="mode-chip"
+          data-mode="Plan"
+        >
+          🎯 Plan
+        </button>
+
+
+        <button
+          class="mode-chip"
+          data-mode="Create"
+        >
+          🎨 Create
+        </button>
+
+
+        <button
+          class="mode-chip"
+          data-mode="Coach"
+        >
+          🧠 Coach
+        </button>
+
+      </div>
+
+
+
+      <!-- =================================================
+           FEATURE NAVIGATION
+      ================================================== -->
+
+      <section
+        class="feature-nav"
+        id="featureNav"
+      >
+
+
+        <button
+          class="feature-card"
+          data-panel="history"
+        >
+
+          <div class="feature-icon">
+            🕘
+          </div>
+
+          <div class="feature-title">
+            History
+          </div>
+
+          <div class="feature-desc">
+            Your conversations
+          </div>
+
+        </button>
+
+
+        <button
+          class="feature-card"
+          data-panel="projects"
+        >
+
+          <div class="feature-icon">
+            📁
+          </div>
+
+          <div class="feature-title">
+            Projects
+          </div>
+
+          <div class="feature-desc">
+            Organize your work
+          </div>
+
+        </button>
+
+
+        <button
+          class="feature-card"
+          data-panel="skills"
+        >
+
+          <div class="feature-icon">
+            🧠
+          </div>
+
+          <div class="feature-title">
+            Skills
+          </div>
+
+          <div class="feature-desc">
+            Learn and improve
+          </div>
+
+        </button>
+
+
+        <button
+          class="feature-card"
+          data-panel="teachers"
+        >
+
+          <div class="feature-icon">
+            👨‍🏫
+          </div>
+
+          <div class="feature-title">
+            Teachers
+          </div>
+
+          <div class="feature-desc">
+            AI learning assistants
+          </div>
+
+        </button>
+
+      </section>
+
+
+
+      <!-- =================================================
+           QUICK TOOLS
+      ================================================== -->
+
+      <section id="quickTools">
+
+
+        <div class="section-title">
+          Quick Tools
+        </div>
+
+
+        <div class="quick-grid">
+
+
+          <button
+            class="quick-card"
+            data-prompt="Teach me a useful skill step by step that I can learn from my phone."
+          >
+
+            <div class="quick-icon">
+              📚
+            </div>
+
+            <div class="quick-title">
+              Learn
+            </div>
+
+            <div class="quick-desc">
+              Build a new skill step by step.
+            </div>
+
+          </button>
+
+
+          <button
+            class="quick-card"
+            data-prompt="Help me find realistic online work or income opportunities that match my skills."
+          >
+
+            <div class="quick-icon">
+              💼
+            </div>
+
+            <div class="quick-title">
+              Work
+            </div>
+
+            <div class="quick-desc">
+              Explore skills and opportunities.
+            </div>
+
+          </button>
+
+
+          <button
+            class="quick-card"
+            data-prompt="Help me create a practical plan for achieving an important goal."
+          >
+
+            <div class="quick-icon">
+              🎯
+            </div>
+
+            <div class="quick-title">
+              Plan
+            </div>
+
+            <div class="quick-desc">
+              Organize your goals and tasks.
+            </div>
+
+          </button>
+
+
+          <button
+            class="quick-card"
+            data-prompt="Give me three creative ideas for something useful, unique and realistic that I can build."
+          >
+
+            <div class="quick-icon">
+              🚀
+            </div>
+
+            <div class="quick-title">
+              Create
+            </div>
+
+            <div class="quick-desc">
+              Turn ideas into something real.
+            </div>
+
+          </button>
+
+
+        </div>
+
+      </section>
+
+
+
+      <!-- =================================================
+           CHAT AREA
+      ================================================== -->
+
+      <section
+        id="chatArea"
+      >
+
+
+        <div
+          class="empty-chat"
+          id="emptyChat"
+        >
+
+          <div class="empty-chat-icon">
+            ✦
+          </div>
+
+
+          <strong>
+            Emogigs AI is ready
+          </strong>
+
+
+          Ask anything, type a message,
+          or use your microphone.
+
+        </div>
+
+
+      </section>
+
+    </main>
+
+
+
+    <!-- ===================================================
+         VOICE STATUS
+    ==================================================== -->
+
+    <div
+      class="voice-status"
+      id="voiceStatus"
+    >
+
+      <div class="voice-bars">
+
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+
+      </div>
+
+
+      <span id="voiceStatusText">
+        Listening...
+      </span>
+
+    </div>
+
+
+
+    <!-- ===================================================
+         COMPOSER
+    ==================================================== -->
+
+    <div class="composer-wrap">
+
+
+      <div
+        class="composer"
+        id="composer"
+      >
+
+
+        <!-- Attachment button -->
+
+        <button
+          class="composer-btn"
+          id="attachmentBtn"
+          title="Attach"
+          aria-label="Attach"
+        >
+          ＋
+        </button>
+
+
+        <!-- Message -->
+
+        <textarea
+          id="messageInput"
+          rows="1"
+          placeholder="Ask Emogigs AI anything..."
+          autocomplete="off"
+        ></textarea>
+
+
+        <!-- Microphone -->
+
+        <button
+          class="composer-btn mic-btn"
+          id="micBtn"
+          title="Voice input"
+          aria-label="Voice input"
+        >
+          🎙️
+        </button>
+
+
+        <!-- Send -->
+
+        <button
+          class="composer-btn send-btn"
+          id="sendBtn"
+          title="Send"
+          aria-label="Send"
+        >
+          ↑
+        </button>
+
+
+        <!-- Attachment menu -->
+
+        <div
+          class="attachment-menu"
+          id="attachmentMenu"
+        >
+
+
+          <button
+            class="attachment-option"
+            id="cameraOption"
+          >
+            📷
+            <span>
+              Camera
+            </span>
+          </button>
+
+
+          <button
+            class="attachment-option"
+            id="galleryOption"
+          >
+            🖼️
+            <span>
+              Gallery
+            </span>
+          </button>
+
+
+          <button
+            class="attachment-option"
+            id="fileOption"
+          >
+            📎
+            <span>
+              File
+            </span>
+          </button>
+
+
         </div>
 
       </div>
 
 
-    </div>
-
-  </aside>
-
-
-
-  <!-- ===================================================
-       AUTH MODAL
-  ==================================================== -->
-
-  <div
-    class="modal"
-    id="authModal"
-  >
-
-    <div class="modal-header">
-
-      <div class="modal-title">
-        Emogigs Account
-      </div>
-
-      <button
-        class="modal-close"
-        data-close-modal="authModal"
-      >
-        ×
-      </button>
-
-    </div>
-
-
-    <div class="modal-body">
-
-      <div class="auth-tabs">
-
-        <button
-          class="auth-tab active"
-          id="loginTab"
-        >
-          Login
-        </button>
-
-        <button
-          class="auth-tab"
-          id="signupTab"
-        >
-          Create account
-        </button>
-
-      </div>
-
-
-      <form
-        class="auth-form"
-        id="authForm"
+      <input
+        type="file"
+        id="fileInput"
+        accept="*/*"
       >
 
-        <input
-          class="auth-input"
-          id="authName"
-          type="text"
-          placeholder="Your name"
-          autocomplete="name"
-        >
+    </div>
 
-        <input
-          class="auth-input"
-          id="authEmail"
-          type="email"
-          placeholder="Email address"
-          autocomplete="email"
-          required
-        >
 
-        <input
-          class="auth-input"
-          id="authPassword"
-          type="password"
-          placeholder="Password"
-          autocomplete="current-password"
-          required
-        >
+
+    <!-- ===================================================
+         OVERLAY
+    ==================================================== -->
+
+    <div
+      class="panel-overlay"
+      id="panelOverlay"
+    ></div>
+
+
+
+    <!-- ===================================================
+         MOBILE SIDE PANEL
+    ==================================================== -->
+
+    <aside
+      class="side-panel"
+      id="sidePanel"
+    >
+
+
+      <div class="panel-header">
+
+
+        <div class="panel-header-title">
+
+          <span>
+            ✦
+          </span>
+
+          <span>
+            Emogigs
+          </span>
+
+        </div>
+
 
         <button
-          class="auth-submit"
-          type="submit"
+          class="panel-close"
+          id="panelClose"
+          aria-label="Close"
         >
-          Continue
+          ×
         </button>
 
-      </form>
+      </div>
 
 
-      <div class="auth-note">
+      <div class="panel-body">
 
-        Account synchronization will be connected
-        to the Emogigs backend in the authentication step.
+
+        <!-- Account -->
+
+        <div class="account-card">
+
+
+          <div class="account-row">
+
+
+            <div class="account-avatar">
+              👤
+            </div>
+
+
+            <div>
+
+              <div class="account-name">
+                Guest User
+              </div>
+
+              <div class="account-email">
+                Sign in to sync your workspace
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="account-status">
+
+            <span>
+              Personal AI Life OS
+            </span>
+
+            <span>
+              Local
+            </span>
+
+          </div>
+
+
+          <button
+            class="login-btn"
+            id="loginBtn"
+          >
+            Sign in / Create account
+          </button>
+
+
+        </div>
+
+
+
+        <!-- Search History -->
+
+        <input
+          class="history-search"
+          id="historySearch"
+          type="search"
+          placeholder="Search chats..."
+          autocomplete="off"
+        >
+
+
+
+        <!-- Workspace -->
+
+        <div class="panel-section-label">
+          Workspace
+        </div>
+
+
+        <nav class="panel-nav">
+
+
+          <button
+            class="panel-nav-item active"
+            data-panel="chat"
+          >
+
+            <span class="panel-nav-icon">
+              ✦
+            </span>
+
+            <span>
+              AI Chat
+            </span>
+
+          </button>
+
+
+          <button
+            class="panel-nav-item"
+            data-panel="history"
+          >
+
+            <span class="panel-nav-icon">
+              🕘
+            </span>
+
+            <span>
+              History
+            </span>
+
+          </button>
+
+
+          <button
+            class="panel-nav-item"
+            data-panel="projects"
+          >
+
+            <span class="panel-nav-icon">
+              📁
+            </span>
+
+            <span>
+              Projects
+            </span>
+
+          </button>
+
+
+          <button
+            class="panel-nav-item"
+            data-panel="skills"
+          >
+
+            <span class="panel-nav-icon">
+              🧠
+            </span>
+
+            <span>
+              Skills
+            </span>
+
+          </button>
+
+
+          <button
+            class="panel-nav-item"
+            data-panel="teachers"
+          >
+
+            <span class="panel-nav-icon">
+              👨‍🏫
+            </span>
+
+            <span>
+              Teachers
+            </span>
+
+          </button>
+
+
+        </nav>
+
+
+
+        <!-- Tools -->
+
+        <div class="panel-section-label">
+          Tools
+        </div>
+
+
+        <nav class="panel-nav">
+
+
+          <button
+            class="panel-nav-item"
+            data-panel="connectors"
+          >
+
+            <span class="panel-nav-icon">
+              🔗
+            </span>
+
+            <span>
+              Connectors
+            </span>
+
+          </button>
+
+
+          <button
+            class="panel-nav-item"
+            data-panel="automations"
+          >
+
+            <span class="panel-nav-icon">
+              ⚡
+            </span>
+
+            <span>
+              Automations
+            </span>
+
+          </button>
+
+
+          <button
+            class="panel-nav-item"
+            data-panel="memory"
+          >
+
+            <span class="panel-nav-icon">
+              🧩
+            </span>
+
+            <span>
+              Memory
+            </span>
+
+          </button>
+
+
+        </nav>
+
+
+
+        <!-- Account -->
+
+        <div class="panel-section-label">
+          Account
+        </div>
+
+
+        <nav class="panel-nav">
+
+
+          <button
+            class="panel-nav-item"
+            data-panel="privacy"
+          >
+
+            <span class="panel-nav-icon">
+              🔒
+            </span>
+
+            <span>
+              Privacy
+            </span>
+
+          </button>
+
+
+          <button
+            class="panel-nav-item"
+            data-panel="settings"
+          >
+
+            <span class="panel-nav-icon">
+              ⚙️
+            </span>
+
+            <span>
+              Settings
+            </span>
+
+          </button>
+
+
+        </nav>
+
+
+
+        <!-- Local history -->
+
+        <div class="panel-section-label">
+          Recent chats
+        </div>
+
+
+        <div
+          class="history-list"
+          id="historyList"
+        >
+
+          <div class="empty-history">
+            Your recent conversations will appear here.
+          </div>
+
+        </div>
+
+
+      </div>
+
+    </aside>
+
+
+
+    <!-- ===================================================
+         AUTH MODAL
+    ==================================================== -->
+
+    <div
+      class="modal"
+      id="authModal"
+    >
+
+
+      <div class="modal-header">
+
+        <div class="modal-title">
+          Emogigs Account
+        </div>
+
+
+        <button
+          class="modal-close"
+          data-close-modal="authModal"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="modal-body">
+
+
+        <div class="auth-tabs">
+
+
+          <button
+            class="auth-tab active"
+            id="loginTab"
+          >
+            Login
+          </button>
+
+
+          <button
+            class="auth-tab"
+            id="signupTab"
+          >
+            Create account
+          </button>
+
+
+        </div>
+
+
+        <form
+          class="auth-form"
+          id="authForm"
+        >
+
+
+          <input
+            class="auth-input"
+            id="authName"
+            type="text"
+            placeholder="Your name"
+            autocomplete="name"
+          >
+
+
+          <input
+            class="auth-input"
+            id="authEmail"
+            type="email"
+            placeholder="Email address"
+            autocomplete="email"
+            required
+          >
+
+
+          <input
+            class="auth-input"
+            id="authPassword"
+            type="password"
+            placeholder="Password"
+            autocomplete="current-password"
+            required
+          >
+
+
+          <button
+            class="auth-submit"
+            type="submit"
+          >
+            Continue
+          </button>
+
+
+        </form>
+
+
+        <div class="auth-note">
+
+          Account synchronization will be connected
+          to the Emogigs backend in the authentication step.
+
+        </div>
+
 
       </div>
 
     </div>
+
+
+
+    <!-- ===================================================
+         FEATURE MODAL
+    ==================================================== -->
+
+    <div
+      class="modal"
+      id="featureModal"
+    >
+
+
+      <div class="modal-header">
+
+
+        <div
+          class="modal-title"
+          id="featureModalHeader"
+        >
+          Emogigs
+        </div>
+
+
+        <button
+          class="modal-close"
+          data-close-modal="featureModal"
+        >
+          ×
+        </button>
+
+
+      </div>
+
+
+      <div class="modal-body">
+
+
+        <div
+          class="feature-modal-icon"
+          id="featureModalIcon"
+        >
+          ✦
+        </div>
+
+
+        <div
+          class="feature-modal-title"
+          id="featureModalTitle"
+        >
+          Emogigs AI
+        </div>
+
+
+        <div
+          class="feature-modal-text"
+          id="featureModalText"
+        >
+          Your AI Life OS workspace.
+        </div>
+
+
+        <div
+          class="feature-list"
+          id="featureModalList"
+        ></div>
+
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ===================================================
+         TOAST
+    ==================================================== -->
+
+    <div
+      class="toast"
+      id="toast"
+    ></div>
+
 
   </div>
-
-
-
-  <!-- ===================================================
-       FEATURE MODAL
-  ==================================================== -->
-
-  <div
-    class="modal"
-    id="featureModal"
-  >
-
-    <div class="modal-header">
-
-      <div
-        class="modal-title"
-        id="featureModalHeader"
-      >
-        Emogigs
-      </div>
-
-      <button
-        class="modal-close"
-        data-close-modal="featureModal"
-      >
-        ×
-      </button>
-
-    </div>
-
-
-    <div class="modal-body">
-
-      <div
-        class="feature-modal-icon"
-        id="featureModalIcon"
-      >
-        ✦
-      </div>
-
-      <div
-        class="feature-modal-title"
-        id="featureModalTitle"
-      >
-        Emogigs AI
-      </div>
-
-      <div
-        class="feature-modal-text"
-        id="featureModalText"
-      >
-        Your AI Life OS workspace.
-      </div>
-
-      <div
-        class="feature-list"
-        id="featureModalList"
-      ></div>
-
-    </div>
-
-  </div>
-
-
-
-  <!-- ===================================================
-       TOAST
-  ==================================================== -->
-
-  <div
-    class="toast"
-    id="toast"
-  ></div>
 
 
 
@@ -3908,7 +4119,7 @@
 
   <script src="script.js"></script>
 
-</div>
 
 </body>
+
 </html>
