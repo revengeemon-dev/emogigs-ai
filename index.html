@@ -25,6 +25,176 @@
     }
 
     html,
+<!-- =====================================================
+     EMOGIGS ACCOUNT MODAL — STEP 21A
+===================================================== -->
+
+<div class="account-overlay" id="accountOverlay">
+
+  <div class="account-modal">
+
+    <button
+      class="account-close"
+      id="accountClose"
+      aria-label="Close">
+      ×
+    </button>
+
+    <div class="account-logo">
+      ✦
+    </div>
+
+    <div class="account-title">
+      Welcome to Emogigs AI
+    </div>
+
+    <div class="account-subtitle">
+      Create your personal Emogigs ID
+    </div>
+
+    <!-- ACCOUNT HOME -->
+
+    <div id="accountHome" class="account-screen">
+
+      <div class="account-profile-card">
+
+        <div class="account-avatar" id="accountAvatar">
+          👤
+        </div>
+
+        <div class="account-profile-info">
+
+          <strong id="accountDisplayName">
+            Guest User
+          </strong>
+
+          <span id="accountDisplayId">
+            No Emogigs ID
+          </span>
+
+        </div>
+
+      </div>
+
+      <button
+        class="account-main-btn"
+        id="createAccountBtn">
+        ✨ Create Emogigs ID
+      </button>
+
+      <button
+        class="account-secondary-btn"
+        id="editProfileBtn">
+        ✏️ Edit Profile
+      </button>
+
+    </div>
+
+
+    <!-- CREATE ACCOUNT -->
+
+    <div
+      id="accountCreate"
+      class="account-screen"
+      style="display:none;">
+
+      <div class="account-form">
+
+        <label>
+          Your name
+        </label>
+
+        <input
+          type="text"
+          id="accountName"
+          placeholder="Enter your name"
+          autocomplete="name">
+
+        <label>
+          Email
+        </label>
+
+        <input
+          type="email"
+          id="accountEmail"
+          placeholder="Enter your email"
+          autocomplete="email">
+
+        <label>
+          Username
+        </label>
+
+        <input
+          type="text"
+          id="accountUsername"
+          placeholder="Choose a username"
+          autocomplete="username">
+
+        <button
+          class="account-main-btn"
+          id="saveAccountBtn">
+          🚀 Create My Emogigs ID
+        </button>
+
+        <button
+          class="account-back-btn"
+          id="accountBackBtn">
+          ← Back
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- ACCOUNT CREATED -->
+
+    <div
+      id="accountCreated"
+      class="account-screen"
+      style="display:none;">
+
+      <div class="success-icon">
+        ✓
+      </div>
+
+      <h3>
+        Your Emogigs ID is ready!
+      </h3>
+
+      <p class="success-text">
+        This ID will become your personal identity
+        inside Emogigs AI.
+      </p>
+
+      <div class="emogigs-id-box">
+
+        <span>
+          Your Emogigs ID
+        </span>
+
+        <strong id="generatedEmogigsId">
+          EMO-000000
+        </strong>
+
+        <button
+          id="copyEmogigsId">
+          📋 Copy ID
+        </button>
+
+      </div>
+
+      <button
+        class="account-main-btn"
+        id="continueAccountBtn">
+        Continue to Emogigs AI →
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
     body {
       margin: 0;
       padding: 0;
