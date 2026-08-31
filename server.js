@@ -5,62 +5,114 @@ const path = require("path");
 const PORT = process.env.PORT || 3000;
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
+const MODEL = "openai/gpt-oss-20b";
+const GROQ_URL = "https://api.groq.com/openai/v1/responses";
+
+const MAX_BODY_SIZE = 64 * 1024;
+const MAX_MESSAGE_LENGTH = 16000;
+const MAX_HISTORY_MESSAGES = 20;
+
+
 /*
 =========================================================
-EMOGIGS AI — INTELLIGENCE CORE
-STEP 18A
+                    EMOGIGS AI
+               INTELLIGENCE CORE
+                  STEP 19A
 =========================================================
 
 Architecture:
 
-User Message
-     ↓
-Input Validation
-     ↓
-Intelligence Analysis
-     ├── Intent
-     ├── Emotion Signal
-     ├── Goal
-     ├── Language
-     └── Response Style
-     ↓
-Dynamic AI System Instructions
-     ↓
-Groq
-     ↓
-Emogigs AI Response
+User
+ ↓
+Request Validation
+ ↓
+Message Analysis
+ ↓
+Intent Detection
+ ↓
+Emotion Signal
+ ↓
+Goal Detection
+ ↓
+Language Detection
+ ↓
+Conversation Memory
+ ↓
+Dynamic Intelligence Prompt
+ ↓
+Reasoning Model
+ ↓
+Groq Responses API
+ ↓
+Reliable Response Extraction
+ ↓
+Emogigs AI
 =========================================================
 */
 
 
 // =======================================================
-// SECURITY / HTTP HELPERS
+// SECURITY / HTTP
 // =======================================================
 
 function setSecurityHeaders(res) {
-  res.setHeader("X-Content-Type-Options", "nosniff");
-  res.setHeader("X-Frame-Options", "SAMEORIGIN");
-  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+
+  res.setHeader(
+    "X-Content-Type-Options",
+    "nosniff"
+  );
+
+  res.setHeader(
+    "X-Frame-Options",
+    "SAMEORIGIN"
+  );
+
+  res.setHeader(
+    "Referrer-Policy",
+    "strict-origin-when-cross-origin"
+  );
+
+  /*
+    Microphone intentionally remains disabled here
+    because voice development is paused for now.
+  */
+
   res.setHeader(
     "Permissions-Policy",
     "camera=(), microphone=(), geolocation=()"
   );
 }
 
+
 function sendJSON(res, statusCode, data) {
+
   res.writeHead(statusCode, {
-    "Content-Type": "application/json; charset=utf-8"
+    "Content-Type":
+      "application/json; charset=utf-8"
   });
 
-  res.end(JSON.stringify(data));
+  res.end(
+    JSON.stringify(data)
+  );
 }
 
 
 // =======================================================
-// BASIC TEXT ANALYSIS
+// TEXT HELPERS
 // =======================================================
 
+function safeText(value) {
+
+  if (typeof value !== "string") {
+    return "";
+  }
+
+  return value.trim();
+}
+
+
 function detectLanguage(text) {
+
   if (/[\u0980-\u09FF]/.test(text)) {
     return "Bengali";
   }
@@ -85,8 +137,14 @@ function detectLanguage(text) {
 }
 
 
+// =======================================================
+// EMOTION DETECTION
+// =======================================================
+
 function detectEmotion(text) {
-  const value = text.toLowerCase();
+
+  const value =
+    text.toLowerCase();
 
   const frustrationWords = [
     "frustrated",
@@ -97,13 +155,20 @@ function detectEmotion(text) {
     "problem",
     "error",
     "broken",
-    "কাজ করছে না",
+    "failed",
+    "not working",
+
     "সমস্যা",
+    "কাজ করছে না",
+    "কাজ হচ্ছে না",
     "রাগ",
     "বিরক্ত",
     "ঝামেলা",
-    "ভুল"
+    "ভুল",
+    "হচ্ছে না",
+    "পারছি না"
   ];
+
 
   const sadnessWords = [
     "sad",
@@ -112,12 +177,15 @@ function detectEmotion(text) {
     "hurt",
     "cry",
     "hopeless",
+
     "দুঃখ",
     "কষ্ট",
     "একা",
     "হতাশ",
-    "কাঁদতে"
+    "কাঁদতে",
+    "মন খারাপ"
   ];
+
 
   const excitementWords = [
     "excited",
@@ -127,6 +195,7 @@ function detectEmotion(text) {
     "wow",
     "love",
     "perfect",
+
     "দারুণ",
     "অসাধারণ",
     "সুন্দর",
@@ -134,85 +203,144 @@ function detectEmotion(text) {
     "ভালো লাগছে"
   ];
 
+
   const confusionWords = [
     "confused",
     "don't understand",
     "what should i do",
     "how",
     "why",
+
     "বুঝতে পারছি না",
     "কি করব",
     "কিভাবে",
-    "কেন"
+    "কেন",
+    "বুঝি না"
   ];
 
-  if (frustrationWords.some(word => value.includes(word))) {
+
+  if (
+    frustrationWords.some(
+      word => value.includes(word)
+    )
+  ) {
     return "frustrated";
   }
 
-  if (sadnessWords.some(word => value.includes(word))) {
+
+  if (
+    sadnessWords.some(
+      word => value.includes(word)
+    )
+  ) {
     return "sad";
   }
 
-  if (excitementWords.some(word => value.includes(word))) {
+
+  if (
+    excitementWords.some(
+      word => value.includes(word)
+    )
+  ) {
     return "excited";
   }
 
-  if (confusionWords.some(word => value.includes(word))) {
+
+  if (
+    confusionWords.some(
+      word => value.includes(word)
+    )
+  ) {
     return "confused";
   }
+
 
   return "neutral";
 }
 
 
+// =======================================================
+// INTENT DETECTION
+// =======================================================
+
 function detectIntent(text) {
-  const value = text.toLowerCase();
+
+  const value =
+    text.toLowerCase();
+
 
   if (
     value.includes("code") ||
+    value.includes("coding") ||
     value.includes("javascript") ||
+    value.includes("typescript") ||
     value.includes("html") ||
     value.includes("css") ||
+    value.includes("node") ||
     value.includes("server") ||
     value.includes("api") ||
-    value.includes("program")
+    value.includes("python") ||
+    value.includes("java") ||
+    value.includes("program") ||
+    value.includes("bug") ||
+    value.includes("debug") ||
+    value.includes("error") ||
+
+    value.includes("কোড") ||
+    value.includes("কোডিং") ||
+    value.includes("এরর") ||
+    value.includes("বাগ") ||
+    value.includes("প্রোগ্রাম")
   ) {
+
     return "programming";
   }
+
 
   if (
     value.includes("learn") ||
     value.includes("study") ||
+    value.includes("education") ||
+
     value.includes("শিখতে") ||
     value.includes("শেখা") ||
-    value.includes("পড়াশোনা")
+    value.includes("পড়াশোনা") ||
+    value.includes("শিক্ষা")
   ) {
+
     return "learning";
   }
+
 
   if (
     value.includes("job") ||
     value.includes("career") ||
     value.includes("work") ||
     value.includes("freelance") ||
+
     value.includes("চাকরি") ||
-    value.includes("কাজ") ||
-    value.includes("ফ্রিল্যান্স")
+    value.includes("ক্যারিয়ার") ||
+    value.includes("ফ্রিল্যান্স") ||
+    value.includes("কাজ")
   ) {
+
     return "career";
   }
+
 
   if (
     value.includes("plan") ||
     value.includes("goal") ||
     value.includes("routine") ||
+
     value.includes("পরিকল্পনা") ||
     value.includes("লক্ষ্য") ||
     value.includes("রুটিন")
   ) {
+
     return "planning";
   }
+
 
   if (
     value.includes("design") ||
@@ -220,104 +348,171 @@ function detectIntent(text) {
     value.includes("ux") ||
     value.includes("app") ||
     value.includes("website") ||
+
     value.includes("ডিজাইন") ||
-    value.includes("অ্যাপ")
+    value.includes("অ্যাপ") ||
+    value.includes("ওয়েবসাইট")
   ) {
+
     return "creative-design";
   }
+
 
   if (
     value.includes("business") ||
     value.includes("money") ||
     value.includes("income") ||
+    value.includes("investment") ||
+
     value.includes("ব্যবসা") ||
     value.includes("টাকা") ||
-    value.includes("আয়")
+    value.includes("আয়") ||
+    value.includes("ইনভেস্ট")
   ) {
+
     return "business-finance";
   }
+
+
+  if (
+    value.includes("photo") ||
+    value.includes("image") ||
+    value.includes("picture") ||
+    value.includes("video") ||
+    value.includes("edit") ||
+
+    value.includes("ছবি") ||
+    value.includes("ফটো") ||
+    value.includes("ভিডিও") ||
+    value.includes("এডিট")
+  ) {
+
+    return "media-creative";
+  }
+
 
   return "general";
 }
 
 
+// =======================================================
+// GOAL DETECTION
+// =======================================================
+
 function detectGoal(text) {
-  const value = text.toLowerCase();
+
+  const value =
+    text.toLowerCase();
+
 
   if (
     value.includes("build") ||
     value.includes("create") ||
     value.includes("make") ||
+    value.includes("develop") ||
+
     value.includes("বানাতে") ||
-    value.includes("তৈরি")
+    value.includes("তৈরি") ||
+    value.includes("ডেভেলপ")
   ) {
+
     return "create or build something";
   }
+
 
   if (
     value.includes("learn") ||
     value.includes("শিখতে") ||
     value.includes("শিখব")
   ) {
+
     return "learn or improve a skill";
   }
+
 
   if (
     value.includes("fix") ||
     value.includes("error") ||
     value.includes("problem") ||
+    value.includes("bug") ||
+
     value.includes("ঠিক") ||
-    value.includes("সমস্যা")
+    value.includes("সমস্যা") ||
+    value.includes("ভুল")
   ) {
+
     return "solve a problem";
   }
+
 
   if (
     value.includes("job") ||
     value.includes("income") ||
     value.includes("earn") ||
+
     value.includes("চাকরি") ||
-    value.includes("আয়")
+    value.includes("আয়") ||
+    value.includes("উপার্জন")
   ) {
+
     return "improve work or income";
   }
 
-  return "understand the user's request and provide useful next steps";
+
+  return "understand the request and provide the most useful next step";
 }
 
 
 // =======================================================
-// EMOGIGS INTELLIGENCE ANALYSIS
+// INTELLIGENCE ANALYSIS
 // =======================================================
 
 function analyzeUserMessage(message) {
-  const language = detectLanguage(message);
-  const emotion = detectEmotion(message);
-  const intent = detectIntent(message);
-  const goal = detectGoal(message);
+
+  const language =
+    detectLanguage(message);
+
+  const emotion =
+    detectEmotion(message);
+
+  const intent =
+    detectIntent(message);
+
+  const goal =
+    detectGoal(message);
+
 
   let responseStyle =
-    "clear, natural, helpful and professional";
+    "clear, natural, accurate, helpful and professional";
+
 
   if (emotion === "frustrated") {
+
     responseStyle =
-      "calm, patient, reassuring and solution-focused";
+      "calm, patient, reassuring, direct and solution-focused";
   }
 
+
   if (emotion === "sad") {
+
     responseStyle =
       "warm, empathetic, respectful and supportive";
   }
 
+
   if (emotion === "excited") {
+
     responseStyle =
-      "positive, energetic, encouraging and constructive";
+      "positive, energetic, creative and encouraging while remaining realistic";
   }
 
+
   if (emotion === "confused") {
+
     responseStyle =
       "simple, patient, structured and step-by-step";
   }
+
 
   return {
     language,
@@ -330,83 +525,180 @@ function analyzeUserMessage(message) {
 
 
 // =======================================================
-// DYNAMIC EMOGIGS AI SYSTEM PROMPT
+// DYNAMIC SYSTEM PROMPT
 // =======================================================
 
 function buildSystemPrompt(intelligence) {
+
   return `
-You are Emogigs AI, the intelligent assistant of the Emogigs platform.
+You are Emogigs AI.
 
+You are the intelligent assistant inside the Emogigs platform.
+
+=========================================================
 IDENTITY
-- Your name is Emogigs AI.
-- If asked who you are, identify yourself as Emogigs AI.
-- Never claim to be ChatGPT.
-- Never claim that you were created by OpenAI.
-- Never invent information about Emogigs.
+=========================================================
 
-CORE PERSONALITY
-You are intelligent, calm, friendly, respectful, practical and emotionally aware.
+Your name is Emogigs AI.
 
-You should communicate naturally rather than sounding robotic.
+If the user asks who you are:
+say that you are Emogigs AI.
 
-EMOTIONAL AWARENESS
-The system has detected an approximate emotional signal from the user's message.
+Never claim to be ChatGPT.
 
-Detected emotion:
-${intelligence.emotion}
+Never claim that you were created by OpenAI.
 
-IMPORTANT:
-This is only an inference from the user's words.
-Do not tell the user that you have diagnosed their emotion.
-Do not pretend to read their mind.
-Use the signal only to adjust your communication style.
+Never invent facts about the Emogigs project.
 
-For example:
-- If the user appears frustrated, remain calm and focus on solving the problem.
-- If the user appears confused, explain things simply and step by step.
-- If the user appears sad or emotionally hurt, respond with empathy and avoid cold robotic language.
-- If the user appears excited, encourage the positive energy while remaining realistic.
+=========================================================
+CORE MISSION
+=========================================================
 
-USER LANGUAGE
+Your mission is to be genuinely useful.
+
+You should:
+
+- understand the user's real goal
+- reason carefully
+- solve problems
+- explain difficult things simply
+- help users learn
+- help users build projects
+- help users debug code
+- help users make decisions
+- provide practical next steps
+- adapt to the user's language and skill level
+
+Do not try to sound artificially human.
+
+Be useful, accurate and honest.
+
+=========================================================
+INTELLIGENCE SIGNALS
+=========================================================
+
 Detected language:
 ${intelligence.language}
 
-Always respond naturally in the user's language whenever possible.
-
-USER INTENT
 Detected intent:
 ${intelligence.intent}
 
-USER GOAL
+Detected emotional signal:
+${intelligence.emotion}
+
 Detected goal:
 ${intelligence.goal}
 
-Use these signals to make the answer more relevant.
-
-RESPONSE STYLE
 Preferred response style:
 ${intelligence.responseStyle}
 
-GENERAL INTELLIGENCE RULES
-1. Understand the user's actual question before answering.
-2. Do not answer a different question just because it is related.
-3. If the request is ambiguous, ask a short clarifying question when necessary.
-4. Prefer useful actions and practical next steps.
-5. Avoid unnecessary repetition.
-6. Match the user's knowledge level.
-7. For complex problems, break the solution into manageable steps.
-8. If the user is building something, protect their existing work and explain exactly what should be changed.
-9. Never say that code is guaranteed to be perfect.
-10. Never invent facts, sources, tools, capabilities or results.
+These are approximate signals.
 
-EMOGIGS FEATURE TRUTH
-Only describe a feature as currently available if it actually exists in the current Emogigs application.
+Never tell the user that you diagnosed their emotions.
+
+Never pretend to read their mind.
+
+Use these signals only to improve communication.
+
+=========================================================
+REASONING
+=========================================================
+
+For difficult questions:
+
+1. Understand the actual problem.
+2. Identify important constraints.
+3. Break the problem into logical parts.
+4. Check assumptions.
+5. Compare possible solutions.
+6. Choose the most practical solution.
+7. Explain the result clearly.
+8. When useful, provide exact implementation steps.
+
+Do not expose private chain-of-thought or hidden reasoning.
+
+Instead, provide concise explanations, conclusions and useful reasoning summaries.
+
+=========================================================
+PROGRAMMING / CODING
+=========================================================
+
+Programming is a high-priority capability.
+
+When solving coding problems:
+
+- identify the likely root cause
+- inspect the provided code carefully
+- preserve working code
+- avoid unnecessary rewrites
+- provide complete replacement files when requested
+- clearly identify the filename
+- explain exactly what changed
+- consider browser compatibility
+- consider mobile compatibility
+- consider security
+- consider API failures
+- consider edge cases
+- consider malformed input
+- consider asynchronous errors
+- consider state management
+- test logically before presenting code
+
+Never claim:
+
+"zero bugs guaranteed"
+
+or
+
+"100% perfect"
+
+because software always requires testing.
+
+If something cannot be guaranteed, say so honestly.
+
+=========================================================
+EMOGIGS DEVELOPMENT MODE
+=========================================================
+
+When the user is working on Emogigs:
+
+Protect the existing project.
+
+Do not randomly replace working architecture.
+
+Prefer incremental upgrades.
+
+Before recommending a major architectural change, explain why it is necessary.
+
+If the user asks for a complete file:
+
+provide the complete file.
+
+Do not provide only fragments unless specifically requested.
+
+=========================================================
+CONVERSATION
+=========================================================
+
+The current request may contain context from previous messages.
+
+Use the supplied conversation history when it is relevant.
+
+Do not pretend to remember information that was not supplied.
+
+Do not invent user preferences.
+
+=========================================================
+FEATURE TRUTH
+=========================================================
+
+Only describe a feature as currently available if it has actually been implemented in Emogigs.
 
 Do NOT claim that Emogigs currently has:
+
 - permanent cloud memory
 - user accounts
 - file editing
-- web search
 - image generation
 - video generation
 - Photoshop integration
@@ -420,42 +712,333 @@ Do NOT claim that Emogigs currently has:
 - progress tracking
 - external account integrations
 - voice features
-- any other feature that has not actually been implemented.
+- web browsing
 
-If a feature is not currently implemented:
-say clearly that it is not currently available,
-then explain how it could be added in a future version if useful.
+unless that feature is actually implemented.
 
-PROGRAMMING
-For programming requests:
-- provide structured solutions
-- identify likely causes of errors
-- preserve working code whenever possible
-- explain exactly which file should change
-- recommend testing after changes
+If a feature is planned but not implemented:
 
-LEARNING
-For learning requests:
-- teach step by step
-- use simple examples
-- create practical exercises when useful
+say:
 
-CREATIVE WORK
-For design, writing, UI/UX, business, content creation and creative tasks:
-- provide practical ideas
-- prioritize usability
-- think about real users
-- suggest improvements when they genuinely help
+"That feature is not implemented yet."
 
-SAFETY AND HONESTY
-Never fabricate medical, financial, legal or technical certainty.
-For high-risk matters, encourage appropriate professional assistance.
+Then, if useful, explain how it can be added.
 
-Never claim to have opened a website, accessed a file, used a tool, searched the web or completed an external action unless that actually happened.
+=========================================================
+CREATIVE INTELLIGENCE
+=========================================================
 
-The objective is not to sound artificially human.
-The objective is to be genuinely useful, emotionally considerate, accurate and honest.
+For creative tasks:
+
+Think beyond generic answers.
+
+Consider:
+
+- user experience
+- simplicity
+- originality
+- usefulness
+- scalability
+- accessibility
+- mobile-first design
+- real-world practicality
+
+Suggest better alternatives when they genuinely improve the result.
+
+=========================================================
+LANGUAGE
+=========================================================
+
+Respond in the user's language whenever possible.
+
+If the user writes Bengali:
+
+respond naturally in Bengali.
+
+If the user mixes Bengali and English:
+
+understand the mixed language naturally.
+
+Do not unnecessarily translate technical terms.
+
+=========================================================
+HONESTY
+=========================================================
+
+Never fabricate:
+
+- facts
+- sources
+- API results
+- tool usage
+- website access
+- file access
+- external actions
+- test results
+
+Never claim that something was executed unless it actually was.
+
+=========================================================
+SAFETY
+=========================================================
+
+For medical, legal, financial or other high-risk subjects:
+
+avoid false certainty.
+
+Provide general information and recommend appropriate professional help when necessary.
+
+=========================================================
+FINAL RESPONSE QUALITY
+=========================================================
+
+Before answering, internally check:
+
+- Did I answer the actual question?
+- Did I understand the user's goal?
+- Did I miss an important constraint?
+- Is my answer practical?
+- Is the code syntactically coherent?
+- Did I avoid inventing capabilities?
+- Is the explanation appropriate for the user's skill level?
+
+Then provide the best useful answer.
+
 `;
+}
+
+
+// =======================================================
+// HISTORY NORMALIZATION
+// =======================================================
+
+function normalizeHistory(history) {
+
+  if (!Array.isArray(history)) {
+    return [];
+  }
+
+
+  return history
+    .filter(item => {
+
+      return (
+        item &&
+        (
+          item.role === "user" ||
+          item.role === "assistant"
+        ) &&
+        typeof item.content === "string"
+      );
+
+    })
+    .slice(-MAX_HISTORY_MESSAGES)
+    .map(item => {
+
+      return {
+        role: item.role,
+        content: item.content.slice(0, 12000)
+      };
+
+    });
+}
+
+
+// =======================================================
+// RESPONSE TEXT EXTRACTION
+// =======================================================
+
+function extractGroqText(result) {
+
+  if (!result) {
+    return "";
+  }
+
+
+  /*
+    Preferred Responses API property.
+  */
+
+  if (
+    typeof result.output_text === "string" &&
+    result.output_text.trim()
+  ) {
+
+    return result.output_text.trim();
+  }
+
+
+  /*
+    Fallback parser.
+  */
+
+  if (Array.isArray(result.output)) {
+
+    for (const item of result.output) {
+
+      if (
+        item &&
+        item.type === "message" &&
+        Array.isArray(item.content)
+      ) {
+
+        for (const content of item.content) {
+
+          if (
+            content &&
+            content.type === "output_text" &&
+            typeof content.text === "string"
+          ) {
+
+            return content.text.trim();
+          }
+
+        }
+
+      }
+
+    }
+
+  }
+
+
+  return "";
+}
+
+
+// =======================================================
+// GROQ AI REQUEST
+// =======================================================
+
+async function askGroq({
+  systemPrompt,
+  history,
+  message
+}) {
+
+  const input = [];
+
+
+  /*
+    System instructions.
+  */
+
+  input.push({
+
+    role: "system",
+
+    content: systemPrompt
+
+  });
+
+
+  /*
+    Conversation history.
+  */
+
+  for (const item of history) {
+
+    input.push({
+
+      role: item.role,
+
+      content: item.content
+
+    });
+
+  }
+
+
+  /*
+    Current user message.
+  */
+
+  input.push({
+
+    role: "user",
+
+    content: message
+
+  });
+
+
+  const response =
+    await fetch(
+      GROQ_URL,
+      {
+
+        method: "POST",
+
+        headers: {
+
+          "Content-Type":
+            "application/json",
+
+          "Authorization":
+            `Bearer ${GROQ_API_KEY}`
+
+        },
+
+        body: JSON.stringify({
+
+          model: MODEL,
+
+          input: input,
+
+          /*
+            Medium reasoning is a good starting
+            balance between intelligence and speed.
+          */
+
+          reasoning: {
+            effort: "medium"
+          }
+
+        })
+
+      }
+    );
+
+
+  const result =
+    await response.json();
+
+
+  if (!response.ok) {
+
+    const errorMessage =
+      result?.error?.message ||
+      "Groq API request failed.";
+
+    const error =
+      new Error(errorMessage);
+
+    error.status =
+      response.status;
+
+    error.groq =
+      result;
+
+    throw error;
+  }
+
+
+  const reply =
+    extractGroqText(result);
+
+
+  if (!reply) {
+
+    throw new Error(
+      "Groq returned an empty response."
+    );
+  }
+
+
+  return {
+    reply,
+    raw: result
+  };
 }
 
 
@@ -463,469 +1046,615 @@ The objective is to be genuinely useful, emotionally considerate, accurate and h
 // SERVER
 // =======================================================
 
-const server = http.createServer((req, res) => {
+const server =
+  http.createServer(
+    (req, res) => {
 
-  setSecurityHeaders(res);
-
-  res.setHeader(
-    "Access-Control-Allow-Origin",
-    "*"
-  );
-
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, OPTIONS"
-  );
-
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Content-Type"
-  );
+      setSecurityHeaders(res);
 
 
-  // =====================================================
-  // OPTIONS
-  // =====================================================
-
-  if (req.method === "OPTIONS") {
-    res.writeHead(204);
-    res.end();
-    return;
-  }
+      res.setHeader(
+        "Access-Control-Allow-Origin",
+        "*"
+      );
 
 
-  // =====================================================
-  // HEALTH CHECK
-  // =====================================================
-
-  if (
-    req.method === "GET" &&
-    req.url === "/api/health"
-  ) {
-    sendJSON(res, 200, {
-      status: "ok",
-      message: "Emogigs AI server is running.",
-      intelligenceCore: "18A"
-    });
-
-    return;
-  }
+      res.setHeader(
+        "Access-Control-Allow-Methods",
+        "GET, POST, OPTIONS"
+      );
 
 
-  // =====================================================
-  // AI CHAT API
-  // =====================================================
-
-  console.log(
-    "REQUEST:",
-    req.method,
-    req.url
-  );
+      res.setHeader(
+        "Access-Control-Allow-Headers",
+        "Content-Type"
+      );
 
 
-  if (
-    req.method === "POST" &&
-    req.url === "/api/chat"
-  ) {
+      // ===================================================
+      // OPTIONS
+      // ===================================================
 
-    let body = "";
+      if (
+        req.method === "OPTIONS"
+      ) {
 
-    let bodyTooLarge = false;
+        res.writeHead(204);
 
-    req.on("data", chunk => {
+        res.end();
 
-      body += chunk.toString();
-
-      /*
-       Limit incoming request body to approximately
-       32 KB to prevent unnecessarily large requests.
-      */
-
-      if (Buffer.byteLength(body, "utf8") > 32 * 1024) {
-        bodyTooLarge = true;
+        return;
       }
-    });
 
 
-    req.on("end", async () => {
+      // ===================================================
+      // HEALTH CHECK
+      // ===================================================
 
-      try {
+      if (
+        req.method === "GET" &&
+        req.url === "/api/health"
+      ) {
 
-        if (bodyTooLarge) {
-
-          sendJSON(res, 413, {
-            error: "Request is too large."
-          });
-
-          return;
-        }
-
-
-        // =================================================
-        // PARSE REQUEST
-        // =================================================
-
-        let data;
-
-        try {
-          data = JSON.parse(body);
-        } catch (parseError) {
-
-          sendJSON(res, 400, {
-            error: "Invalid JSON request."
-          });
-
-          return;
-        }
-
-
-        const message =
-          typeof data.message === "string"
-            ? data.message.trim()
-            : "";
-
-
-        if (!message) {
-
-          sendJSON(res, 400, {
-            error: "Message is required."
-          });
-
-          return;
-        }
-
-
-        // =================================================
-        // MESSAGE LENGTH PROTECTION
-        // =================================================
-
-        if (message.length > 12000) {
-
-          sendJSON(res, 413, {
-            error:
-              "Message is too long. Please shorten your message."
-          });
-
-          return;
-        }
-
-
-        // =================================================
-        // API KEY CHECK
-        // =================================================
-
-        if (!GROQ_API_KEY) {
-
-          console.error(
-            "GROQ_API_KEY is missing."
-          );
-
-          sendJSON(res, 500, {
-            error:
-              "GROQ_API_KEY is not configured."
-          });
-
-          return;
-        }
-
-
-        // =================================================
-        // INTELLIGENCE ANALYSIS
-        // =================================================
-
-        const intelligence =
-          analyzeUserMessage(message);
-
-
-        console.log(
-          "EMOGIGS INTELLIGENCE:",
-          JSON.stringify(intelligence)
-        );
-
-
-        // =================================================
-        // BUILD INTELLIGENT SYSTEM PROMPT
-        // =================================================
-
-        const systemPrompt =
-          buildSystemPrompt(intelligence);
-
-
-        // =================================================
-        // GROQ REQUEST
-        // =================================================
-
-        console.log(
-          "GROQ REQUEST STARTING"
-        );
-
-
-        const groqResponse = await fetch(
-          "https://api.groq.com/openai/v1/responses",
+        sendJSON(
+          res,
+          200,
           {
-            method: "POST",
 
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization":
-                `Bearer ${GROQ_API_KEY}`
-            },
+            status: "ok",
 
-            body: JSON.stringify({
+            message:
+              "Emogigs AI server is running.",
 
-              model:
-                "openai/gpt-oss-20b",
+            intelligenceCore:
+              "19A",
 
-              input: [
+            model:
+              MODEL,
 
-                {
-                  role: "system",
+            features: {
 
-                  content: systemPrompt
-                },
+              conversationHistory:
+                true,
 
-                {
-                  role: "user",
+              reasoning:
+                true,
 
-                  content: message
-                }
+              programmingMode:
+                true,
 
-              ]
+              emotionAwareness:
+                true,
 
-            })
-          }
-        );
+              intentDetection:
+                true,
 
+              languageDetection:
+                true
 
-        // =================================================
-        // GROQ RESPONSE
-        // =================================================
-
-        const result =
-          await groqResponse.json();
-
-
-        console.log(
-          "GROQ RESPONSE:",
-          groqResponse.status
-        );
-
-
-        if (!groqResponse.ok) {
-
-          console.error(
-            "GROQ ERROR:",
-            JSON.stringify(result)
-          );
-
-          sendJSON(
-            res,
-            groqResponse.status,
-            {
-              error:
-                result.error?.message ||
-                "Groq API request failed."
             }
-          );
 
-          return;
-        }
-
-
-        // =================================================
-        // EXTRACT AI TEXT
-        // =================================================
-
-        const reply =
-          result.output
-            ?.find(
-              item =>
-                item.type === "message"
-            )
-            ?.content
-            ?.find(
-              item =>
-                item.type === "output_text"
-            )
-            ?.text ||
-          "I couldn't generate a response.";
-
-
-        // =================================================
-        // RETURN RESPONSE
-        // =================================================
-
-        sendJSON(res, 200, {
-
-          reply: reply,
-
-          /*
-          This metadata is useful for debugging
-          the Intelligence Core.
-
-          The frontend does not need to display it.
-          */
-
-          intelligence: {
-            intent:
-              intelligence.intent,
-
-            emotion:
-              intelligence.emotion,
-
-            goal:
-              intelligence.goal,
-
-            language:
-              intelligence.language
           }
-
-        });
-
-      } catch (error) {
-
-        console.error(
-          "SERVER ERROR:",
-          error
         );
 
-        sendJSON(res, 500, {
+        return;
+      }
+
+
+      // ===================================================
+      // AI CHAT
+      // ===================================================
+
+      if (
+        req.method === "POST" &&
+        req.url === "/api/chat"
+      ) {
+
+        let body = "";
+
+        let bodyTooLarge =
+          false;
+
+
+        req.on(
+          "data",
+          chunk => {
+
+            body +=
+              chunk.toString();
+
+
+            if (
+              Buffer.byteLength(
+                body,
+                "utf8"
+              ) > MAX_BODY_SIZE
+            ) {
+
+              bodyTooLarge =
+                true;
+
+            }
+
+          }
+        );
+
+
+        req.on(
+          "end",
+          async () => {
+
+            try {
+
+              // =========================================
+              // BODY SIZE
+              // =========================================
+
+              if (bodyTooLarge) {
+
+                sendJSON(
+                  res,
+                  413,
+                  {
+                    error:
+                      "Request is too large."
+                  }
+                );
+
+                return;
+              }
+
+
+              // =========================================
+              // JSON
+              // =========================================
+
+              let data;
+
+              try {
+
+                data =
+                  JSON.parse(body);
+
+              } catch (error) {
+
+                sendJSON(
+                  res,
+                  400,
+                  {
+                    error:
+                      "Invalid JSON request."
+                  }
+                );
+
+                return;
+              }
+
+
+              // =========================================
+              // MESSAGE
+              // =========================================
+
+              const message =
+                safeText(
+                  data.message
+                );
+
+
+              if (!message) {
+
+                sendJSON(
+                  res,
+                  400,
+                  {
+                    error:
+                      "Message is required."
+                  }
+                );
+
+                return;
+              }
+
+
+              if (
+                message.length >
+                MAX_MESSAGE_LENGTH
+              ) {
+
+                sendJSON(
+                  res,
+                  413,
+                  {
+                    error:
+                      "Message is too long."
+                  }
+                );
+
+                return;
+              }
+
+
+              // =========================================
+              // API KEY
+              // =========================================
+
+              if (!GROQ_API_KEY) {
+
+                console.error(
+                  "GROQ_API_KEY is missing."
+                );
+
+                sendJSON(
+                  res,
+                  500,
+                  {
+                    error:
+                      "GROQ_API_KEY is not configured."
+                  }
+                );
+
+                return;
+              }
+
+
+              // =========================================
+              // HISTORY
+              // =========================================
+
+              const history =
+                normalizeHistory(
+                  data.history
+                );
+
+
+              // =========================================
+              // INTELLIGENCE
+              // =========================================
+
+              const intelligence =
+                analyzeUserMessage(
+                  message
+                );
+
+
+              console.log(
+                "================================================="
+              );
+
+              console.log(
+                "EMOGIGS AI REQUEST"
+              );
+
+              console.log(
+                "Intent:",
+                intelligence.intent
+              );
+
+              console.log(
+                "Emotion:",
+                intelligence.emotion
+              );
+
+              console.log(
+                "Goal:",
+                intelligence.goal
+              );
+
+              console.log(
+                "Language:",
+                intelligence.language
+              );
+
+              console.log(
+                "History:",
+                history.length
+              );
+
+              console.log(
+                "================================================="
+              );
+
+
+              // =========================================
+              // SYSTEM PROMPT
+              // =========================================
+
+              const systemPrompt =
+                buildSystemPrompt(
+                  intelligence
+                );
+
+
+              // =========================================
+              // GROQ
+              // =========================================
+
+              console.log(
+                "GROQ REQUEST STARTING"
+              );
+
+
+              const ai =
+                await askGroq({
+
+                  systemPrompt,
+
+                  history,
+
+                  message
+
+                });
+
+
+              console.log(
+                "GROQ RESPONSE SUCCESS"
+              );
+
+
+              // =========================================
+              // RESPONSE
+              // =========================================
+
+              sendJSON(
+                res,
+                200,
+                {
+
+                  reply:
+                    ai.reply,
+
+                  intelligence: {
+
+                    intent:
+                      intelligence.intent,
+
+                    emotion:
+                      intelligence.emotion,
+
+                    goal:
+                      intelligence.goal,
+
+                    language:
+                      intelligence.language
+
+                  },
+
+                  model:
+                    MODEL
+
+                }
+              );
+
+
+            } catch (error) {
+
+              console.error(
+                "================================================="
+              );
+
+              console.error(
+                "EMOGIGS SERVER ERROR"
+              );
+
+              console.error(
+                error
+              );
+
+              console.error(
+                "================================================="
+              );
+
+
+              const status =
+                Number.isInteger(
+                  error.status
+                )
+                  ? error.status
+                  : 500;
+
+
+              let message =
+                "Emogigs AI could not complete the request.";
+
+
+              if (
+                status === 401
+              ) {
+
+                message =
+                  "Groq API authentication failed. Check GROQ_API_KEY.";
+
+              } else if (
+                status === 429
+              ) {
+
+                message =
+                  "Groq rate limit reached. Please try again shortly.";
+
+              } else if (
+                status >= 400 &&
+                status < 500 &&
+                error.message
+              ) {
+
+                message =
+                  error.message;
+
+              }
+
+
+              sendJSON(
+                res,
+                status,
+                {
+                  error:
+                    message
+                }
+              );
+
+            }
+
+          }
+        );
+
+
+        return;
+      }
+
+
+      // ===================================================
+      // INDEX.HTML
+      // ===================================================
+
+      if (
+        (
+          req.method === "GET" ||
+          req.method === "HEAD"
+        ) &&
+        (
+          req.url === "/" ||
+          req.url === "/index.html"
+        )
+      ) {
+
+        const filePath =
+          path.join(
+            __dirname,
+            "index.html"
+          );
+
+
+        fs.readFile(
+          filePath,
+          (err, data) => {
+
+            if (err) {
+
+              console.error(
+                "INDEX ERROR:",
+                err
+              );
+
+              res.writeHead(
+                500,
+                {
+                  "Content-Type":
+                    "text/plain; charset=utf-8"
+                }
+              );
+
+              res.end(
+                "Could not load index.html."
+              );
+
+              return;
+            }
+
+
+            res.writeHead(
+              200,
+              {
+                "Content-Type":
+                  "text/html; charset=utf-8"
+              }
+            );
+
+
+            res.end(data);
+
+          }
+        );
+
+
+        return;
+      }
+
+
+      // ===================================================
+      // SCRIPT.JS
+      // ===================================================
+
+      if (
+        (
+          req.method === "GET" ||
+          req.method === "HEAD"
+        ) &&
+        req.url === "/script.js"
+      ) {
+
+        const filePath =
+          path.join(
+            __dirname,
+            "script.js"
+          );
+
+
+        fs.readFile(
+          filePath,
+          (err, data) => {
+
+            if (err) {
+
+              console.error(
+                "SCRIPT.JS ERROR:",
+                err
+              );
+
+              res.writeHead(
+                404,
+                {
+                  "Content-Type":
+                    "text/plain; charset=utf-8"
+                }
+              );
+
+              res.end(
+                "script.js not found."
+              );
+
+              return;
+            }
+
+
+            res.writeHead(
+              200,
+              {
+
+                "Content-Type":
+                  "application/javascript; charset=utf-8",
+
+                "Cache-Control":
+                  "no-cache"
+
+              }
+            );
+
+
+            res.end(data);
+
+          }
+        );
+
+
+        return;
+      }
+
+
+      // ===================================================
+      // 404
+      // ===================================================
+
+      sendJSON(
+        res,
+        404,
+        {
           error:
-            "Server error."
-        });
-      }
-
-    });
-
-    return;
-  }
-
-
-  // =====================================================
-  // SERVE INDEX.HTML
-  // =====================================================
-
-  if (
-    (req.method === "GET" ||
-      req.method === "HEAD") &&
-    (
-      req.url === "/" ||
-      req.url === "/index.html"
-    )
-  ) {
-
-    const filePath =
-      path.join(
-        __dirname,
-        "index.html"
+            "Not found"
+        }
       );
 
-
-    fs.readFile(
-      filePath,
-      (err, data) => {
-
-        if (err) {
-
-          console.error(
-            "INDEX ERROR:",
-            err
-          );
-
-          res.writeHead(500, {
-            "Content-Type":
-              "text/plain; charset=utf-8"
-          });
-
-          res.end(
-            "Could not load index.html."
-          );
-
-          return;
-        }
-
-
-        res.writeHead(200, {
-          "Content-Type":
-            "text/html; charset=utf-8"
-        });
-
-        res.end(data);
-      }
-    );
-
-    return;
-  }
-
-
-  // =====================================================
-  // SERVE SCRIPT.JS
-  // =====================================================
-
-  if (
-    (req.method === "GET" ||
-      req.method === "HEAD") &&
-    req.url === "/script.js"
-  ) {
-
-    const filePath =
-      path.join(
-        __dirname,
-        "script.js"
-      );
-
-
-    fs.readFile(
-      filePath,
-      (err, data) => {
-
-        if (err) {
-
-          console.error(
-            "SCRIPT.JS ERROR:",
-            err
-          );
-
-          res.writeHead(404, {
-            "Content-Type":
-              "text/plain; charset=utf-8"
-          });
-
-          res.end(
-            "script.js not found."
-          );
-
-          return;
-        }
-
-
-        res.writeHead(200, {
-
-          "Content-Type":
-            "application/javascript; charset=utf-8",
-
-          "Cache-Control":
-            "no-cache"
-
-        });
-
-        res.end(data);
-      }
-    );
-
-    return;
-  }
-
-
-  // =====================================================
-  // NOT FOUND
-  // =====================================================
-
-  sendJSON(res, 404, {
-    error: "Not found"
-  });
-
-});
+    }
+  );
 
 
 // =======================================================
@@ -938,11 +1667,39 @@ server.listen(
   () => {
 
     console.log(
-      `Emogigs AI server running on port ${PORT}`
+      "================================================="
     );
 
     console.log(
-      "Emogigs Intelligence Core: Step 18A"
+      "EMOGIGS AI SERVER"
+    );
+
+    console.log(
+      `Running on port ${PORT}`
+    );
+
+    console.log(
+      `Model: ${MODEL}`
+    );
+
+    console.log(
+      "Intelligence Core: Step 19A"
+    );
+
+    console.log(
+      "Conversation History: ENABLED"
+    );
+
+    console.log(
+      "Reasoning: ENABLED"
+    );
+
+    console.log(
+      "Programming Intelligence: ENABLED"
+    );
+
+    console.log(
+      "================================================="
     );
 
   }
