@@ -7365,3 +7365,1479 @@ console.log(
 ========================================================= */
 
 })();
+/* =========================================================
+   EMOGIGS AI — VOICE ASSISTANT
+   ChatGPT-style Voice Interaction
+========================================================= */
+
+let emogigsVoiceRecognition = null;
+let emogigsVoiceListening = false;
+let emogigsVoiceSpeaking = false;
+let emogigsVoiceModeOpen = false;
+
+
+/* =========================================================
+   VOICE SUPPORT DETECTION
+========================================================= */
+
+function isVoiceRecognitionSupported() {
+
+  return !!(
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition
+  );
+
+}
+
+
+/* =========================================================
+   CREATE VOICE UI
+========================================================= */
+
+function createEmogigsVoiceUI() {
+
+  if (
+    document.getElementById(
+      "emogigsVoiceOverlay"
+    )
+  ) {
+    return;
+  }
+
+
+  const overlay =
+    document.createElement("div");
+
+  overlay.id =
+    "emogigsVoiceOverlay";
+
+  overlay.className =
+    "emogigs-voice-overlay";
+
+
+  overlay.innerHTML = `
+
+    <div class="emogigs-voice-top">
+
+      <button
+        type="button"
+        id="emogigsVoiceClose"
+        aria-label="Close voice mode">
+        ×
+      </button>
+
+    </div>
+
+
+    <div class="emogigs-voice-center">
+
+      <div
+        id="emogigsVoiceOrb"
+        class="emogigs-voice-orb">
+
+        <div class="emogigs-voice-orb-inner"></div>
+
+      </div>
+
+
+      <div
+        id="emogigsVoiceStatus"
+        class="emogigs-voice-status">
+
+        Tap the microphone and speak
+
+      </div>
+
+
+      <div
+        id="emogigsVoiceTranscript"
+        class="emogigs-voice-transcript">
+      </div>
+
+    </div>
+
+
+    <div class="emogigs-voice-controls">
+
+      <button
+        type="button"
+        id="emogigsVoiceMic"
+        class="emogigs-voice-mic"
+        aria-label="Start voice input">
+
+        🎙️
+
+      </button>
+
+    </div>
+
+  `;
+
+
+  document.body.appendChild(
+    overlay
+  );
+
+
+  const closeButton =
+    document.getElementById(
+      "emogigsVoiceClose"
+    );
+
+
+  const micButton =
+    document.getElementById(
+      "emogigsVoiceMic"
+    );
+
+
+  if (closeButton) {
+
+    closeButton.addEventListener(
+      "click",
+      closeEmogigsVoiceMode
+    );
+
+  }
+
+
+  if (micButton) {
+
+    micButton.addEventListener(
+      "click",
+      toggleEmogigsVoiceListening
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   VOICE UI CSS
+========================================================= */
+
+function injectEmogigsVoiceStyles() {
+
+  if (
+    document.getElementById(
+      "emogigsVoiceStyles"
+    )
+  ) {
+    return;
+  }
+
+
+  const style =
+    document.createElement(
+      "style"
+    );
+
+
+  style.id =
+    "emogigsVoiceStyles";
+
+
+  style.textContent = `
+
+    .emogigs-voice-overlay {
+
+      position: fixed;
+
+      inset: 0;
+
+      z-index: 99999;
+
+      background: #000;
+
+      display: none;
+
+      flex-direction: column;
+
+      align-items: center;
+
+      justify-content: space-between;
+
+      padding:
+        env(safe-area-inset-top)
+        24px
+        calc(24px + env(safe-area-inset-bottom));
+
+      box-sizing: border-box;
+
+      color: white;
+
+      font-family: inherit;
+
+    }
+
+
+    .emogigs-voice-overlay.show {
+
+      display: flex;
+
+    }
+
+
+    .emogigs-voice-top {
+
+      width: 100%;
+
+      display: flex;
+
+      justify-content: flex-end;
+
+      padding-top: 18px;
+
+    }
+
+
+    #emogigsVoiceClose {
+
+      width: 58px;
+
+      height: 58px;
+
+      border-radius: 50%;
+
+      border: 1px solid
+        rgba(255,255,255,.15);
+
+      background:
+        rgba(255,255,255,.12);
+
+      color: white;
+
+      font-size: 38px;
+
+      line-height: 1;
+
+      cursor: pointer;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+    }
+
+
+    .emogigs-voice-center {
+
+      flex: 1;
+
+      width: 100%;
+
+      display: flex;
+
+      flex-direction: column;
+
+      align-items: center;
+
+      justify-content: center;
+
+      text-align: center;
+
+    }
+
+
+    .emogigs-voice-orb {
+
+      width: 185px;
+
+      height: 185px;
+
+      border-radius: 50%;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      background:
+        radial-gradient(
+          circle at 35% 25%,
+          #ffd5e8 0%,
+          #f5a4ca 25%,
+          #e86da7 55%,
+          #9c4d91 100%
+        );
+
+      box-shadow:
+        0 0 50px
+        rgba(235,105,170,.35);
+
+      transition:
+        transform .25s ease,
+        box-shadow .25s ease;
+
+    }
+
+
+    .emogigs-voice-orb-inner {
+
+      width: 70%;
+
+      height: 70%;
+
+      border-radius: 50%;
+
+      background:
+        radial-gradient(
+          circle at 35% 30%,
+          rgba(255,255,255,.95),
+          rgba(255,220,238,.75),
+          rgba(255,190,220,.25)
+        );
+
+      filter: blur(1px);
+
+    }
+
+
+    .emogigs-voice-orb.listening {
+
+      animation:
+        emogigsVoicePulse 1.2s
+        infinite alternate;
+
+      box-shadow:
+        0 0 90px
+        rgba(238,105,174,.65);
+
+    }
+
+
+    .emogigs-voice-orb.speaking {
+
+      animation:
+        emogigsVoiceSpeaking .7s
+        infinite alternate;
+
+    }
+
+
+    @keyframes emogigsVoicePulse {
+
+      from {
+        transform: scale(.94);
+      }
+
+      to {
+        transform: scale(1.08);
+      }
+
+    }
+
+
+    @keyframes emogigsVoiceSpeaking {
+
+      from {
+        transform: scale(.96);
+      }
+
+      to {
+        transform: scale(1.12);
+      }
+
+    }
+
+
+    .emogigs-voice-status {
+
+      margin-top: 38px;
+
+      font-size: 17px;
+
+      color:
+        rgba(255,255,255,.78);
+
+    }
+
+
+    .emogigs-voice-transcript {
+
+      max-width: 650px;
+
+      min-height: 30px;
+
+      margin-top: 16px;
+
+      font-size: 18px;
+
+      line-height: 1.5;
+
+      color: white;
+
+      padding: 0 20px;
+
+    }
+
+
+    .emogigs-voice-controls {
+
+      width: 100%;
+
+      display: flex;
+
+      justify-content: center;
+
+      padding-bottom: 20px;
+
+    }
+
+
+    .emogigs-voice-mic {
+
+      width: 72px;
+
+      height: 72px;
+
+      border-radius: 50%;
+
+      border: 1px solid
+        rgba(255,255,255,.15);
+
+      background:
+        rgba(255,255,255,.12);
+
+      color: white;
+
+      font-size: 30px;
+
+      cursor: pointer;
+
+      transition:
+        transform .2s ease,
+        background .2s ease;
+
+    }
+
+
+    .emogigs-voice-mic:active {
+
+      transform: scale(.92);
+
+    }
+
+
+    .emogigs-voice-mic.active {
+
+      background:
+        rgba(230,80,130,.35);
+
+    }
+
+
+    @media (max-width: 600px) {
+
+      .emogigs-voice-orb {
+
+        width: 170px;
+
+        height: 170px;
+
+      }
+
+      .emogigs-voice-status {
+
+        font-size: 16px;
+
+      }
+
+      .emogigs-voice-transcript {
+
+        font-size: 17px;
+
+      }
+
+    }
+
+  `;
+
+
+  document.head.appendChild(
+    style
+  );
+
+}
+
+
+/* =========================================================
+   INITIALIZE SPEECH RECOGNITION
+========================================================= */
+
+function initializeEmogigsVoiceRecognition() {
+
+  if (
+    !isVoiceRecognitionSupported()
+  ) {
+
+    console.warn(
+      "Speech Recognition is not supported."
+    );
+
+    return;
+
+  }
+
+
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+
+  emogigsVoiceRecognition =
+    new SpeechRecognition();
+
+
+  emogigsVoiceRecognition.continuous =
+    false;
+
+
+  emogigsVoiceRecognition.interimResults =
+    true;
+
+
+  /*
+    Browser will try to detect
+    the spoken language.
+  */
+
+  emogigsVoiceRecognition.lang =
+    "en-US";
+
+
+  emogigsVoiceRecognition.onstart =
+    () => {
+
+      emogigsVoiceListening =
+        true;
+
+
+      updateEmogigsVoiceUI(
+        "listening"
+      );
+
+    };
+
+
+  emogigsVoiceRecognition.onresult =
+    event => {
+
+      let transcript = "";
+
+
+      for (
+        let i = event.resultIndex;
+        i < event.results.length;
+        i++
+      ) {
+
+        transcript +=
+          event.results[i][0].transcript;
+
+      }
+
+
+      transcript =
+        transcript.trim();
+
+
+      const transcriptElement =
+        document.getElementById(
+          "emogigsVoiceTranscript"
+        );
+
+
+      if (transcriptElement) {
+
+        transcriptElement.textContent =
+          transcript;
+
+      }
+
+
+      const finalResult =
+        event.results[
+          event.results.length - 1
+        ];
+
+
+      if (
+        finalResult &&
+        finalResult.isFinal
+      ) {
+
+        handleEmogigsVoiceInput(
+          transcript
+        );
+
+      }
+
+    };
+
+
+  emogigsVoiceRecognition.onerror =
+    event => {
+
+      console.error(
+        "Emogigs voice error:",
+        event.error
+      );
+
+
+      emogigsVoiceListening =
+        false;
+
+
+      if (
+        event.error ===
+        "not-allowed"
+      ) {
+
+        updateEmogigsVoiceUI(
+          "error",
+          "Microphone permission is required."
+        );
+
+      } else {
+
+        updateEmogigsVoiceUI(
+          "error",
+          "I couldn't hear you. Please try again."
+        );
+
+      }
+
+    };
+
+
+  emogigsVoiceRecognition.onend =
+    () => {
+
+      emogigsVoiceListening =
+        false;
+
+
+      if (
+        !emogigsVoiceSpeaking
+      ) {
+
+        updateEmogigsVoiceUI(
+          "idle"
+        );
+
+      }
+
+    };
+
+}
+
+
+/* =========================================================
+   OPEN VOICE MODE
+========================================================= */
+
+function openEmogigsVoiceMode() {
+
+  createEmogigsVoiceUI();
+
+
+  const overlay =
+    document.getElementById(
+      "emogigsVoiceOverlay"
+    );
+
+
+  if (!overlay) {
+    return;
+  }
+
+
+  overlay.classList.add(
+    "show"
+  );
+
+
+  emogigsVoiceModeOpen =
+    true;
+
+
+  updateEmogigsVoiceUI(
+    "idle"
+  );
+
+}
+
+
+/* =========================================================
+   CLOSE VOICE MODE
+========================================================= */
+
+function closeEmogigsVoiceMode() {
+
+  if (
+    emogigsVoiceRecognition &&
+    emogigsVoiceListening
+  ) {
+
+    try {
+
+      emogigsVoiceRecognition.stop();
+
+    } catch (_) {}
+
+  }
+
+
+  stopEmogigsVoiceSpeaking();
+
+
+  const overlay =
+    document.getElementById(
+      "emogigsVoiceOverlay"
+    );
+
+
+  if (overlay) {
+
+    overlay.classList.remove(
+      "show"
+    );
+
+  }
+
+
+  emogigsVoiceModeOpen =
+    false;
+
+}
+
+
+/* =========================================================
+   TOGGLE MICROPHONE
+========================================================= */
+
+function toggleEmogigsVoiceListening() {
+
+  if (
+    !emogigsVoiceRecognition
+  ) {
+
+    initializeEmogigsVoiceRecognition();
+
+  }
+
+
+  if (
+    !emogigsVoiceRecognition
+  ) {
+
+    updateEmogigsVoiceUI(
+      "error",
+      "Voice input is not supported by this browser."
+    );
+
+    return;
+
+  }
+
+
+  if (
+    emogigsVoiceListening
+  ) {
+
+    try {
+
+      emogigsVoiceRecognition.stop();
+
+    } catch (_) {}
+
+    return;
+
+  }
+
+
+  /*
+    Stop any current AI speech
+    before listening again.
+  */
+
+  stopEmogigsVoiceSpeaking();
+
+
+  const transcriptElement =
+    document.getElementById(
+      "emogigsVoiceTranscript"
+    );
+
+
+  if (transcriptElement) {
+
+    transcriptElement.textContent =
+      "";
+
+  }
+
+
+  try {
+
+    emogigsVoiceRecognition.start();
+
+  } catch (error) {
+
+    console.log(
+      "Voice recognition start failed:",
+      error
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   HANDLE VOICE INPUT
+========================================================= */
+
+async function handleEmogigsVoiceInput(
+  text
+) {
+
+  if (!text) {
+    return;
+  }
+
+
+  /*
+    Put recognized speech
+    into normal chat input.
+  */
+
+  if (messageInput) {
+
+    messageInput.value =
+      text;
+
+    messageInput.dispatchEvent(
+      new Event(
+        "input",
+        {
+          bubbles: true
+        }
+      )
+    );
+
+  }
+
+
+  updateEmogigsVoiceUI(
+    "thinking",
+    "Emogigs AI is thinking..."
+  );
+
+
+  /*
+    Use existing AI system.
+  */
+
+  try {
+
+    const data =
+      await requestWithRetry(
+        text
+      );
+
+
+    const answer =
+      normalizeAIResponse(
+        data
+      );
+
+
+    if (!answer) {
+
+      throw new Error(
+        "Empty AI response"
+      );
+
+    }
+
+
+    /*
+      Add answer to normal chat.
+    */
+
+    addMessage(
+      "assistant",
+      answer
+    );
+
+
+    conversation.push({
+
+      role:
+        "user",
+
+      content:
+        text,
+
+      mode:
+        currentMode,
+
+      timestamp:
+        new Date().toISOString()
+
+    });
+
+
+    conversation.push({
+
+      role:
+        "assistant",
+
+      content:
+        answer,
+
+      mode:
+        currentMode,
+
+      timestamp:
+        new Date().toISOString()
+
+    });
+
+
+    saveConversation();
+
+
+    /*
+      Speak AI answer.
+    */
+
+    speakEmogigsAI(
+      answer
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Voice AI request failed:",
+      error
+    );
+
+
+    const message =
+      getFriendlyAIError(
+        error
+      );
+
+
+    updateEmogigsVoiceUI(
+      "error",
+      message
+    );
+
+
+    speakEmogigsAI(
+      message
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   TEXT TO SPEECH
+========================================================= */
+
+function speakEmogigsAI(
+  text
+) {
+
+  if (
+    !("speechSynthesis" in window)
+  ) {
+
+    console.warn(
+      "Speech synthesis is not supported."
+    );
+
+    return;
+
+  }
+
+
+  if (!text) {
+    return;
+  }
+
+
+  stopEmogigsVoiceSpeaking();
+
+
+  const utterance =
+    new SpeechSynthesisUtterance(
+      String(text)
+    );
+
+
+  /*
+    Better natural voice settings.
+  */
+
+  utterance.rate =
+    0.95;
+
+  utterance.pitch =
+    1;
+
+  utterance.volume =
+    1;
+
+
+  /*
+    Try to select a suitable voice.
+  */
+
+  const voices =
+    window.speechSynthesis
+      .getVoices();
+
+
+  const preferredVoice =
+    voices.find(
+      voice =>
+        /en-US|en-GB|bn-BD|bn-IN/i
+          .test(
+            voice.lang
+          )
+    );
+
+
+  if (preferredVoice) {
+
+    utterance.voice =
+      preferredVoice;
+
+  }
+
+
+  utterance.onstart =
+    () => {
+
+      emogigsVoiceSpeaking =
+        true;
+
+
+      updateEmogigsVoiceUI(
+        "speaking"
+      );
+
+    };
+
+
+  utterance.onend =
+    () => {
+
+      emogigsVoiceSpeaking =
+        false;
+
+
+      updateEmogigsVoiceUI(
+        "idle"
+      );
+
+    };
+
+
+  utterance.onerror =
+    error => {
+
+      console.error(
+        "Speech synthesis error:",
+        error
+      );
+
+
+      emogigsVoiceSpeaking =
+        false;
+
+
+      updateEmogigsVoiceUI(
+        "idle"
+      );
+
+    };
+
+
+  window.speechSynthesis.speak(
+    utterance
+  );
+
+}
+
+
+/* =========================================================
+   STOP AI SPEECH
+========================================================= */
+
+function stopEmogigsVoiceSpeaking() {
+
+  if (
+    "speechSynthesis" in window
+  ) {
+
+    window.speechSynthesis.cancel();
+
+  }
+
+
+  emogigsVoiceSpeaking =
+    false;
+
+}
+
+
+/* =========================================================
+   VOICE UI STATE
+========================================================= */
+
+function updateEmogigsVoiceUI(
+  state,
+  customText
+) {
+
+  const orb =
+    document.getElementById(
+      "emogigsVoiceOrb"
+    );
+
+
+  const status =
+    document.getElementById(
+      "emogigsVoiceStatus"
+    );
+
+
+  const mic =
+    document.getElementById(
+      "emogigsVoiceMic"
+    );
+
+
+  if (orb) {
+
+    orb.classList.remove(
+      "listening",
+      "speaking"
+    );
+
+  }
+
+
+  if (mic) {
+
+    mic.classList.remove(
+      "active"
+    );
+
+  }
+
+
+  if (
+    state === "listening"
+  ) {
+
+    if (orb) {
+
+      orb.classList.add(
+        "listening"
+      );
+
+    }
+
+
+    if (mic) {
+
+      mic.classList.add(
+        "active"
+      );
+
+      mic.textContent =
+        "⏹️";
+
+    }
+
+
+    if (status) {
+
+      status.textContent =
+        "Listening...";
+
+    }
+
+    return;
+
+  }
+
+
+  if (
+    state === "thinking"
+  ) {
+
+    if (status) {
+
+      status.textContent =
+        customText ||
+        "Thinking...";
+
+    }
+
+    return;
+
+  }
+
+
+  if (
+    state === "speaking"
+  ) {
+
+    if (orb) {
+
+      orb.classList.add(
+        "speaking"
+      );
+
+    }
+
+
+    if (status) {
+
+      status.textContent =
+        "Emogigs AI is speaking...";
+
+    }
+
+
+    if (mic) {
+
+      mic.textContent =
+        "🔇";
+
+    }
+
+    return;
+
+  }
+
+
+  if (
+    state === "error"
+  ) {
+
+    if (status) {
+
+      status.textContent =
+        customText ||
+        "Something went wrong.";
+
+    }
+
+
+    if (mic) {
+
+      mic.textContent =
+        "🎙️";
+
+    }
+
+    return;
+
+  }
+
+
+  /*
+    Idle
+  */
+
+  if (status) {
+
+    status.textContent =
+      "Tap the microphone and speak";
+
+  }
+
+
+  if (mic) {
+
+    mic.textContent =
+      "🎙️";
+
+  }
+
+}
+
+
+/* =========================================================
+   VOICE BUTTON
+========================================================= */
+
+function addEmogigsVoiceButton() {
+
+  if (
+    document.getElementById(
+      "emogigsVoiceButton"
+    )
+  ) {
+
+    return;
+
+  }
+
+
+  const button =
+    document.createElement(
+      "button"
+    );
+
+
+  button.id =
+    "emogigsVoiceButton";
+
+
+  button.type =
+    "button";
+
+
+  button.textContent =
+    "🎙️";
+
+
+  button.title =
+    "Emogigs AI Voice Assistant";
+
+
+  button.setAttribute(
+    "aria-label",
+    "Open Emogigs AI Voice Assistant"
+  );
+
+
+  button.style.cssText = `
+
+    position: fixed;
+
+    right: 16px;
+
+    bottom: 205px;
+
+    width: 52px;
+
+    height: 52px;
+
+    border: 0;
+
+    border-radius: 50%;
+
+    background:
+      linear-gradient(
+        135deg,
+        #7c5cff,
+        #e96ca8
+      );
+
+    color: white;
+
+    font-size: 23px;
+
+    z-index: 8999;
+
+    cursor: pointer;
+
+    box-shadow:
+      0 10px 30px
+      rgba(124,92,255,.35);
+
+  `;
+
+
+  button.addEventListener(
+    "click",
+    openEmogigsVoiceMode
+  );
+
+
+  document.body.appendChild(
+    button
+  );
+
+}
+
+
+/* =========================================================
+   VOICE INITIALIZATION
+========================================================= */
+
+function initializeEmogigsVoiceAssistant() {
+
+  injectEmogigsVoiceStyles();
+
+  createEmogigsVoiceUI();
+
+  initializeEmogigsVoiceRecognition();
+
+  addEmogigsVoiceButton();
+
+
+  /*
+    Some browsers load voices
+    asynchronously.
+  */
+
+  if (
+    "speechSynthesis" in window
+  ) {
+
+    window.speechSynthesis.onvoiceschanged =
+      () => {
+
+        window.speechSynthesis
+          .getVoices();
+
+      };
+
+  }
+
+
+  console.log(
+    "🎙️ Emogigs AI Voice Assistant initialized."
+  );
+
+}
+
+
+/* =========================================================
+   START VOICE SYSTEM
+========================================================= */
+
+if (
+  document.readyState ===
+  "loading"
+) {
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    initializeEmogigsVoiceAssistant
+  );
+
+} else {
+
+  initializeEmogigsVoiceAssistant();
+
+}
