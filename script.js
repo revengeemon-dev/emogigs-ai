@@ -3975,3 +3975,1910 @@
      🛡️ Error handling
      🚀 Final initialization
      ========================================================= */
+/* =========================================================
+   EMOGIGS AI — PART 2/3
+   ADVANCED AI ENGINE + VOICE + CHAT SYSTEM
+   ========================================================= */
+
+
+/* =========================================================
+   SMART MODE CONFIGURATION
+========================================================= */
+
+const EMOGIGS_MODES = {
+
+  General: {
+    label: "General",
+    icon: "✦",
+    instruction:
+      "You are Emogigs AI, a helpful, intelligent and creative AI assistant."
+  },
+
+  Study: {
+    label: "Study",
+    icon: "📚",
+    instruction:
+      "Act as an expert study assistant. Explain difficult topics simply, clearly and step by step."
+  },
+
+  Career: {
+    label: "Career",
+    icon: "💼",
+    instruction:
+      "Act as a practical career assistant. Help with jobs, skills, CVs, interviews and career planning."
+  },
+
+  Creative: {
+    label: "Creative",
+    icon: "🎨",
+    instruction:
+      "Act as a highly creative assistant. Generate original ideas, concepts, stories, names and innovative solutions."
+  },
+
+  Coding: {
+    label: "Coding",
+    icon: "💻",
+    instruction:
+      "Act as an expert programming assistant. Provide clean, practical and beginner-friendly technical solutions."
+  },
+
+  Life: {
+    label: "Life",
+    icon: "🌱",
+    instruction:
+      "Act as a practical life assistant. Give thoughtful, realistic and useful guidance."
+  },
+
+  Business: {
+    label: "Business",
+    icon: "🚀",
+    instruction:
+      "Act as a business and entrepreneurship assistant. Focus on practical opportunities, strategy and execution."
+  }
+
+};
+
+
+/* =========================================================
+   SMART MODE DETECTION
+========================================================= */
+
+function detectSmartMode(text) {
+
+  if (!text) {
+    return "General";
+  }
+
+  const value =
+    text.toLowerCase();
+
+  const keywordGroups = {
+
+    Study: [
+      "study",
+      "exam",
+      "learn",
+      "lesson",
+      "school",
+      "college",
+      "university",
+      "math",
+      "physics",
+      "chemistry",
+      "biology",
+      "পড়াশোনা",
+      "পরীক্ষা",
+      "শিখতে",
+      "গণিত"
+    ],
+
+    Career: [
+      "job",
+      "career",
+      "cv",
+      "resume",
+      "interview",
+      "freelance",
+      "freelancing",
+      "চাকরি",
+      "ক্যারিয়ার",
+      "সিভি",
+      "ফ্রিল্যান্স"
+    ],
+
+    Coding: [
+      "code",
+      "coding",
+      "javascript",
+      "html",
+      "css",
+      "python",
+      "api",
+      "bug",
+      "programming",
+      "কোড",
+      "প্রোগ্রামিং",
+      "ওয়েবসাইট",
+      "অ্যাপ"
+    ],
+
+    Creative: [
+      "idea",
+      "creative",
+      "story",
+      "design",
+      "name",
+      "logo",
+      "concept",
+      "idea",
+      "ক্রিয়েটিভ",
+      "আইডিয়া",
+      "গল্প",
+      "ডিজাইন"
+    ],
+
+    Business: [
+      "business",
+      "startup",
+      "company",
+      "marketing",
+      "sell",
+      "profit",
+      "ব্যবসা",
+      "স্টার্টআপ",
+      "মার্কেটিং",
+      "লাভ"
+    ],
+
+    Life: [
+      "life",
+      "motivation",
+      "habit",
+      "goal",
+      "relationship",
+      "mindset",
+      "জীবন",
+      "মোটিভেশন",
+      "অভ্যাস",
+      "লক্ষ্য",
+      "মানসিকতা"
+    ]
+
+  };
+
+
+  let bestMode = "General";
+
+  let highestScore = 0;
+
+
+  Object.keys(keywordGroups)
+    .forEach(mode => {
+
+      let score = 0;
+
+
+      keywordGroups[mode]
+        .forEach(keyword => {
+
+          if (value.includes(keyword)) {
+            score++;
+          }
+
+        });
+
+
+      if (score > highestScore) {
+
+        highestScore = score;
+
+        bestMode = mode;
+
+      }
+
+    });
+
+
+  return bestMode;
+
+}
+
+
+/* =========================================================
+   APPLY SMART MODE
+========================================================= */
+
+function applySmartMode(text) {
+
+  const detected =
+    detectSmartMode(text);
+
+
+  /*
+    Only automatically change mode
+    when the user is currently using General.
+  */
+
+  if (
+    currentMode === "General" &&
+    detected !== "General"
+  ) {
+
+    currentMode =
+      detected;
+
+
+    const modes =
+      document.querySelectorAll(
+        ".mode-chip"
+      );
+
+
+    modes.forEach(button => {
+
+      const buttonMode =
+        button.dataset.mode;
+
+
+      if (
+        buttonMode === detected
+      ) {
+
+        modes.forEach(item => {
+
+          item.classList.remove(
+            "active"
+          );
+
+        });
+
+
+        button.classList.add(
+          "active"
+        );
+
+      }
+
+    });
+
+  }
+
+
+  return currentMode;
+
+}
+
+
+/* =========================================================
+   BUILD AI CONTEXT
+========================================================= */
+
+function buildAIContext(
+  userMessage
+) {
+
+  const account =
+    getEmogigsAccount();
+
+
+  const modeData =
+    EMOGIGS_MODES[
+      currentMode
+    ] ||
+    EMOGIGS_MODES.General;
+
+
+  const context = {
+
+    app:
+      "Emogigs AI",
+
+    product:
+      "AI Life OS",
+
+    mode:
+      currentMode,
+
+    modeInstruction:
+      modeData.instruction,
+
+    user:
+      account
+        ? {
+            name: account.name,
+            username: account.username
+          }
+        : null,
+
+    currentMessage:
+      userMessage,
+
+    history:
+      conversation.slice(-12)
+
+  };
+
+
+  return context;
+
+}
+
+
+/* =========================================================
+   SMART PERSONALIZATION
+========================================================= */
+
+function getPersonalizedGreeting() {
+
+  const account =
+    getEmogigsAccount();
+
+
+  if (!account) {
+
+    return "Hello! I'm Emogigs AI. How can I help you today?";
+
+  }
+
+
+  return (
+    `Hello ${account.name}! 👋 ` +
+    `I'm Emogigs AI. What would you like to do today?`
+  );
+
+}
+
+
+/* =========================================================
+   CHAT INPUT HELPERS
+========================================================= */
+
+function focusMessageInput() {
+
+  if (!messageInput) {
+    return;
+  }
+
+
+  try {
+
+    messageInput.focus();
+
+  } catch (error) {
+
+    console.log(
+      "Input focus failed:",
+      error
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   INSERT TEXT INTO INPUT
+========================================================= */
+
+function insertIntoInput(text) {
+
+  if (!messageInput) {
+    return;
+  }
+
+
+  const current =
+    messageInput.value.trim();
+
+
+  messageInput.value =
+    current
+      ? current + " " + text
+      : text;
+
+
+  messageInput.dispatchEvent(
+    new Event(
+      "input",
+      {
+        bubbles: true
+      }
+    )
+  );
+
+
+  focusMessageInput();
+
+}
+
+
+/* =========================================================
+   CLEAR INPUT
+========================================================= */
+
+function clearMessageInput() {
+
+  if (!messageInput) {
+    return;
+  }
+
+
+  messageInput.value = "";
+
+  messageInput.style.height =
+    "auto";
+
+}
+
+
+/* =========================================================
+   AI REQUEST BUILDER
+========================================================= */
+
+function buildAIRequest(
+  userMessage
+) {
+
+  const context =
+    buildAIContext(
+      userMessage
+    );
+
+
+  return {
+
+    message:
+      userMessage,
+
+    prompt:
+      userMessage,
+
+    mode:
+      currentMode,
+
+    context:
+      context,
+
+    history:
+      conversation.slice(-12)
+
+  };
+
+}
+
+
+/* =========================================================
+   SEND MESSAGE — ADVANCED WRAPPER
+========================================================= */
+
+async function sendToEmogigsAI(
+  userMessage
+) {
+
+  const payload =
+    buildAIRequest(
+      userMessage
+    );
+
+
+  const controller =
+    new AbortController();
+
+
+  const timeout =
+    setTimeout(() => {
+
+      controller.abort();
+
+    }, 45000);
+
+
+  try {
+
+    const response =
+      await fetch(
+        API_URL,
+        {
+
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+
+            "Accept":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify(
+              payload
+            ),
+
+          signal:
+            controller.signal
+
+        }
+      );
+
+
+    clearTimeout(timeout);
+
+
+    if (!response.ok) {
+
+      let serverMessage = "";
+
+
+      try {
+
+        const errorData =
+          await response.json();
+
+
+        serverMessage =
+          extractAnswer(
+            errorData
+          );
+
+      } catch (_) {
+
+        serverMessage = "";
+
+      }
+
+
+      throw new Error(
+        serverMessage ||
+        `Server error ${response.status}`
+      );
+
+    }
+
+
+    const data =
+      await response.json();
+
+
+    return data;
+
+  } catch (error) {
+
+    clearTimeout(timeout);
+
+    throw error;
+
+  }
+
+}
+
+
+/* =========================================================
+   SAFE AI RESPONSE
+========================================================= */
+
+function normalizeAIResponse(
+  data
+) {
+
+  let answer =
+    extractAnswer(
+      data
+    );
+
+
+  if (!answer) {
+
+    return "";
+
+  }
+
+
+  answer =
+    String(answer)
+      .trim();
+
+
+  /*
+    Remove accidental API wrappers.
+  */
+
+  if (
+    answer.startsWith("```") &&
+    answer.endsWith("```")
+  ) {
+
+    answer =
+      answer
+        .replace(/^```[a-zA-Z]*\n?/, "")
+        .replace(/\n?```$/, "")
+        .trim();
+
+  }
+
+
+  return answer;
+
+}
+
+
+/* =========================================================
+   ERROR MESSAGE GENERATOR
+========================================================= */
+
+function getFriendlyAIError(
+  error
+) {
+
+  if (!error) {
+
+    return (
+      "Sorry, something went wrong. " +
+      "Please try again."
+    );
+
+  }
+
+
+  if (
+    error.name ===
+    "AbortError"
+  ) {
+
+    return (
+      "Emogigs AI is taking too long to respond. " +
+      "Please check your internet connection and try again."
+    );
+
+  }
+
+
+  const message =
+    String(
+      error.message || ""
+    ).toLowerCase();
+
+
+  if (
+    message.includes("failed to fetch") ||
+    message.includes("network")
+  ) {
+
+    return (
+      "I couldn't reach Emogigs AI. " +
+      "Please check your internet connection."
+    );
+
+  }
+
+
+  if (
+    message.includes("401") ||
+    message.includes("403")
+  ) {
+
+    return (
+      "Emogigs AI authorization failed. " +
+      "Please check the server configuration."
+    );
+
+  }
+
+
+  if (
+    message.includes("404")
+  ) {
+
+    return (
+      "The Emogigs AI service endpoint could not be found."
+    );
+
+  }
+
+
+  if (
+    message.includes("429")
+  ) {
+
+    return (
+      "Emogigs AI is currently busy. " +
+      "Please wait a moment and try again."
+    );
+
+  }
+
+
+  if (
+    message.includes("500") ||
+    message.includes("502") ||
+    message.includes("503")
+  ) {
+
+    return (
+      "Emogigs AI server is temporarily unavailable. " +
+      "Please try again in a moment."
+    );
+
+  }
+
+
+  return (
+    "Sorry, I couldn't connect to Emogigs AI right now. " +
+    "Please try again."
+  );
+
+}
+
+
+/* =========================================================
+   RETRY SYSTEM
+========================================================= */
+
+let retryCount = 0;
+
+const MAX_RETRIES = 2;
+
+
+async function requestWithRetry(
+  userMessage
+) {
+
+  retryCount = 0;
+
+
+  while (
+    retryCount <= MAX_RETRIES
+  ) {
+
+    try {
+
+      return await sendToEmogigsAI(
+        userMessage
+      );
+
+    } catch (error) {
+
+      retryCount++;
+
+
+      if (
+        retryCount >
+        MAX_RETRIES
+      ) {
+
+        throw error;
+
+      }
+
+
+      await new Promise(
+        resolve => {
+
+          setTimeout(
+            resolve,
+            700 * retryCount
+          );
+
+        }
+      );
+
+    }
+
+  }
+
+}
+
+
+/* =========================================================
+   IMPROVED MESSAGE SENDING
+========================================================= */
+
+async function sendMessageAdvanced() {
+
+  if (!messageInput) {
+    return;
+  }
+
+
+  const text =
+    messageInput.value.trim();
+
+
+  if (!text) {
+    return;
+  }
+
+
+  stopSpeaking();
+
+
+  /*
+    Automatically understand
+    the user's intent.
+  */
+
+  applySmartMode(
+    text
+  );
+
+
+  /*
+    Stop voice recognition
+    before sending.
+  */
+
+  if (
+    recognition &&
+    isListening
+  ) {
+
+    try {
+
+      recognition.stop();
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+
+  }
+
+
+  /*
+    Switch UI into chat mode.
+  */
+
+  if (hero) {
+
+    hero.style.display =
+      "none";
+
+  }
+
+
+  if (quickTools) {
+
+    quickTools.style.display =
+      "none";
+
+  }
+
+
+  if (chatArea) {
+
+    chatArea.classList.add(
+      "visible"
+    );
+
+  }
+
+
+  const empty =
+    document.getElementById(
+      "emptyChat"
+    );
+
+
+  if (empty) {
+    empty.remove();
+  }
+
+
+  /*
+    Add user message.
+  */
+
+  addMessage(
+    "user",
+    text
+  );
+
+
+  conversation.push({
+
+    role:
+      "user",
+
+    content:
+      text,
+
+    mode:
+      currentMode,
+
+    timestamp:
+      new Date().toISOString()
+
+  });
+
+
+  saveConversation();
+
+
+  clearMessageInput();
+
+
+  /*
+    Show typing animation.
+  */
+
+  const typingId =
+    addTyping();
+
+
+  try {
+
+    const data =
+      await requestWithRetry(
+        text
+      );
+
+
+    removeTyping(
+      typingId
+    );
+
+
+    const answer =
+      normalizeAIResponse(
+        data
+      );
+
+
+    if (!answer) {
+
+      throw new Error(
+        "Empty AI response"
+      );
+
+    }
+
+
+    addMessage(
+      "assistant",
+      answer
+    );
+
+
+    conversation.push({
+
+      role:
+        "assistant",
+
+      content:
+        answer,
+
+      mode:
+        currentMode,
+
+      timestamp:
+        new Date().toISOString()
+
+    });
+
+
+    saveConversation();
+
+
+  } catch (error) {
+
+    console.error(
+      "Emogigs AI request failed:",
+      error
+    );
+
+
+    removeTyping(
+      typingId
+    );
+
+
+    const friendlyError =
+      getFriendlyAIError(
+        error
+      );
+
+
+    addMessage(
+      "assistant",
+      friendlyError
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   SMART QUICK ACTIONS
+========================================================= */
+
+const EMOGIGS_QUICK_ACTIONS = {
+
+  summarize:
+    "Summarize this clearly and give me the most important points.",
+
+  explain:
+    "Explain this in a very simple way with examples.",
+
+  improve:
+    "Improve this and make it clearer, smarter and more professional.",
+
+  translate:
+    "Translate this into natural English while keeping the original meaning.",
+
+  ideas:
+    "Give me 10 creative and practical ideas about this.",
+
+  plan:
+    "Create a practical step-by-step action plan for this.",
+
+  analyze:
+    "Analyze this deeply and explain the important advantages, disadvantages and risks."
+
+};
+
+
+/* =========================================================
+   RUN QUICK ACTION
+========================================================= */
+
+function runQuickAction(
+  action
+) {
+
+  const instruction =
+    EMOGIGS_QUICK_ACTIONS[
+      action
+    ];
+
+
+  if (!instruction) {
+
+    return;
+
+  }
+
+
+  if (!messageInput) {
+
+    return;
+
+  }
+
+
+  const current =
+    messageInput.value.trim();
+
+
+  if (!current) {
+
+    insertIntoInput(
+      instruction
+    );
+
+    return;
+
+  }
+
+
+  messageInput.value =
+    `${instruction}\n\n${current}`;
+
+
+  messageInput.dispatchEvent(
+    new Event(
+      "input",
+      {
+        bubbles: true
+      }
+    )
+  );
+
+
+  sendMessageAdvanced();
+
+}
+
+
+/* =========================================================
+   KEYBOARD SHORTCUTS
+========================================================= */
+
+document.addEventListener(
+  "keydown",
+  event => {
+
+    /*
+      Ctrl/Cmd + K
+      Focus chat input.
+    */
+
+    if (
+      (event.ctrlKey ||
+       event.metaKey) &&
+      event.key.toLowerCase() === "k"
+    ) {
+
+      event.preventDefault();
+
+      focusMessageInput();
+
+    }
+
+
+    /*
+      Escape stops speaking.
+    */
+
+    if (
+      event.key === "Escape"
+    ) {
+
+      if (
+        "speechSynthesis" in window &&
+        window.speechSynthesis.speaking
+      ) {
+
+        stopSpeaking();
+
+      }
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   MOBILE TOUCH FEEDBACK
+========================================================= */
+
+function setupMobileInteractions() {
+
+  const interactive =
+    document.querySelectorAll(
+      "button, .quick-card, .mode-chip"
+    );
+
+
+  interactive.forEach(element => {
+
+    element.addEventListener(
+      "touchstart",
+      () => {
+
+        element.classList.add(
+          "emogigs-touching"
+        );
+
+      },
+      {
+        passive: true
+      }
+    );
+
+
+    element.addEventListener(
+      "touchend",
+      () => {
+
+        setTimeout(() => {
+
+          element.classList.remove(
+            "emogigs-touching"
+          );
+
+        }, 100);
+
+      },
+      {
+        passive: true
+      }
+    );
+
+  });
+
+}
+
+
+/* =========================================================
+   MOBILE INTERACTION CSS
+========================================================= */
+
+function injectMobileInteractionStyles() {
+
+  if (
+    document.getElementById(
+      "emogigsMobileStyles"
+    )
+  ) {
+
+    return;
+
+  }
+
+
+  const style =
+    document.createElement(
+      "style"
+    );
+
+
+  style.id =
+    "emogigsMobileStyles";
+
+
+  style.textContent = `
+
+    .emogigs-touching {
+      transform: scale(.97);
+      opacity: .86;
+    }
+
+    button,
+    .quick-card,
+    .mode-chip {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    textarea,
+    input,
+    button {
+      font-family: inherit;
+    }
+
+  `;
+
+
+  document.head.appendChild(
+    style
+  );
+
+}
+
+
+/* =========================================================
+   CHAT SEARCH
+========================================================= */
+
+function searchConversation(
+  query
+) {
+
+  const value =
+    String(query || "")
+      .trim()
+      .toLowerCase();
+
+
+  if (!value) {
+
+    return [];
+
+  }
+
+
+  return conversation.filter(
+    item => {
+
+      return (
+        typeof item.content === "string" &&
+        item.content
+          .toLowerCase()
+          .includes(value)
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   GET LAST USER MESSAGE
+========================================================= */
+
+function getLastUserMessage() {
+
+  for (
+    let i = conversation.length - 1;
+    i >= 0;
+    i--
+  ) {
+
+    if (
+      conversation[i].role ===
+      "user"
+    ) {
+
+      return conversation[i];
+
+    }
+
+  }
+
+
+  return null;
+
+}
+
+
+/* =========================================================
+   GET LAST ASSISTANT MESSAGE
+========================================================= */
+
+function getLastAssistantMessage() {
+
+  for (
+    let i = conversation.length - 1;
+    i >= 0;
+    i--
+  ) {
+
+    if (
+      conversation[i].role ===
+      "assistant"
+    ) {
+
+      return conversation[i];
+
+    }
+
+  }
+
+
+  return null;
+
+}
+
+
+/* =========================================================
+   IMPROVED REGENERATE
+========================================================= */
+
+async function regenerateLastAnswerAdvanced() {
+
+  const lastUser =
+    getLastUserMessage();
+
+
+  if (!lastUser) {
+
+    showToast(
+      "There is no previous message to regenerate."
+    );
+
+    return;
+
+  }
+
+
+  /*
+    Remove the last assistant
+    bubble from the UI.
+  */
+
+  const assistantMessages =
+    chatArea
+      ? chatArea.querySelectorAll(
+          ".message.assistant"
+        )
+      : [];
+
+
+  if (
+    assistantMessages.length
+  ) {
+
+    const last =
+      assistantMessages[
+        assistantMessages.length - 1
+      ];
+
+
+    if (
+      !last.classList.contains(
+        "typing"
+      )
+    ) {
+
+      last.remove();
+
+    }
+
+  }
+
+
+  /*
+    Remove previous assistant
+    message from conversation.
+  */
+
+  if (
+    conversation.length &&
+    conversation[
+      conversation.length - 1
+    ].role === "assistant"
+  ) {
+
+    conversation.pop();
+
+  }
+
+
+  saveConversation();
+
+
+  /*
+    Put original user text back.
+  */
+
+  if (messageInput) {
+
+    messageInput.value =
+      lastUser.content;
+
+  }
+
+
+  await sendMessageAdvanced();
+
+}
+
+
+/* =========================================================
+   COPY MESSAGE WITH FALLBACK
+========================================================= */
+
+async function copyMessageText(
+  text
+) {
+
+  if (!text) {
+
+    return false;
+
+  }
+
+
+  try {
+
+    if (
+      navigator.clipboard &&
+      window.isSecureContext
+    ) {
+
+      await navigator.clipboard.writeText(
+        text
+      );
+
+      return true;
+
+    }
+
+  } catch (error) {
+
+    console.log(
+      "Clipboard API failed:",
+      error
+    );
+
+  }
+
+
+  try {
+
+    const textarea =
+      document.createElement(
+        "textarea"
+      );
+
+
+    textarea.value =
+      text;
+
+
+    textarea.style.position =
+      "fixed";
+
+    textarea.style.left =
+      "-9999px";
+
+
+    document.body.appendChild(
+      textarea
+    );
+
+
+    textarea.focus();
+
+    textarea.select();
+
+
+    const success =
+      document.execCommand(
+        "copy"
+      );
+
+
+    textarea.remove();
+
+
+    return success;
+
+  } catch (error) {
+
+    console.error(
+      "Copy fallback failed:",
+      error
+    );
+
+
+    return false;
+
+  }
+
+}
+
+
+/* =========================================================
+   CHAT EXPORT
+========================================================= */
+
+function exportConversation() {
+
+  if (
+    !conversation.length
+  ) {
+
+    showToast(
+      "There is no conversation to export."
+    );
+
+    return;
+
+  }
+
+
+  let output =
+    "EMOGIGS AI\n";
+
+  output +=
+    "====================\n\n";
+
+
+  conversation.forEach(
+    item => {
+
+      const role =
+        item.role === "user"
+          ? "You"
+          : "Emogigs AI";
+
+
+      output +=
+        `${role}:\n`;
+
+      output +=
+        `${item.content}\n\n`;
+
+    }
+  );
+
+
+  const blob =
+    new Blob(
+      [output],
+      {
+        type:
+          "text/plain;charset=utf-8"
+      }
+    );
+
+
+  const url =
+    URL.createObjectURL(
+      blob
+    );
+
+
+  const link =
+    document.createElement(
+      "a"
+    );
+
+
+  link.href =
+    url;
+
+
+  link.download =
+    `emogigs-chat-${Date.now()}.txt`;
+
+
+  document.body.appendChild(
+    link
+  );
+
+
+  link.click();
+
+
+  link.remove();
+
+
+  setTimeout(() => {
+
+    URL.revokeObjectURL(
+      url
+    );
+
+  }, 1000);
+
+
+  showToast(
+    "Conversation exported ✓"
+  );
+
+}
+
+
+/* =========================================================
+   CHAT STATISTICS
+========================================================= */
+
+function getConversationStats() {
+
+  const total =
+    conversation.length;
+
+
+  let userMessages = 0;
+
+  let aiMessages = 0;
+
+
+  conversation.forEach(
+    item => {
+
+      if (
+        item.role === "user"
+      ) {
+
+        userMessages++;
+
+      }
+
+
+      if (
+        item.role === "assistant"
+      ) {
+
+        aiMessages++;
+
+      }
+
+    }
+  );
+
+
+  return {
+
+    total,
+    userMessages,
+    aiMessages
+
+  };
+
+}
+
+
+/* =========================================================
+   SMART WELCOME
+========================================================= */
+
+function showSmartWelcome() {
+
+  if (
+    conversation.length
+  ) {
+
+    return;
+
+  }
+
+
+  const account =
+    getEmogigsAccount();
+
+
+  const empty =
+    document.getElementById(
+      "emptyChat"
+    );
+
+
+  if (!empty) {
+
+    return;
+
+  }
+
+
+  const strong =
+    empty.querySelector(
+      "strong"
+    );
+
+
+  if (strong) {
+
+    strong.textContent =
+      account
+        ? `Welcome back, ${account.name} 👋`
+        : "Emogigs AI is ready";
+        
+  }
+
+}
+
+
+/* =========================================================
+   INITIALIZE ADVANCED ENGINE
+========================================================= */
+
+function initializeAdvancedEngine() {
+
+  injectMobileInteractionStyles();
+
+  setupMobileInteractions();
+
+  showSmartWelcome();
+
+
+  console.log(
+    "Emogigs AI Advanced Engine initialized."
+  );
+
+}
+
+
+/* =========================================================
+   ADVANCED DOM READY
+========================================================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    initializeAdvancedEngine();
+
+  }
+);
+
+
+/* =========================================================
+   OVERRIDE STANDARD SEND
+========================================================= */
+
+(function patchSendButton() {
+
+  if (!sendBtn) {
+    return;
+  }
+
+
+  /*
+    Prevent duplicate listeners
+    from triggering two AI requests.
+
+    The original setupButtons()
+    listener still exists, so we use
+    a capture listener and stop it.
+  */
+
+  sendBtn.addEventListener(
+    "click",
+    event => {
+
+      event.preventDefault();
+
+      event.stopImmediatePropagation();
+
+      sendMessageAdvanced();
+
+    },
+    true
+  );
+
+})();
+
+
+/* =========================================================
+   OVERRIDE ENTER KEY
+========================================================= */
+
+(function patchEnterKey() {
+
+  if (!messageInput) {
+    return;
+  }
+
+
+  messageInput.addEventListener(
+    "keydown",
+    event => {
+
+      if (
+        event.key === "Enter" &&
+        !event.shiftKey
+      ) {
+
+        event.preventDefault();
+
+        event.stopImmediatePropagation();
+
+        sendMessageAdvanced();
+
+      }
+
+    },
+    true
+  );
+
+})();
+
+
+/* =========================================================
+   QUICK ACTION EVENT BINDING
+========================================================= */
+
+function setupAdvancedQuickActions() {
+
+  const buttons =
+    document.querySelectorAll(
+      "[data-ai-action]"
+    );
+
+
+  buttons.forEach(
+    button => {
+
+      button.addEventListener(
+        "click",
+        event => {
+
+          event.preventDefault();
+
+
+          const action =
+            button.dataset.aiAction;
+
+
+          runQuickAction(
+            action
+          );
+
+        }
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   ADVANCED READY
+========================================================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    setupAdvancedQuickActions();
+
+  }
+);
