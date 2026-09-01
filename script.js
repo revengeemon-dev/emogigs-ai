@@ -5882,3 +5882,1486 @@ document.addEventListener(
 
   }
 );
+/* =========================================================
+   EMOGIGS AI — PART 3 / 3
+   SMART FEATURES + MEMORY + PRODUCTIVITY + UI
+   ========================================================= */
+
+
+/* =========================================================
+   SMART MEMORY SYSTEM
+========================================================= */
+
+const MEMORY_KEY = "emogigs_smart_memory_v1";
+
+function getSmartMemory() {
+
+  try {
+
+    const saved =
+      localStorage.getItem(MEMORY_KEY);
+
+    if (!saved) {
+      return {
+        facts: [],
+        preferences: [],
+        goals: [],
+        notes: []
+      };
+    }
+
+    const memory = JSON.parse(saved);
+
+    return {
+      facts: Array.isArray(memory.facts)
+        ? memory.facts
+        : [],
+
+      preferences: Array.isArray(memory.preferences)
+        ? memory.preferences
+        : [],
+
+      goals: Array.isArray(memory.goals)
+        ? memory.goals
+        : [],
+
+      notes: Array.isArray(memory.notes)
+        ? memory.notes
+        : []
+    };
+
+  } catch (error) {
+
+    console.log(
+      "Emogigs memory error:",
+      error
+    );
+
+    return {
+      facts: [],
+      preferences: [],
+      goals: [],
+      notes: []
+    };
+
+  }
+
+}
+
+
+function saveSmartMemory(memory) {
+
+  try {
+
+    localStorage.setItem(
+      MEMORY_KEY,
+      JSON.stringify(memory)
+    );
+
+  } catch (error) {
+
+    console.log(
+      "Could not save smart memory:",
+      error
+    );
+
+  }
+
+}
+
+
+function addMemoryItem(
+  category,
+  text
+) {
+
+  if (!text || !category) {
+    return;
+  }
+
+  const memory =
+    getSmartMemory();
+
+  if (!Array.isArray(memory[category])) {
+    memory[category] = [];
+  }
+
+  const clean =
+    String(text).trim();
+
+  if (!clean) {
+    return;
+  }
+
+  const exists =
+    memory[category].some(
+      item =>
+        String(item).toLowerCase() ===
+        clean.toLowerCase()
+    );
+
+  if (!exists) {
+
+    memory[category].push(clean);
+
+    memory[category] =
+      memory[category].slice(-30);
+
+    saveSmartMemory(memory);
+
+  }
+
+}
+
+
+function clearSmartMemory() {
+
+  localStorage.removeItem(
+    MEMORY_KEY
+  );
+
+  showToast(
+    "Emogigs memory cleared"
+  );
+
+}
+
+
+function buildMemoryContext() {
+
+  const memory =
+    getSmartMemory();
+
+  const sections = [];
+
+  if (memory.facts.length) {
+
+    sections.push(
+      "Known facts: " +
+      memory.facts.join("; ")
+    );
+
+  }
+
+  if (memory.preferences.length) {
+
+    sections.push(
+      "User preferences: " +
+      memory.preferences.join("; ")
+    );
+
+  }
+
+  if (memory.goals.length) {
+
+    sections.push(
+      "User goals: " +
+      memory.goals.join("; ")
+    );
+
+  }
+
+  if (memory.notes.length) {
+
+    sections.push(
+      "Important notes: " +
+      memory.notes.join("; ")
+    );
+
+  }
+
+  return sections.join("\n");
+
+}
+
+
+/* =========================================================
+   AUTOMATIC MEMORY DETECTION
+========================================================= */
+
+function detectUserMemory(text) {
+
+  if (!text) {
+    return;
+  }
+
+  const value =
+    String(text).trim();
+
+  const lower =
+    value.toLowerCase();
+
+
+  /*
+    Goal detection
+  */
+
+  const goalWords = [
+    "my goal",
+    "i want to",
+    "i need to",
+    "my target",
+    "আমার লক্ষ্য",
+    "আমি চাই",
+    "আমার টার্গেট",
+    "আমার উদ্দেশ্য"
+  ];
+
+  if (
+    goalWords.some(
+      word => lower.includes(word.toLowerCase())
+    )
+  ) {
+
+    addMemoryItem(
+      "goals",
+      value
+    );
+
+  }
+
+
+  /*
+    Preference detection
+  */
+
+  const preferenceWords = [
+    "i prefer",
+    "i like",
+    "i don't like",
+    "my favorite",
+    "আমি পছন্দ করি",
+    "আমার পছন্দ",
+    "আমি পছন্দ করি না"
+  ];
+
+  if (
+    preferenceWords.some(
+      word => lower.includes(word.toLowerCase())
+    )
+  ) {
+
+    addMemoryItem(
+      "preferences",
+      value
+    );
+
+  }
+
+
+  /*
+    General personal information
+  */
+
+  const personalWords = [
+    "my name is",
+    "i am",
+    "i'm",
+    "আমার নাম",
+    "আমি"
+  ];
+
+  if (
+    personalWords.some(
+      word => lower.includes(word.toLowerCase())
+    )
+  ) {
+
+    addMemoryItem(
+      "facts",
+      value
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   PRODUCTIVITY COMMANDS
+========================================================= */
+
+function handleSmartCommand(text) {
+
+  if (!text) {
+    return false;
+  }
+
+  const value =
+    text.trim().toLowerCase();
+
+
+  /*
+    Show memory
+  */
+
+  if (
+    value === "/memory" ||
+    value.includes("what do you remember about me") ||
+    value.includes("তুমি আমার সম্পর্কে কি মনে রেখেছ")
+  ) {
+
+    const memory =
+      getSmartMemory();
+
+    const all = [
+      ...memory.facts,
+      ...memory.preferences,
+      ...memory.goals,
+      ...memory.notes
+    ];
+
+    if (!all.length) {
+
+      addMessage(
+        "assistant",
+        "I don't have any saved personal memory yet."
+      );
+
+    } else {
+
+      addMessage(
+        "assistant",
+        "🧠 Here's what Emogigs remembers:\n\n" +
+        all.map(
+          item => "• " + item
+        ).join("\n")
+      );
+
+    }
+
+    return true;
+
+  }
+
+
+  /*
+    Clear memory
+  */
+
+  if (
+    value === "/clear-memory" ||
+    value.includes("forget everything") ||
+    value.includes("সবকিছু ভুলে যাও")
+  ) {
+
+    const confirmed =
+      window.confirm(
+        "Clear Emogigs' saved memory?"
+      );
+
+    if (confirmed) {
+
+      clearSmartMemory();
+
+      addMessage(
+        "assistant",
+        "🧠 Your saved Emogigs memory has been cleared."
+      );
+
+    }
+
+    return true;
+
+  }
+
+
+  /*
+    New chat command
+  */
+
+  if (
+    value === "/new" ||
+    value === "/newchat"
+  ) {
+
+    startNewChat();
+
+    return true;
+
+  }
+
+
+  /*
+    Help command
+  */
+
+  if (
+    value === "/help"
+  ) {
+
+    addMessage(
+      "assistant",
+      `✨ Emogigs AI Smart Commands
+
+/memory — View saved memory
+/clear-memory — Clear saved memory
+/new — Start a new chat
+/help — Show commands
+
+You can also simply talk naturally with Emogigs AI.`
+    );
+
+    return true;
+
+  }
+
+
+  return false;
+
+}
+
+
+/* =========================================================
+   SMART DAILY PLANNER
+========================================================= */
+
+function createDailyPlan() {
+
+  const plan = {
+
+    createdAt:
+      new Date().toISOString(),
+
+    tasks: []
+
+  };
+
+  try {
+
+    localStorage.setItem(
+      "emogigs_daily_plan_v1",
+      JSON.stringify(plan)
+    );
+
+  } catch (error) {
+
+    console.log(error);
+
+  }
+
+}
+
+
+/* =========================================================
+   FOCUS MODE
+========================================================= */
+
+let focusModeActive = false;
+
+function toggleFocusMode() {
+
+  focusModeActive =
+    !focusModeActive;
+
+  document.body.classList.toggle(
+    "emogigs-focus-mode",
+    focusModeActive
+  );
+
+  if (focusModeActive) {
+
+    showToast(
+      "🎯 Focus Mode activated"
+    );
+
+  } else {
+
+    showToast(
+      "Focus Mode disabled"
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   FOCUS MODE CSS
+========================================================= */
+
+function injectSmartFeatureStyles() {
+
+  if (
+    document.getElementById(
+      "emogigsSmartFeatureStyles"
+    )
+  ) {
+
+    return;
+
+  }
+
+  const style =
+    document.createElement("style");
+
+  style.id =
+    "emogigsSmartFeatureStyles";
+
+  style.textContent = `
+
+    body.emogigs-focus-mode
+    .quick-tools,
+    body.emogigs-focus-mode
+    .hero-subtitle,
+    body.emogigs-focus-mode
+    .mode-row {
+      opacity: .25;
+      transition: opacity .25s ease;
+    }
+
+    body.emogigs-focus-mode
+    .chat-area {
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .emogigs-smart-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(124,92,255,.12);
+      border: 1px solid rgba(124,92,255,.25);
+      color: rgba(255,255,255,.78);
+      font-size: 11px;
+      margin-top: 8px;
+    }
+
+    .emogigs-command-panel {
+      position: fixed;
+      left: 50%;
+      bottom: 90px;
+      transform: translateX(-50%);
+      width: min(92%, 430px);
+      padding: 15px;
+      border-radius: 18px;
+      background: rgba(15,15,28,.96);
+      border: 1px solid rgba(255,255,255,.1);
+      box-shadow: 0 20px 60px rgba(0,0,0,.4);
+      z-index: 9990;
+      display: none;
+    }
+
+    .emogigs-command-panel.show {
+      display: block;
+    }
+
+    .emogigs-command-panel button {
+      width: 100%;
+      border: 0;
+      padding: 12px;
+      margin-top: 7px;
+      border-radius: 11px;
+      background: rgba(255,255,255,.07);
+      color: white;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .emogigs-command-panel button:active {
+      transform: scale(.98);
+    }
+
+  `;
+
+  document.head.appendChild(
+    style
+  );
+
+}
+
+
+/* =========================================================
+   QUICK ACTION SYSTEM
+========================================================= */
+
+function createSmartQuickActions() {
+
+  if (
+    document.getElementById(
+      "emogigsSmartActions"
+    )
+  ) {
+
+    return;
+
+  }
+
+  const panel =
+    document.createElement("div");
+
+  panel.id =
+    "emogigsSmartActions";
+
+  panel.className =
+    "emogigs-command-panel";
+
+  panel.innerHTML = `
+
+    <strong style="
+      color:white;
+      font-size:15px;
+    ">
+      ✨ Emogigs Smart Actions
+    </strong>
+
+    <button
+      type="button"
+      data-smart-action="memory">
+      🧠 What does Emogigs remember?
+    </button>
+
+    <button
+      type="button"
+      data-smart-action="focus">
+      🎯 Toggle Focus Mode
+    </button>
+
+    <button
+      type="button"
+      data-smart-action="new">
+      🆕 Start New Chat
+    </button>
+
+    <button
+      type="button"
+      data-smart-action="help">
+      💡 Smart Commands
+    </button>
+
+  `;
+
+  document.body.appendChild(
+    panel
+  );
+
+
+  panel
+    .querySelectorAll(
+      "[data-smart-action]"
+    )
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          const action =
+            button.dataset.smartAction;
+
+          panel.classList.remove(
+            "show"
+          );
+
+
+          if (action === "memory") {
+
+            handleSmartCommand(
+              "/memory"
+            );
+
+          }
+
+
+          if (action === "focus") {
+
+            toggleFocusMode();
+
+          }
+
+
+          if (action === "new") {
+
+            startNewChat();
+
+          }
+
+
+          if (action === "help") {
+
+            handleSmartCommand(
+              "/help"
+            );
+
+          }
+
+        }
+      );
+
+    });
+
+}
+
+
+/* =========================================================
+   SMART ACTION BUTTON
+========================================================= */
+
+function addSmartActionButton() {
+
+  if (
+    document.getElementById(
+      "emogigsSmartActionButton"
+    )
+  ) {
+
+    return;
+
+  }
+
+  const button =
+    document.createElement("button");
+
+  button.id =
+    "emogigsSmartActionButton";
+
+  button.type =
+    "button";
+
+  button.textContent =
+    "✨";
+
+  button.title =
+    "Emogigs Smart Actions";
+
+  button.setAttribute(
+    "aria-label",
+    "Emogigs Smart Actions"
+  );
+
+  button.style.cssText = `
+    position: fixed;
+    right: 14px;
+    bottom: 145px;
+    width: 46px;
+    height: 46px;
+    border: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg,#7c5cff,#a66cff);
+    color: white;
+    font-size: 20px;
+    z-index: 9000;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(124,92,255,.3);
+  `;
+
+  button.addEventListener(
+    "click",
+    () => {
+
+      const panel =
+        document.getElementById(
+          "emogigsSmartActions"
+        );
+
+      if (panel) {
+
+        panel.classList.toggle(
+          "show"
+        );
+
+      }
+
+    }
+  );
+
+  document.body.appendChild(
+    button
+  );
+
+}
+
+
+/* =========================================================
+   OFFLINE / CONNECTION STATUS
+========================================================= */
+
+function setupConnectionStatus() {
+
+  const update =
+    () => {
+
+      const online =
+        navigator.onLine;
+
+      document.body.classList.toggle(
+        "emogigs-offline",
+        !online
+      );
+
+      if (!online) {
+
+        showToast(
+          "You are offline"
+        );
+
+      }
+
+    };
+
+
+  window.addEventListener(
+    "online",
+    () => {
+
+      showToast(
+        "🌐 Connection restored"
+      );
+
+      update();
+
+    }
+  );
+
+
+  window.addEventListener(
+    "offline",
+    () => {
+
+      showToast(
+        "⚠️ Internet connection lost"
+      );
+
+      update();
+
+    }
+  );
+
+
+  update();
+
+}
+
+
+/* =========================================================
+   KEYBOARD SHORTCUTS
+========================================================= */
+
+function setupKeyboardShortcuts() {
+
+  document.addEventListener(
+    "keydown",
+    event => {
+
+      /*
+        Ctrl/Cmd + K
+        Focus input
+      */
+
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.key.toLowerCase() === "k"
+      ) {
+
+        event.preventDefault();
+
+        if (messageInput) {
+
+          messageInput.focus();
+
+        }
+
+      }
+
+
+      /*
+        Escape
+        Stop speech
+      */
+
+      if (
+        event.key === "Escape"
+      ) {
+
+        stopSpeaking();
+
+      }
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   ENHANCED MESSAGE SEND
+========================================================= */
+
+const originalSendMessage =
+  sendMessage;
+
+
+/*
+  Replace sendMessage with smart wrapper.
+*/
+
+sendMessage = async function () {
+
+  if (!messageInput) {
+    return;
+  }
+
+  const text =
+    messageInput.value.trim();
+
+  if (!text) {
+    return;
+  }
+
+
+  /*
+    Smart local commands
+  */
+
+  if (
+    handleSmartCommand(text)
+  ) {
+
+    messageInput.value = "";
+
+    messageInput.style.height =
+      "auto";
+
+    return;
+
+  }
+
+
+  /*
+    Learn from the conversation
+  */
+
+  detectUserMemory(text);
+
+
+  /*
+    Add memory context to request
+  */
+
+  const memoryContext =
+    buildMemoryContext();
+
+
+  /*
+    Temporarily enhance API request
+    through fetch interception.
+  */
+
+  const originalFetch =
+    window.fetch;
+
+
+  window.fetch = async function (
+    input,
+    init
+  ) {
+
+    try {
+
+      if (
+        typeof input === "string" &&
+        input === API_URL &&
+        init &&
+        init.body
+      ) {
+
+        const body =
+          JSON.parse(init.body);
+
+
+        body.memory =
+          memoryContext;
+
+
+        body.userContext = {
+          mode: currentMode,
+          memory: memoryContext
+        };
+
+
+        init.body =
+          JSON.stringify(body);
+
+      }
+
+    } catch (error) {
+
+      console.log(
+        "Memory context injection error:",
+        error
+      );
+
+    }
+
+
+    return originalFetch(
+      input,
+      init
+    );
+
+  };
+
+
+  try {
+
+    await originalSendMessage();
+
+  } finally {
+
+    /*
+      Restore original fetch
+    */
+
+    window.fetch =
+      originalFetch;
+
+  }
+
+};
+
+
+/* =========================================================
+   AI RESPONSE MEMORY LEARNING
+========================================================= */
+
+function learnFromAssistantResponse(
+  text
+) {
+
+  if (!text) {
+    return;
+  }
+
+  /*
+    We deliberately keep this lightweight.
+    Emogigs should not blindly save every AI response.
+  */
+
+  if (
+    text.length > 1000
+  ) {
+
+    return;
+
+  }
+
+}
+
+
+/* =========================================================
+   CHAT EXPORT
+========================================================= */
+
+function exportConversation() {
+
+  if (
+    !conversation ||
+    !conversation.length
+  ) {
+
+    showToast(
+      "There is no conversation to export."
+    );
+
+    return;
+
+  }
+
+
+  const lines = [];
+
+  lines.push(
+    "EMOGIGS AI CONVERSATION"
+  );
+
+  lines.push(
+    "========================"
+  );
+
+  lines.push("");
+
+
+  conversation.forEach(
+    item => {
+
+      const role =
+        item.role === "user"
+          ? "You"
+          : "Emogigs AI";
+
+      lines.push(
+        `${role}:`
+      );
+
+      lines.push(
+        item.content
+      );
+
+      lines.push("");
+
+    }
+  );
+
+
+  const blob =
+    new Blob(
+      [
+        lines.join("\n")
+      ],
+      {
+        type:
+          "text/plain;charset=utf-8"
+      }
+    );
+
+
+  const url =
+    URL.createObjectURL(blob);
+
+
+  const link =
+    document.createElement("a");
+
+  link.href =
+    url;
+
+  link.download =
+    "emogigs-conversation.txt";
+
+  document.body.appendChild(
+    link
+  );
+
+  link.click();
+
+  link.remove();
+
+  URL.revokeObjectURL(
+    url
+  );
+
+
+  showToast(
+    "Conversation exported"
+  );
+
+}
+
+
+/* =========================================================
+   EXPORT BUTTON AUTO-DETECTION
+========================================================= */
+
+function setupExportButtons() {
+
+  const buttons =
+    document.querySelectorAll(
+      "#exportChat, #exportBtn, [data-action='export'], [data-export]"
+    );
+
+  buttons.forEach(
+    button => {
+
+      button.addEventListener(
+        "click",
+        event => {
+
+          event.preventDefault();
+
+          exportConversation();
+
+        }
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   DOUBLE TAP / TOUCH FEEDBACK
+========================================================= */
+
+function setupTouchFeedback() {
+
+  document.addEventListener(
+    "touchstart",
+    event => {
+
+      const target =
+        event.target.closest(
+          "button"
+        );
+
+      if (!target) {
+        return;
+      }
+
+      target.classList.add(
+        "emogigs-touching"
+      );
+
+    },
+    {
+      passive: true
+    }
+  );
+
+
+  document.addEventListener(
+    "touchend",
+    event => {
+
+      const target =
+        event.target.closest(
+          "button"
+        );
+
+      if (!target) {
+        return;
+      }
+
+      setTimeout(
+        () => {
+
+          target.classList.remove(
+            "emogigs-touching"
+          );
+
+        },
+        120
+      );
+
+    },
+    {
+      passive: true
+    }
+  );
+
+}
+
+
+/* =========================================================
+   SMART MOBILE UX
+========================================================= */
+
+function setupMobileUX() {
+
+  if (!messageInput) {
+    return;
+  }
+
+
+  /*
+    Prevent mobile keyboard resize
+    from creating strange layouts.
+  */
+
+  messageInput.addEventListener(
+    "focus",
+    () => {
+
+      setTimeout(
+        () => {
+
+          messageInput.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+          });
+
+        },
+        250
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   ACCOUNT PROFILE GREETING
+========================================================= */
+
+function getPersonalGreeting() {
+
+  const account =
+    getEmogigsAccount();
+
+  if (!account) {
+    return "";
+  }
+
+  const hour =
+    new Date().getHours();
+
+  let greeting;
+
+  if (hour < 12) {
+
+    greeting =
+      "Good morning";
+
+  } else if (hour < 18) {
+
+    greeting =
+      "Good afternoon";
+
+  } else {
+
+    greeting =
+      "Good evening";
+
+  }
+
+  return (
+    greeting +
+    ", " +
+    account.name +
+    " ✨"
+  );
+
+}
+
+
+/* =========================================================
+   PERSONALIZED HERO
+========================================================= */
+
+function personalizeHero() {
+
+  const greeting =
+    getPersonalGreeting();
+
+  if (!greeting) {
+    return;
+  }
+
+  const heroTitle =
+    document.querySelector(
+      "#hero h1, .hero h1, .hero-title"
+    );
+
+  if (
+    heroTitle &&
+    !heroTitle.dataset.emogigsPersonalized
+  ) {
+
+    heroTitle.dataset.emogigsPersonalized =
+      "true";
+
+    /*
+      Keep the original brand title,
+      but add a small personalized message.
+    */
+
+    const badge =
+      document.createElement("div");
+
+    badge.className =
+      "emogigs-smart-badge";
+
+    badge.textContent =
+      greeting;
+
+    heroTitle.parentNode.insertBefore(
+      badge,
+      heroTitle.nextSibling
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   SAFETY: PREVENT DUPLICATE INITIALIZATION
+========================================================= */
+
+let emogigsPart3Initialized =
+  false;
+
+
+/* =========================================================
+   PART 3 INITIALIZATION
+========================================================= */
+
+function initializeEmogigsPart3() {
+
+  if (
+    emogigsPart3Initialized
+  ) {
+
+    return;
+
+  }
+
+  emogigsPart3Initialized =
+    true;
+
+
+  injectSmartFeatureStyles();
+
+  createSmartQuickActions();
+
+  addSmartActionButton();
+
+  setupConnectionStatus();
+
+  setupKeyboardShortcuts();
+
+  setupExportButtons();
+
+  setupTouchFeedback();
+
+  setupMobileUX();
+
+  personalizeHero();
+
+
+  console.log(
+    "✨ Emogigs AI Part 3 smart systems initialized."
+  );
+
+}
+
+
+/* =========================================================
+   DOM READY
+========================================================= */
+
+if (
+  document.readyState ===
+  "loading"
+) {
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    initializeEmogigsPart3
+  );
+
+} else {
+
+  initializeEmogigsPart3();
+
+}
+
+
+/* =========================================================
+   FINAL EMOGIGS AI INITIALIZATION
+========================================================= */
+
+console.log(
+  "🚀 Emogigs AI — Full Smart System Loaded"
+);
+
+
+/* =========================================================
+   END OF PART 3
+========================================================= */
+
+})();
