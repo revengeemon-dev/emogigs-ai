@@ -1,23 +1,75 @@
 /* =========================================================
+   EMOGIGS AI — SCRIPT.JS
+   PART 1 / 3
+
    EMOGIGS AI
    Mobile AI Life OS
-   CHAT + VOICE INPUT + READ ALOUD
-   ACCOUNT / EMOGIGS ID SYSTEM
+
+   CORE SYSTEM
+   ─────────────────────────────────────────────────────────
+   💬 AI Chat foundation
+   🎙️ Voice Input
+   🔊 Read Aloud / Text-to-Speech
+   📋 Copy
+   ↻ Regenerate
+   🆕 New Chat
+   💾 Local Chat History
+   🤖 General / Mode System
+
+   👤 EMOGIGS ID / ACCOUNT
+   🪪 Create / View / Remove Emogigs ID
+   📱 Mobile-friendly Account Modal
+   🎨 Dynamic Account Modal CSS
+   🎤 Microphone permission handling
+
+   PART 1 also creates the foundation for:
+   🧠 AI Life OS
+   🎯 Goals
+   🔥 Streak
+   📊 Statistics
+   ⭐ Favorites
+   🔎 Search
+   ⚡ Focus Mode
+   🧠 Local Memory
+   ⚙️ Settings
    ========================================================= */
 
 (() => {
 
   "use strict";
 
+
   /* =========================================================
-     CONFIG
-  ========================================================== */
+     01 — CONFIGURATION
+  ========================================================= */
 
   const API_URL = "/api/chat";
 
-  const STORAGE_KEY = "emogigs_ai_chat_v2";
+  const STORAGE_KEY =
+    "emogigs_ai_chat_v3";
 
-  const ACCOUNT_STORAGE_KEY = "emogigs_user_account_v1";
+  const ACCOUNT_STORAGE_KEY =
+    "emogigs_user_account_v2";
+
+  const MEMORY_STORAGE_KEY =
+    "emogigs_ai_memory_v1";
+
+  const SETTINGS_STORAGE_KEY =
+    "emogigs_ai_settings_v1";
+
+  const GOALS_STORAGE_KEY =
+    "emogigs_ai_goals_v1";
+
+  const ACTIVITY_STORAGE_KEY =
+    "emogigs_ai_activity_v1";
+
+  const FAVORITES_STORAGE_KEY =
+    "emogigs_ai_favorites_v1";
+
+
+  /* =========================================================
+     02 — GLOBAL STATE
+  ========================================================== */
 
   let currentMode = "General";
 
@@ -33,9 +85,66 @@
 
   let microphoneStream = null;
 
+  let toastTimer = null;
+
+  let currentConversationId = null;
+
+  let isOnline = navigator.onLine;
+
+  let focusMode = false;
+
+  let isSendingMessage = false;
+
+  let accountModalCreated = false;
+
+
+  /*
+    AI Life OS state.
+
+    These are intentionally stored locally for now.
+
+    Later we can connect them to a real database/backend.
+  */
+
+  let aiMemory = [];
+
+  let userGoals = [];
+
+  let activityData = {
+
+    totalMessages: 0,
+
+    totalChats: 0,
+
+    totalVoiceInputs: 0,
+
+    totalAIReplies: 0,
+
+    currentStreak: 0,
+
+    lastActiveDate: null
+
+  };
+
+  let favorites = [];
+
+  let settings = {
+
+    autoSave: true,
+
+    soundEffects: true,
+
+    enterToSend: true,
+
+    rememberMode: true,
+
+    showSuggestions: true
+
+  };
+
 
   /* =========================================================
-     DOM
+     03 — DOM REFERENCES
   ========================================================== */
 
   const messageInput =
@@ -73,83 +182,142 @@
 
 
   /* =========================================================
-     INITIALIZATION
+     04 — INITIALIZATION
   ========================================================== */
 
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener(
+    "DOMContentLoaded",
+    () => {
 
-    setupTextarea();
+      console.log(
+        "🚀 Emogigs AI Life OS initializing..."
+      );
 
-    setupModes();
 
-    setupQuickTools();
+      loadLocalSystems();
 
-    setupButtons();
+      setupTextarea();
 
-    setupAccountSystem();
+      setupModes();
 
-    setupVoiceRecognition();
+      setupQuickTools();
 
-    loadConversation();
+      setupButtons();
 
-  });
+      setupAccountSystem();
+
+      setupVoiceRecognition();
+
+      setupOnlineStatus();
+
+      setupKeyboardShortcuts();
+
+      initializeAccountState();
+
+      loadConversation();
+
+      updateModeState();
+
+      updateActivityUI();
+
+      injectCoreStyles();
+
+
+      console.log(
+        "✅ Emogigs AI Life OS initialized."
+      );
+
+    }
+  );
 
 
   /* =========================================================
-     BUTTONS
+     05 — LOCAL SYSTEM LOADER
   ========================================================== */
 
-  function setupButtons() {
+  function loadLocalSystems() {
 
-    if (sendBtn) {
-
-      sendBtn.addEventListener("click", () => {
-
-        sendMessage();
-
-      });
-
-    }
+    aiMemory =
+      readLocalStorage(
+        MEMORY_STORAGE_KEY,
+        []
+      );
 
 
-    if (micBtn) {
-
-      micBtn.addEventListener("click", () => {
-
-        toggleVoiceInput();
-
-      });
-
-    }
+    userGoals =
+      readLocalStorage(
+        GOALS_STORAGE_KEY,
+        []
+      );
 
 
-    if (newChatBtn) {
-
-      newChatBtn.addEventListener("click", () => {
-
-        startNewChat();
-
-      });
-
-    }
+    favorites =
+      readLocalStorage(
+        FAVORITES_STORAGE_KEY,
+        []
+      );
 
 
-    if (messageInput) {
+    activityData =
+      readLocalStorage(
+        ACTIVITY_STORAGE_KEY,
+        {
 
-      messageInput.addEventListener("keydown", event => {
+          totalMessages: 0,
 
-        if (
-          event.key === "Enter" &&
-          !event.shiftKey
-        ) {
+          totalChats: 0,
 
-          event.preventDefault();
+          totalVoiceInputs: 0,
 
-          sendMessage();
+          totalAIReplies: 0,
+
+          currentStreak: 0,
+
+          lastActiveDate: null
 
         }
+      );
 
-      });
+
+    settings =
+      readLocalStorage(
+        SETTINGS_STORAGE_KEY,
+        {
+
+          autoSave: true,
+
+          soundEffects: true,
+
+          enterToSend: true,
+
+          rememberMode: true,
+
+          showSuggestions: true
+
+        }
+      );
+
+
+    /*
+      Restore remembered mode.
+    */
+
+    if (
+      settings.rememberMode
+    ) {
+
+      const savedMode =
+        localStorage.getItem(
+          "emogigs_current_mode"
+        );
+
+
+      if (savedMode) {
+
+        currentMode =
+          savedMode;
+
+      }
 
     }
 
@@ -157,71 +325,517 @@
 
 
   /* =========================================================
-     ACCOUNT / EMOGIGS ID SYSTEM
+     06 — SAFE LOCAL STORAGE
   ========================================================== */
 
-  function setupAccountSystem() {
+  function readLocalStorage(
+    key,
+    fallback
+  ) {
+
+    try {
+
+      const saved =
+        localStorage.getItem(key);
+
+
+      if (!saved) {
+
+        return fallback;
+
+      }
+
+
+      const parsed =
+        JSON.parse(saved);
+
+
+      return parsed;
+
+    } catch (error) {
+
+      console.warn(
+        "Emogigs local storage read error:",
+        key,
+        error
+      );
+
+
+      return fallback;
+
+    }
+
+  }
+
+
+  function writeLocalStorage(
+    key,
+    value
+  ) {
+
+    try {
+
+      localStorage.setItem(
+        key,
+        JSON.stringify(value)
+      );
+
+
+      return true;
+
+    } catch (error) {
+
+      console.warn(
+        "Emogigs local storage write error:",
+        key,
+        error
+      );
+
+
+      return false;
+
+    }
+
+  }
+
+
+  /* =========================================================
+     07 — BUTTON SYSTEM
+  ========================================================== */
+
+  function setupButtons() {
 
     /*
-      Supports all of these possible account buttons:
-
-      #accountBtn
-      #accountButton
-      .account-btn
-      .account-button
-      [data-action="account"]
-      [data-account]
+      Send button
     */
 
-    const accountButtons =
-      document.querySelectorAll(
-        "#accountBtn, #accountButton, .account-btn, .account-button, [data-action='account'], [data-account]"
+    if (sendBtn) {
+
+      sendBtn.addEventListener(
+        "click",
+        () => {
+
+          sendMessage();
+
+        }
       );
 
+    }
 
-    if (!accountButtons.length) {
 
-      console.log(
-        "Emogigs Account button was not found."
+    /*
+      Microphone button
+    */
+
+    if (micBtn) {
+
+      micBtn.addEventListener(
+        "click",
+        () => {
+
+          toggleVoiceInput();
+
+        }
       );
+
+    }
+
+
+    /*
+      New chat
+    */
+
+    if (newChatBtn) {
+
+      newChatBtn.addEventListener(
+        "click",
+        () => {
+
+          startNewChat();
+
+        }
+      );
+
+    }
+
+
+    /*
+      Message input
+    */
+
+    if (messageInput) {
+
+      messageInput.addEventListener(
+        "keydown",
+        event => {
+
+          if (
+            event.key === "Enter" &&
+            !event.shiftKey
+          ) {
+
+            if (
+              settings.enterToSend
+            ) {
+
+              event.preventDefault();
+
+              sendMessage();
+
+            }
+
+          }
+
+        }
+      );
+
+    }
+
+  }
+
+
+  /* =========================================================
+     08 — TEXTAREA SYSTEM
+  ========================================================== */
+
+  function setupTextarea() {
+
+    if (!messageInput) {
 
       return;
 
     }
 
 
-    accountButtons.forEach(button => {
+    messageInput.addEventListener(
+      "input",
+      () => {
 
-      /*
-        Remove accidental old inline behavior
-        only through our event handling.
-      */
-
-      button.addEventListener(
-        "click",
-        event => {
-
-          event.preventDefault();
-
-          event.stopPropagation();
-
-          openAccountModal();
-
-        }
-      );
-
-    });
+        messageInput.style.height =
+          "auto";
 
 
-    console.log(
-      "Emogigs Account system initialized."
+        messageInput.style.height =
+          Math.min(
+            messageInput.scrollHeight,
+            140
+          ) + "px";
+
+      }
     );
 
   }
 
 
   /* =========================================================
-     ACCOUNT MODAL
+     09 — MODE SYSTEM
+  ========================================================== */
+
+  function setupModes() {
+
+    const modes =
+      document.querySelectorAll(
+        ".mode-chip"
+      );
+
+
+    modes.forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            modes.forEach(
+              item => {
+
+                item.classList.remove(
+                  "active"
+                );
+
+              }
+            );
+
+
+            button.classList.add(
+              "active"
+            );
+
+
+            currentMode =
+              button.dataset.mode ||
+              "General";
+
+
+            if (
+              settings.rememberMode
+            ) {
+
+              try {
+
+                localStorage.setItem(
+                  "emogigs_current_mode",
+                  currentMode
+                );
+
+              } catch (error) {
+
+                console.log(error);
+
+              }
+
+            }
+
+
+            showToast(
+              `${currentMode} mode selected`
+            );
+
+
+            /*
+              AI Life OS can later use this
+              mode to modify system prompts.
+            */
+
+            emitLifeOSEvent(
+              "mode_changed",
+              {
+
+                mode:
+                  currentMode
+
+              }
+            );
+
+          }
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =========================================================
+     10 — RESTORE MODE
+  ========================================================== */
+
+  function updateModeState() {
+
+    const modes =
+      document.querySelectorAll(
+        ".mode-chip"
+      );
+
+
+    if (!modes.length) {
+
+      return;
+
+    }
+
+
+    let found = false;
+
+
+    modes.forEach(
+      button => {
+
+        const mode =
+          button.dataset.mode ||
+          "General";
+
+
+        if (
+          mode === currentMode
+        ) {
+
+          button.classList.add(
+            "active"
+          );
+
+          found = true;
+
+        } else {
+
+          button.classList.remove(
+            "active"
+          );
+
+        }
+
+      }
+    );
+
+
+    /*
+      If remembered mode no longer exists,
+      return to General.
+    */
+
+    if (!found) {
+
+      currentMode =
+        "General";
+
+
+      const general =
+        document.querySelector(
+          ".mode-chip[data-mode='General']"
+        );
+
+
+      if (general) {
+
+        general.classList.add(
+          "active"
+        );
+
+      }
+
+    }
+
+  }
+
+
+  /* =========================================================
+     11 — QUICK AI TOOLS
+  ========================================================== */
+
+  function setupQuickTools() {
+
+    const cards =
+      document.querySelectorAll(
+        ".quick-card"
+      );
+
+
+    cards.forEach(
+      card => {
+
+        card.addEventListener(
+          "click",
+          () => {
+
+            const prompt =
+              card.dataset.prompt ||
+              "";
+
+
+            if (!messageInput) {
+
+              return;
+
+            }
+
+
+            messageInput.value =
+              prompt;
+
+
+            messageInput.dispatchEvent(
+              new Event("input")
+            );
+
+
+            sendMessage();
+
+          }
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =========================================================
+     12 — ACCOUNT / EMOGIGS ID SYSTEM
+  ========================================================== */
+
+  function setupAccountSystem() {
+
+    /*
+      Supports multiple possible
+      account button selectors.
+
+      This makes the system compatible
+      with your existing HTML.
+    */
+
+    const accountButtons =
+      document.querySelectorAll(
+        [
+          "#accountBtn",
+          "#accountButton",
+          ".account-btn",
+          ".account-button",
+          "[data-action='account']",
+          "[data-account]"
+        ].join(",")
+      );
+
+
+    if (!accountButtons.length) {
+
+      console.log(
+        "ℹ️ Emogigs Account button was not found."
+      );
+
+
+      return;
+
+    }
+
+
+    accountButtons.forEach(
+      button => {
+
+        /*
+          Avoid attaching the same listener
+          multiple times.
+        */
+
+        if (
+          button.dataset.emogigsAccountBound ===
+          "true"
+        ) {
+
+          return;
+
+        }
+
+
+        button.dataset.emogigsAccountBound =
+          "true";
+
+
+        button.addEventListener(
+          "click",
+          event => {
+
+            event.preventDefault();
+
+            event.stopPropagation();
+
+            openAccountModal();
+
+          }
+        );
+
+      }
+    );
+
+
+    console.log(
+      "👤 Emogigs Account system initialized."
+    );
+
+  }
+
+
+  /* =========================================================
+     13 — OPEN ACCOUNT MODAL
   ========================================================== */
 
   function openAccountModal() {
@@ -231,11 +845,6 @@
         "emogigsAccountModal"
       );
 
-
-    /*
-      If modal already exists,
-      simply show it.
-    */
 
     if (!modal) {
 
@@ -248,7 +857,13 @@
     updateAccountModal();
 
 
-    modal.classList.add("show");
+    injectAccountModalStyles();
+
+
+    modal.classList.add(
+      "show"
+    );
+
 
     modal.setAttribute(
       "aria-hidden",
@@ -260,17 +875,42 @@
       "emogigs-modal-open"
     );
 
+
+    setTimeout(
+      () => {
+
+        const firstInput =
+          modal.querySelector(
+            "input"
+          );
+
+
+        if (
+          firstInput &&
+          !getEmogigsAccount()
+        ) {
+
+          firstInput.focus();
+
+        }
+
+      },
+      100
+    );
+
   }
 
 
   /* =========================================================
-     CREATE ACCOUNT MODAL
+     14 — CREATE ACCOUNT MODAL
   ========================================================== */
 
   function createAccountModal() {
 
     const modal =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
 
 
     modal.id =
@@ -289,37 +929,61 @@
 
     modal.innerHTML = `
 
-      <div class="emogigs-account-backdrop"
-           data-close-account="true">
+      <div
+        class="emogigs-account-backdrop"
+        data-close-account="true">
       </div>
 
-      <div class="emogigs-account-dialog"
-           role="dialog"
-           aria-modal="true"
-           aria-labelledby="emogigsAccountTitle">
+
+      <div
+        class="emogigs-account-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="emogigsAccountTitle">
+
 
         <button
           type="button"
           class="emogigs-account-close"
           id="emogigsAccountClose"
-          aria-label="Close">
+          aria-label="Close account">
+
           ×
+
         </button>
+
 
         <div class="emogigs-account-icon">
           ✦
         </div>
 
+
         <div class="emogigs-account-content">
 
-          <h2 id="emogigsAccountTitle">
+
+          <div
+            class="emogigs-account-badge">
+            EMOGIGS AI
+          </div>
+
+
+          <h2
+            id="emogigsAccountTitle">
+
             Create Emogigs ID
+
           </h2>
 
-          <p class="emogigs-account-subtitle">
-            Create your free Emogigs ID to personalize
-            your AI Life OS experience.
+
+          <p
+            class="emogigs-account-subtitle">
+
+            Create your free Emogigs ID
+            to personalize your AI Life OS
+            experience.
+
           </p>
+
 
           <div
             id="emogigsExistingAccount"
@@ -327,15 +991,18 @@
             style="display:none;">
           </div>
 
+
           <form
             id="emogigsAccountForm"
             autocomplete="off">
+
 
             <div class="emogigs-field">
 
               <label for="emogigsName">
                 Your name
               </label>
+
 
               <input
                 type="text"
@@ -355,17 +1022,28 @@
                 Emogigs ID
               </label>
 
-              <input
-                type="text"
-                id="emogigsUsername"
-                name="username"
-                placeholder="Choose your Emogigs ID"
-                maxlength="20"
-                autocomplete="username"
-                required>
+
+              <div
+                class="emogigs-username-wrapper">
+
+                <span>@</span>
+
+
+                <input
+                  type="text"
+                  id="emogigsUsername"
+                  name="username"
+                  placeholder="Choose your ID"
+                  maxlength="20"
+                  autocomplete="username"
+                  required>
+
+              </div>
+
 
               <small>
-                3–20 characters. Letters, numbers and underscore.
+                3–20 characters.
+                Letters, numbers and underscore.
               </small>
 
             </div>
@@ -379,6 +1057,7 @@
               Create Emogigs ID
 
             </button>
+
 
           </form>
 
@@ -404,6 +1083,7 @@
 
           </button>
 
+
         </div>
 
       </div>
@@ -416,13 +1096,17 @@
     );
 
 
+    accountModalCreated =
+      true;
+
+
     /*
       Close button
     */
 
     const closeBtn =
-      document.getElementById(
-        "emogigsAccountClose"
+      modal.querySelector(
+        "#emogigsAccountClose"
       );
 
 
@@ -461,8 +1145,8 @@
     */
 
     const form =
-      document.getElementById(
-        "emogigsAccountForm"
+      modal.querySelector(
+        "#emogigsAccountForm"
       );
 
 
@@ -483,12 +1167,12 @@
 
 
     /*
-      Continue button
+      Continue
     */
 
     const continueBtn =
-      document.getElementById(
-        "emogigsContinueBtn"
+      modal.querySelector(
+        "#emogigsContinueBtn"
       );
 
 
@@ -503,12 +1187,12 @@
 
 
     /*
-      Remove account button
+      Remove ID
     */
 
     const deleteBtn =
-      document.getElementById(
-        "emogigsDeleteAccountBtn"
+      modal.querySelector(
+        "#emogigsDeleteAccountBtn"
       );
 
 
@@ -523,12 +1207,12 @@
 
 
     /*
-      Username formatting
+      Username formatting.
     */
 
     const usernameInput =
-      document.getElementById(
-        "emogigsUsername"
+      modal.querySelector(
+        "#emogigsUsername"
       );
 
 
@@ -541,7 +1225,10 @@
           usernameInput.value =
             usernameInput.value
               .replace(/\s+/g, "")
-              .replace(/[^a-zA-Z0-9_]/g, "")
+              .replace(
+                /[^a-zA-Z0-9_]/g,
+                ""
+              )
               .slice(0, 20);
 
         }
@@ -551,30 +1238,40 @@
 
 
     /*
-      ESC key
+      Escape key.
     */
 
-    document.addEventListener(
-      "keydown",
-      event => {
+    if (
+      !modal.dataset.escapeBound
+    ) {
 
-        if (
-          event.key === "Escape" &&
-          modal.classList.contains("show")
-        ) {
+      modal.dataset.escapeBound =
+        "true";
 
-          closeAccountModal();
+
+      document.addEventListener(
+        "keydown",
+        event => {
+
+          if (
+            event.key === "Escape" &&
+            modal.classList.contains(
+              "show"
+            )
+          ) {
+
+            closeAccountModal();
+
+          }
 
         }
+      );
 
-      }
-    );
+    }
 
 
     /*
-      Modal CSS
-      Added dynamically so no HTML/CSS change
-      is required for the modal to appear.
+      Inject account CSS.
     */
 
     injectAccountModalStyles();
@@ -586,7 +1283,7 @@
 
 
   /* =========================================================
-     UPDATE ACCOUNT MODAL
+     15 — UPDATE ACCOUNT MODAL
   ========================================================== */
 
   function updateAccountModal() {
@@ -665,30 +1362,62 @@
 
         existing.innerHTML = `
 
-          <div class="emogigs-profile-card">
+          <div
+            class="emogigs-profile-card">
 
-            <div class="emogigs-profile-avatar">
+
+            <div
+              class="emogigs-profile-avatar">
+
               ${escapeHTML(
-                getInitials(account.name)
+                getInitials(
+                  account.name
+                )
               )}
+
             </div>
 
-            <div class="emogigs-profile-info">
+
+            <div
+              class="emogigs-profile-info">
 
               <strong>
-                ${escapeHTML(account.name)}
+
+                ${escapeHTML(
+                  account.name
+                )}
+
               </strong>
 
+
               <span>
-                @${escapeHTML(account.username)}
+
+                @${escapeHTML(
+                  account.username
+                )}
+
               </span>
 
             </div>
 
+
           </div>
 
-          <div class="emogigs-id-success">
+
+          <div
+            class="emogigs-id-success">
+
             ✓ Emogigs ID is active
+
+          </div>
+
+
+          <div
+            class="emogigs-account-local-note">
+
+            🔒 Your ID is currently stored
+            on this device.
+
           </div>
 
         `;
@@ -766,7 +1495,7 @@
 
 
   /* =========================================================
-     CREATE EMOGIGS ID
+     16 — CREATE EMOGIGS ID
   ========================================================== */
 
   function createEmogigsID() {
@@ -783,7 +1512,10 @@
       );
 
 
-    if (!nameInput || !usernameInput) {
+    if (
+      !nameInput ||
+      !usernameInput
+    ) {
 
       return;
 
@@ -800,13 +1532,17 @@
         .toLowerCase();
 
 
-    if (name.length < 2) {
+    if (
+      name.length < 2
+    ) {
 
       showToast(
         "Please enter your name."
       );
 
+
       nameInput.focus();
+
 
       return;
 
@@ -823,7 +1559,9 @@
         "Emogigs ID must be 3–20 characters."
       );
 
+
       usernameInput.focus();
+
 
       return;
 
@@ -832,54 +1570,72 @@
 
     const account = {
 
-      name: name,
+      name,
 
-      username: username,
+      username,
 
       createdAt:
-        new Date().toISOString()
+        new Date().toISOString(),
+
+      version:
+        2
 
     };
 
 
-    try {
-
-      localStorage.setItem(
+    const saved =
+      writeLocalStorage(
         ACCOUNT_STORAGE_KEY,
-        JSON.stringify(account)
+        account
       );
 
-    } catch (error) {
 
-      console.error(
-        "Could not save Emogigs ID:",
-        error
-      );
+    if (!saved) {
 
       showToast(
         "Could not save Emogigs ID on this device."
       );
+
 
       return;
 
     }
 
 
-    updateAccountModal();
+    /*
+      Create first memory entry.
+    */
 
-
-    showToast(
-      `Welcome to Emogigs, ${name}!`
+    rememberLocally(
+      `User's name is ${name}.`,
+      "profile"
     );
 
 
+    updateAccountModal();
+
     updateAccountButton();
+
+
+    showToast(
+      `Welcome to Emogigs, ${name}! ✨`
+    );
+
+
+    emitLifeOSEvent(
+      "account_created",
+      {
+
+        username
+
+      }
+    );
 
   }
 
 
   /* =========================================================
-     GET ACCOUNT
+     17 — GET EMOGIGS ACCOUNT
   ========================================================== */
 
   function getEmogigsAccount() {
@@ -927,10 +1683,11 @@
 
     } catch (error) {
 
-      console.log(
+      console.warn(
         "Could not read Emogigs ID:",
         error
       );
+
 
       return null;
 
@@ -940,7 +1697,7 @@
 
 
   /* =========================================================
-     REMOVE ACCOUNT
+     18 — REMOVE EMOGIGS ID
   ========================================================== */
 
   function removeEmogigsID() {
@@ -958,9 +1715,17 @@
     }
 
 
-    localStorage.removeItem(
-      ACCOUNT_STORAGE_KEY
-    );
+    try {
+
+      localStorage.removeItem(
+        ACCOUNT_STORAGE_KEY
+      );
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
 
 
     updateAccountModal();
@@ -972,11 +1737,17 @@
       "Emogigs ID removed from this device."
     );
 
+
+    emitLifeOSEvent(
+      "account_removed",
+      {}
+    );
+
   }
 
 
   /* =========================================================
-     UPDATE ACCOUNT BUTTON
+     19 — UPDATE ACCOUNT BUTTON
   ========================================================== */
 
   function updateAccountButton() {
@@ -987,42 +1758,60 @@
 
     const buttons =
       document.querySelectorAll(
-        "#accountBtn, #accountButton, .account-btn, .account-button, [data-action='account'], [data-account]"
+        [
+          "#accountBtn",
+          "#accountButton",
+          ".account-btn",
+          ".account-button",
+          "[data-action='account']",
+          "[data-account]"
+        ].join(",")
       );
 
 
-    buttons.forEach(button => {
+    buttons.forEach(
+      button => {
 
-      if (!account) {
+        if (!account) {
 
-        return;
+          button.removeAttribute(
+            "data-emogigs-user"
+          );
+
+          button.removeAttribute(
+            "title"
+          );
+
+          return;
+
+        }
+
+
+        button.setAttribute(
+          "data-emogigs-user",
+          account.username
+        );
+
+
+        button.setAttribute(
+          "title",
+          `Emogigs ID: @${account.username}`
+        );
+
+
+        button.setAttribute(
+          "aria-label",
+          `Emogigs account @${account.username}`
+        );
 
       }
-
-
-      /*
-        Do not destroy the existing icon/design.
-        Only update useful accessibility information.
-      */
-
-      button.setAttribute(
-        "data-emogigs-user",
-        account.username
-      );
-
-
-      button.setAttribute(
-        "title",
-        `Emogigs ID: @${account.username}`
-      );
-
-    });
+    );
 
   }
 
 
   /* =========================================================
-     INITIAL ACCOUNT STATE
+     20 — INITIAL ACCOUNT STATE
   ========================================================== */
 
   function initializeAccountState() {
@@ -1041,21 +1830,7 @@
 
 
   /* =========================================================
-     INITIAL ACCOUNT STATE AFTER DOM LOAD
-  ========================================================== */
-
-  document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-      initializeAccountState();
-
-    }
-  );
-
-
-  /* =========================================================
-     ACCOUNT MODAL CLOSE
+     21 — CLOSE ACCOUNT MODAL
   ========================================================== */
 
   function closeAccountModal() {
@@ -1092,23 +1867,7 @@
 
 
   /* =========================================================
-     ESCAPE HTML
-  ========================================================== */
-
-  function escapeHTML(value) {
-
-    return String(value)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-
-  }
-
-
-  /* =========================================================
-     GET INITIALS
+     22 — GET INITIALS
   ========================================================== */
 
   function getInitials(name) {
@@ -1127,7 +1886,9 @@
     }
 
 
-    if (words.length === 1) {
+    if (
+      words.length === 1
+    ) {
 
       return words[0]
         .substring(0, 2)
@@ -1145,7 +1906,43 @@
 
 
   /* =========================================================
-     ACCOUNT MODAL CSS
+     23 — ESCAPE HTML
+  ========================================================== */
+
+  function escapeHTML(value) {
+
+    return String(value)
+
+      .replace(
+        /&/g,
+        "&amp;"
+      )
+
+      .replace(
+        /</g,
+        "&lt;"
+      )
+
+      .replace(
+        />/g,
+        "&gt;"
+      )
+
+      .replace(
+        /"/g,
+        "&quot;"
+      )
+
+      .replace(
+        /'/g,
+        "&#039;"
+      );
+
+  }
+
+
+  /* =========================================================
+     24 — ACCOUNT MODAL CSS
   ========================================================== */
 
   function injectAccountModalStyles() {
@@ -1162,7 +1959,9 @@
 
 
     const style =
-      document.createElement("style");
+      document.createElement(
+        "style"
+      );
 
 
     style.id =
@@ -1177,48 +1976,63 @@
 
 
       .emogigs-account-modal {
+
         position: fixed;
+
         inset: 0;
+
         z-index: 99999;
 
         display: flex;
+
         align-items: center;
+
         justify-content: center;
 
         padding: 18px;
 
         opacity: 0;
+
         visibility: hidden;
 
         transition:
-          opacity .2s ease,
-          visibility .2s ease;
+          opacity .22s ease,
+          visibility .22s ease;
+
       }
 
 
       .emogigs-account-modal.show {
+
         opacity: 1;
+
         visibility: visible;
+
       }
 
 
       .emogigs-account-backdrop {
+
         position: absolute;
+
         inset: 0;
 
         background:
-          rgba(0, 0, 0, .62);
+          rgba(0,0,0,.66);
 
         backdrop-filter:
-          blur(7px);
+          blur(9px);
 
         -webkit-backdrop-filter:
-          blur(7px);
+          blur(9px);
+
       }
 
 
       .emogigs-account-dialog {
+
         position: relative;
+
         z-index: 2;
 
         width: min(
@@ -1233,53 +2047,67 @@
         background:
           linear-gradient(
             145deg,
-            #151525,
-            #0d0d18
+            #17172a,
+            #0c0c16
           );
 
         border:
-          1px solid rgba(
+          1px solid
+          rgba(
             255,
             255,
             255,
             .12
           );
 
-        border-radius: 24px;
+        border-radius: 26px;
 
-        padding: 28px 22px 22px;
+        padding:
+          30px 22px 22px;
 
         box-shadow:
-          0 25px 80px
-          rgba(0,0,0,.45);
+          0 30px 90px
+          rgba(
+            0,
+            0,
+            0,
+            .52
+          );
 
         transform:
-          translateY(18px)
-          scale(.97);
+          translateY(20px)
+          scale(.96);
 
         transition:
-          transform .22s ease;
+          transform .25s ease;
+
       }
 
 
       .emogigs-account-modal.show
       .emogigs-account-dialog {
+
         transform:
           translateY(0)
           scale(1);
+
       }
 
 
       .emogigs-account-close {
+
         position: absolute;
 
         top: 10px;
+
         right: 12px;
 
         width: 38px;
+
         height: 38px;
 
         border: 0;
+
         border-radius: 50%;
 
         background:
@@ -1297,21 +2125,29 @@
         cursor: pointer;
 
         display: flex;
+
         align-items: center;
+
         justify-content: center;
+
       }
 
 
       .emogigs-account-icon {
+
         width: 64px;
+
         height: 64px;
 
-        margin: 0 auto 14px;
+        margin:
+          0 auto 13px;
 
         border-radius: 20px;
 
         display: flex;
+
         align-items: center;
+
         justify-content: center;
 
         font-size: 31px;
@@ -1326,22 +2162,76 @@
         color: white;
 
         box-shadow:
-          0 10px 30px
+          0 12px 34px
           rgba(
             124,
             92,
             255,
-            .28
+            .30
           );
+
       }
 
 
       .emogigs-account-content {
+
         text-align: center;
+
+      }
+
+
+      .emogigs-account-badge {
+
+        display: inline-flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        padding:
+          5px 9px;
+
+        margin-bottom: 8px;
+
+        border-radius: 999px;
+
+        background:
+          rgba(
+            124,
+            92,
+            255,
+            .12
+          );
+
+        border:
+          1px solid
+          rgba(
+            124,
+            92,
+            255,
+            .22
+          );
+
+        color:
+          rgba(
+            255,
+            255,
+            255,
+            .70
+          );
+
+        font-size: 9px;
+
+        font-weight: 800;
+
+        letter-spacing:
+          1.5px;
+
       }
 
 
       .emogigs-account-content h2 {
+
         margin:
           0 0 8px;
 
@@ -1349,11 +2239,13 @@
 
         font-size: 24px;
 
-        font-weight: 700;
+        font-weight: 750;
+
       }
 
 
       .emogigs-account-subtitle {
+
         margin:
           0 auto 22px;
 
@@ -1370,17 +2262,21 @@
         line-height: 1.5;
 
         font-size: 14px;
+
       }
 
 
       .emogigs-field {
+
         text-align: left;
 
         margin-bottom: 15px;
+
       }
 
 
       .emogigs-field label {
+
         display: block;
 
         margin-bottom: 7px;
@@ -1395,11 +2291,13 @@
 
         font-size: 13px;
 
-        font-weight: 600;
+        font-weight: 650;
+
       }
 
 
       .emogigs-field input {
+
         box-sizing: border-box;
 
         width: 100%;
@@ -1437,16 +2335,18 @@
         transition:
           border-color .2s,
           background .2s;
+
       }
 
 
       .emogigs-field input:focus {
+
         border-color:
           rgba(
             124,
             92,
             255,
-            .75
+            .78
           );
 
         background:
@@ -1456,10 +2356,12 @@
             255,
             .09
           );
+
       }
 
 
       .emogigs-field input::placeholder {
+
         color:
           rgba(
             255,
@@ -1467,10 +2369,12 @@
             255,
             .35
           );
+
       }
 
 
       .emogigs-field small {
+
         display: block;
 
         margin-top: 6px;
@@ -1484,11 +2388,53 @@
           );
 
         font-size: 11px;
+
+      }
+
+
+      .emogigs-username-wrapper {
+
+        position: relative;
+
+      }
+
+
+      .emogigs-username-wrapper > span {
+
+        position: absolute;
+
+        left: 14px;
+
+        top: 50%;
+
+        transform:
+          translateY(-50%);
+
+        color:
+          rgba(
+            255,
+            255,
+            255,
+            .42
+          );
+
+        font-size: 15px;
+
+        pointer-events: none;
+
+      }
+
+
+      .emogigs-username-wrapper input {
+
+        padding-left: 29px;
+
       }
 
 
       .emogigs-create-id-btn,
       .emogigs-continue-btn {
+
         width: 100%;
 
         height: 51px;
@@ -1515,28 +2461,38 @@
         margin-top: 6px;
 
         box-shadow:
-          0 10px 25px
+          0 11px 27px
           rgba(
             124,
             92,
             255,
-            .22
+            .23
           );
+
+        transition:
+          transform .15s ease;
+
       }
 
 
       .emogigs-create-id-btn:active,
       .emogigs-continue-btn:active {
-        transform: scale(.98);
+
+        transform:
+          scale(.98);
+
       }
 
 
       .emogigs-existing-account {
+
         margin-bottom: 18px;
+
       }
 
 
       .emogigs-profile-card {
+
         display: flex;
 
         align-items: center;
@@ -1565,11 +2521,14 @@
           );
 
         text-align: left;
+
       }
 
 
       .emogigs-profile-avatar {
+
         width: 48px;
+
         height: 48px;
 
         flex-shrink: 0;
@@ -1577,7 +2536,9 @@
         border-radius: 50%;
 
         display: flex;
+
         align-items: center;
+
         justify-content: center;
 
         background:
@@ -1589,27 +2550,33 @@
 
         color: white;
 
-        font-weight: 700;
+        font-weight: 750;
+
       }
 
 
       .emogigs-profile-info {
+
         display: flex;
 
         flex-direction: column;
 
         gap: 4px;
+
       }
 
 
       .emogigs-profile-info strong {
+
         color: white;
 
         font-size: 15px;
+
       }
 
 
       .emogigs-profile-info span {
+
         color:
           rgba(
             255,
@@ -1619,19 +2586,41 @@
           );
 
         font-size: 13px;
+
       }
 
 
       .emogigs-id-success {
+
         margin-top: 10px;
 
-        color: #75e6a5;
+        color:
+          #75e6a5;
 
         font-size: 13px;
+
+      }
+
+
+      .emogigs-account-local-note {
+
+        margin-top: 9px;
+
+        color:
+          rgba(
+            255,
+            255,
+            255,
+            .40
+          );
+
+        font-size: 11px;
+
       }
 
 
       .emogigs-delete-btn {
+
         display: block;
 
         width: 100%;
@@ -1648,27 +2637,39 @@
             .42
           );
 
-        padding: 15px 5px 4px;
+        padding:
+          15px 5px 4px;
 
         font-size: 12px;
 
         cursor: pointer;
+
       }
 
 
       @media (max-width: 480px) {
 
         .emogigs-account-modal {
-          padding: 12px;
+
+          padding: 10px;
+
           align-items: flex-end;
+
         }
 
+
         .emogigs-account-dialog {
+
           width: 100%;
-          border-radius: 24px 24px 18px 18px;
+
+          border-radius:
+            25px 25px 18px 18px;
+
           padding:
             25px 18px 18px;
+
           max-height: 88vh;
+
         }
 
       }
@@ -1684,98 +2685,7 @@
 
 
   /* =========================================================
-     TEXTAREA
-  ========================================================== */
-
-  function setupTextarea() {
-
-    if (!messageInput) return;
-
-    messageInput.addEventListener("input", () => {
-
-      messageInput.style.height = "auto";
-
-      messageInput.style.height =
-        Math.min(
-          messageInput.scrollHeight,
-          130
-        ) + "px";
-
-    });
-
-  }
-
-
-  /* =========================================================
-     MODES
-  ========================================================== */
-
-  function setupModes() {
-
-    const modes =
-      document.querySelectorAll(".mode-chip");
-
-    modes.forEach(button => {
-
-      button.addEventListener("click", () => {
-
-        modes.forEach(item => {
-
-          item.classList.remove("active");
-
-        });
-
-        button.classList.add("active");
-
-        currentMode =
-          button.dataset.mode || "General";
-
-        showToast(
-          `${currentMode} mode selected`
-        );
-
-      });
-
-    });
-
-  }
-
-
-  /* =========================================================
-     QUICK TOOLS
-  ========================================================== */
-
-  function setupQuickTools() {
-
-    const cards =
-      document.querySelectorAll(".quick-card");
-
-    cards.forEach(card => {
-
-      card.addEventListener("click", () => {
-
-        const prompt =
-          card.dataset.prompt || "";
-
-        if (!messageInput) return;
-
-        messageInput.value = prompt;
-
-        messageInput.dispatchEvent(
-          new Event("input")
-        );
-
-        sendMessage();
-
-      });
-
-    });
-
-  }
-
-
-  /* =========================================================
-     VOICE RECOGNITION
+     25 — VOICE RECOGNITION
   ========================================================== */
 
   function setupVoiceRecognition() {
@@ -1788,8 +2698,19 @@
     if (!SpeechRecognition) {
 
       console.log(
-        "SpeechRecognition is not supported."
+        "⚠️ SpeechRecognition is not supported."
       );
+
+
+      if (micBtn) {
+
+        micBtn.setAttribute(
+          "title",
+          "Voice input is not supported"
+        );
+
+      }
+
 
       return;
 
@@ -1800,109 +2721,69 @@
       new SpeechRecognition();
 
 
-    recognition.lang = "bn-BD";
+    /*
+      Bengali is the default language
+      because your main UI is Bengali-friendly.
 
-    recognition.continuous = false;
+      The browser can still recognize
+      English words depending on the device.
+    */
 
-    recognition.interimResults = true;
+    recognition.lang =
+      "bn-BD";
 
-    recognition.maxAlternatives = 1;
+
+    recognition.continuous =
+      false;
 
 
-    recognition.onstart = () => {
+    recognition.interimResults =
+      true;
 
-      console.log(
-        "Emogigs voice recognition started."
-      );
 
-      voiceStarting = false;
+    recognition.maxAlternatives =
+      1;
 
-      isListening = true;
 
-      if (micBtn) {
+    recognition.onstart =
+      () => {
 
-        micBtn.classList.add("listening");
-
-        micBtn.textContent = "⏹";
-
-        micBtn.setAttribute(
-          "aria-label",
-          "Stop voice input"
+        console.log(
+          "🎙️ Emogigs voice recognition started."
         );
 
-      }
+
+        voiceStarting =
+          false;
 
 
-      if (voiceStatus) {
-
-        voiceStatus.classList.add("show");
-
-      }
+        isListening =
+          true;
 
 
-      if (voiceStatusText) {
+        if (micBtn) {
 
-        voiceStatusText.textContent =
-          "Listening... speak now";
-
-      }
-
-    };
+          micBtn.classList.add(
+            "listening"
+          );
 
 
-    recognition.onresult = event => {
-
-      let finalText = "";
-
-      let interimText = "";
+          micBtn.textContent =
+            "⏹";
 
 
-      for (
-        let i = event.resultIndex;
-        i < event.results.length;
-        i++
-      ) {
-
-        const result =
-          event.results[i];
-
-        const transcript =
-          result[0].transcript;
-
-
-        if (result.isFinal) {
-
-          finalText += transcript;
-
-        } else {
-
-          interimText += transcript;
+          micBtn.setAttribute(
+            "aria-label",
+            "Stop voice input"
+          );
 
         }
 
-      }
 
+        if (voiceStatus) {
 
-      if (finalText.trim()) {
-
-        const cleanText =
-          finalText.trim();
-
-
-        if (messageInput) {
-
-          const oldText =
-            messageInput.value.trim();
-
-
-          messageInput.value =
-            oldText
-              ? oldText + " " + cleanText
-              : cleanText;
-
-
-          messageInput.dispatchEvent(
-            new Event("input")
+          voiceStatus.classList.add(
+            "show"
           );
 
         }
@@ -1911,154 +2792,286 @@
         if (voiceStatusText) {
 
           voiceStatusText.textContent =
-            "Voice captured ✓";
+            "Listening... speak now";
+
+        }
+
+      };
+
+
+    recognition.onresult =
+      event => {
+
+        let finalText =
+          "";
+
+        let interimText =
+          "";
+
+
+        for (
+          let i =
+            event.resultIndex;
+
+          i <
+            event.results.length;
+
+          i++
+        ) {
+
+          const result =
+            event.results[i];
+
+
+          const transcript =
+            result[0].transcript;
+
+
+          if (
+            result.isFinal
+          ) {
+
+            finalText +=
+              transcript;
+
+          } else {
+
+            interimText +=
+              transcript;
+
+          }
 
         }
 
 
-        setTimeout(() => {
+        if (
+          finalText.trim()
+        ) {
 
-          if (!isListening && voiceStatus) {
+          const cleanText =
+            finalText.trim();
 
-            voiceStatus.classList.remove(
-              "show"
+
+          if (messageInput) {
+
+            const oldText =
+              messageInput.value.trim();
+
+
+            messageInput.value =
+              oldText
+                ? oldText +
+                  " " +
+                  cleanText
+                : cleanText;
+
+
+            messageInput.dispatchEvent(
+              new Event("input")
             );
 
           }
 
-        }, 700);
 
-      }
+          activityData.totalVoiceInputs =
+            Number(
+              activityData.totalVoiceInputs ||
+              0
+            ) + 1;
 
-      else if (interimText.trim()) {
 
-        if (voiceStatusText) {
+          saveActivityData();
 
-          voiceStatusText.textContent =
-            "Listening: " +
-            interimText.trim();
+
+          if (voiceStatusText) {
+
+            voiceStatusText.textContent =
+              "Voice captured ✓";
+
+          }
+
+
+          emitLifeOSEvent(
+            "voice_input",
+            {
+
+              text:
+                cleanText
+
+            }
+          );
+
+
+          setTimeout(
+            () => {
+
+              if (
+                !isListening &&
+                voiceStatus
+              ) {
+
+                voiceStatus.classList.remove(
+                  "show"
+                );
+
+              }
+
+            },
+            700
+          );
+
+        }
+        else if (
+          interimText.trim()
+        ) {
+
+          if (voiceStatusText) {
+
+            voiceStatusText.textContent =
+              "Listening: " +
+              interimText.trim();
+
+          }
 
         }
 
-      }
-
-    };
+      };
 
 
-    recognition.onerror = event => {
+    recognition.onerror =
+      event => {
 
-      console.log(
-        "Emogigs SpeechRecognition error:",
-        event.error
-      );
-
-
-      voiceStarting = false;
+        console.log(
+          "🎙️ SpeechRecognition error:",
+          event.error
+        );
 
 
-      switch (event.error) {
-
-        case "not-allowed":
-
-          stopVoiceUI();
-
-          showToast(
-            "Microphone permission denied. Check Chrome microphone permission."
-          );
-
-          break;
+        voiceStarting =
+          false;
 
 
-        case "permission-denied":
+        switch (
+          event.error
+        ) {
 
-          stopVoiceUI();
+          case "not-allowed":
 
-          showToast(
-            "Microphone permission denied."
-          );
-
-          break;
+            stopVoiceUI();
 
 
-        case "no-speech":
-
-          stopVoiceUI();
-
-          showToast(
-            "No speech detected. Please speak closer to the microphone."
-          );
-
-          break;
+            showToast(
+              "Microphone permission denied. Check Chrome microphone permission."
+            );
 
 
-        case "audio-capture":
-
-          stopVoiceUI();
-
-          showToast(
-            "Microphone is unavailable. Check your phone microphone."
-          );
-
-          break;
+            break;
 
 
-        case "network":
+          case "permission-denied":
 
-          stopVoiceUI();
-
-          showToast(
-            "Voice service needs an internet connection."
-          );
-
-          break;
+            stopVoiceUI();
 
 
-        case "aborted":
-
-          stopVoiceUI();
-
-          break;
+            showToast(
+              "Microphone permission denied."
+            );
 
 
-        case "service-not-allowed":
-
-          stopVoiceUI();
-
-          showToast(
-            "Chrome voice service is unavailable."
-          );
-
-          break;
+            break;
 
 
-        default:
+          case "no-speech":
 
-          stopVoiceUI();
-
-          showToast(
-            "Voice input could not start. Please try again."
-          );
-
-      }
-
-    };
+            stopVoiceUI();
 
 
-    recognition.onend = () => {
+            showToast(
+              "No speech detected. Please try again."
+            );
 
-      console.log(
-        "Emogigs SpeechRecognition ended."
-      );
 
-      stopVoiceUI();
+            break;
 
-    };
+
+          case "audio-capture":
+
+            stopVoiceUI();
+
+
+            showToast(
+              "Microphone is unavailable. Check your phone microphone."
+            );
+
+
+            break;
+
+
+          case "network":
+
+            stopVoiceUI();
+
+
+            showToast(
+              "Voice service needs an internet connection."
+            );
+
+
+            break;
+
+
+          case "aborted":
+
+            stopVoiceUI();
+
+
+            break;
+
+
+          case "service-not-allowed":
+
+            stopVoiceUI();
+
+
+            showToast(
+              "Chrome voice service is unavailable."
+            );
+
+
+            break;
+
+
+          default:
+
+            stopVoiceUI();
+
+
+            showToast(
+              "Voice input could not start. Please try again."
+            );
+
+        }
+
+      };
+
+
+    recognition.onend =
+      () => {
+
+        console.log(
+          "🎙️ Emogigs SpeechRecognition ended."
+        );
+
+
+        stopVoiceUI();
+
+      };
 
   }
 
 
   /* =========================================================
-     MICROPHONE TEST
+     26 — MICROPHONE ACCESS
   ========================================================== */
 
   async function requestMicrophoneAccess() {
@@ -2078,13 +3091,15 @@
     try {
 
       microphoneStream =
-        await navigator.mediaDevices.getUserMedia({
-          audio: true
-        });
+        await navigator.mediaDevices.getUserMedia(
+          {
+            audio: true
+          }
+        );
 
 
       console.log(
-        "Microphone access granted."
+        "🎤 Microphone access granted."
       );
 
 
@@ -2093,7 +3108,7 @@
     } catch (error) {
 
       console.error(
-        "Microphone access error:",
+        "🎤 Microphone access error:",
         error
       );
 
@@ -2106,7 +3121,7 @@
 
 
   /* =========================================================
-     RELEASE MICROPHONE
+     27 — RELEASE MICROPHONE
   ========================================================== */
 
   function releaseMicrophone() {
@@ -2120,20 +3135,23 @@
 
     microphoneStream
       .getTracks()
-      .forEach(track => {
+      .forEach(
+        track => {
 
-        track.stop();
+          track.stop();
 
-      });
+        }
+      );
 
 
-    microphoneStream = null;
+    microphoneStream =
+      null;
 
   }
 
 
   /* =========================================================
-     VOICE TOGGLE
+     28 — VOICE INPUT TOGGLE
   ========================================================== */
 
   async function toggleVoiceInput() {
@@ -2143,6 +3161,7 @@
       showToast(
         "Voice input is not supported by this browser."
       );
+
 
       return;
 
@@ -2161,6 +3180,7 @@
 
       }
 
+
       return;
 
     }
@@ -2172,19 +3192,23 @@
         "Voice system is starting. Please wait..."
       );
 
+
       return;
 
     }
 
 
-    voiceStarting = true;
+    voiceStarting =
+      true;
 
 
     try {
 
       if (voiceStatus) {
 
-        voiceStatus.classList.add("show");
+        voiceStatus.classList.add(
+          "show"
+        );
 
       }
 
@@ -2211,11 +3235,16 @@
       }
 
 
-      await new Promise(resolve => {
+      await new Promise(
+        resolve => {
 
-        setTimeout(resolve, 150);
+          setTimeout(
+            resolve,
+            150
+          );
 
-      });
+        }
+      );
 
 
       try {
@@ -2230,9 +3259,12 @@
         );
 
 
-        voiceStarting = false;
+        voiceStarting =
+          false;
+
 
         stopVoiceUI();
+
 
         showToast(
           "Voice system is busy. Please wait and try again."
@@ -2248,9 +3280,12 @@
       );
 
 
-      voiceStarting = false;
+      voiceStarting =
+        false;
+
 
       releaseMicrophone();
+
 
       stopVoiceUI();
 
@@ -2258,8 +3293,11 @@
       if (
         error &&
         (
-          error.name === "NotAllowedError" ||
-          error.name === "PermissionDeniedError"
+          error.name ===
+            "NotAllowedError" ||
+
+          error.name ===
+            "PermissionDeniedError"
         )
       ) {
 
@@ -2267,6 +3305,7 @@
           "Microphone permission denied. Allow microphone for Chrome."
         );
 
+
         return;
 
       }
@@ -2274,13 +3313,15 @@
 
       if (
         error &&
-        error.name === "NotFoundError"
+        error.name ===
+          "NotFoundError"
       ) {
 
         showToast(
           "No microphone was found on this device."
         );
 
+
         return;
 
       }
@@ -2288,12 +3329,14 @@
 
       if (
         error &&
-        error.name === "NotReadableError"
+        error.name ===
+          "NotReadableError"
       ) {
 
         showToast(
           "Microphone is being used by another app."
         );
+
 
         return;
 
@@ -2303,12 +3346,13 @@
       if (
         error &&
         error.message ===
-        "MICROPHONE_API_NOT_SUPPORTED"
+          "MICROPHONE_API_NOT_SUPPORTED"
       ) {
 
         showToast(
           "This browser cannot access the microphone."
         );
+
 
         return;
 
@@ -2325,14 +3369,17 @@
 
 
   /* =========================================================
-     STOP VOICE UI
+     29 — STOP VOICE UI
   ========================================================== */
 
   function stopVoiceUI() {
 
-    isListening = false;
+    isListening =
+      false;
 
-    voiceStarting = false;
+
+    voiceStarting =
+      false;
 
 
     if (micBtn) {
@@ -2341,7 +3388,10 @@
         "listening"
       );
 
-      micBtn.textContent = "🎙️";
+
+      micBtn.textContent =
+        "🎙️";
+
 
       micBtn.setAttribute(
         "aria-label",
@@ -2366,883 +3416,142 @@
 
 
   /* =========================================================
-     SEND MESSAGE
+     30 — ONLINE / OFFLINE SYSTEM
   ========================================================== */
 
-  async function sendMessage() {
+  function setupOnlineStatus() {
 
-    if (!messageInput) return;
+    window.addEventListener(
+      "online",
+      () => {
 
-
-    const text =
-      messageInput.value.trim();
-
-
-    if (!text) {
-
-      return;
-
-    }
+        isOnline =
+          true;
 
 
-    stopSpeaking();
+        showToast(
+          "Internet connection restored ✓"
+        );
 
 
-    if (
-      recognition &&
-      isListening
-    ) {
-
-      try {
-
-        recognition.stop();
-
-      } catch (error) {
-
-        console.log(error);
+        emitLifeOSEvent(
+          "online",
+          {}
+        );
 
       }
-
-    }
-
-
-    if (hero) {
-
-      hero.style.display = "none";
-
-    }
-
-
-    if (quickTools) {
-
-      quickTools.style.display = "none";
-
-    }
-
-
-    if (modeRow) {
-
-      modeRow.style.display = "flex";
-
-    }
-
-
-    if (chatArea) {
-
-      chatArea.classList.add("visible");
-
-    }
-
-
-    const empty =
-      document.getElementById("emptyChat");
-
-
-    if (empty) {
-
-      empty.remove();
-
-    }
-
-
-    addMessage(
-      "user",
-      text
     );
 
 
-    conversation.push({
+    window.addEventListener(
+      "offline",
+      () => {
 
-      role: "user",
-
-      content: text
-
-    });
-
-
-    saveConversation();
+        isOnline =
+          false;
 
 
-    messageInput.value = "";
-
-    messageInput.style.height = "auto";
-
-
-    const typingId =
-      addTyping();
+        showToast(
+          "You are offline. Local features still work."
+        );
 
 
-    try {
-
-      const response =
-        await fetch(API_URL, {
-
-          method: "POST",
-
-          headers: {
-
-            "Content-Type":
-              "application/json"
-
-          },
-
-          body: JSON.stringify({
-
-            message: text,
-
-            prompt: text,
-
-            mode: currentMode,
-
-            history:
-              conversation.slice(-12)
-
-          })
-
-        });
-
-
-      removeTyping(typingId);
-
-
-      if (!response.ok) {
-
-        throw new Error(
-          `Server returned ${response.status}`
+        emitLifeOSEvent(
+          "offline",
+          {}
         );
 
       }
-
-
-      const data =
-        await response.json();
-
-
-      const answer =
-        extractAnswer(data);
-
-
-      if (!answer) {
-
-        throw new Error(
-          "Empty AI response"
-        );
-
-      }
-
-
-      addMessage(
-        "assistant",
-        answer
-      );
-
-
-      conversation.push({
-
-        role: "assistant",
-
-        content: answer
-
-      });
-
-
-      saveConversation();
-
-    } catch (error) {
-
-      console.error(
-        "Emogigs AI error:",
-        error
-      );
-
-
-      removeTyping(typingId);
-
-
-      addMessage(
-        "assistant",
-        "Sorry, I couldn't connect to Emogigs AI right now. Please try again."
-      );
-
-    }
+    );
 
   }
 
 
   /* =========================================================
-     EXTRACT API RESPONSE
+     31 — KEYBOARD SHORTCUTS
   ========================================================== */
 
-  function extractAnswer(data) {
+  function setupKeyboardShortcuts() {
 
-    if (!data) {
+    document.addEventListener(
+      "keydown",
+      event => {
 
-      return "";
+        /*
+          Ctrl/Cmd + K
+          → focus chat input
+        */
 
-    }
+        if (
+          (event.ctrlKey ||
+            event.metaKey) &&
+          event.key.toLowerCase() ===
+            "k"
+        ) {
 
+          event.preventDefault();
 
-    if (
-      typeof data === "string"
-    ) {
 
-      return data;
+          if (messageInput) {
 
-    }
+            messageInput.focus();
 
-
-    if (data.reply) {
-
-      return data.reply;
-
-    }
-
-
-    if (data.response) {
-
-      return data.response;
-
-    }
-
-
-    if (data.answer) {
-
-      return data.answer;
-
-    }
-
-
-    if (data.message) {
-
-      if (
-        typeof data.message === "string"
-      ) {
-
-        return data.message;
-
-      }
-
-
-      if (data.message.content) {
-
-        return data.message.content;
-
-      }
-
-    }
-
-
-    if (
-      Array.isArray(data.choices) &&
-      data.choices[0]
-    ) {
-
-      const choice =
-        data.choices[0];
-
-
-      if (choice.message) {
-
-        return choice.message.content || "";
-
-      }
-
-
-      if (choice.text) {
-
-        return choice.text;
-
-      }
-
-    }
-
-
-    return "";
-
-  }
-
-
-  /* =========================================================
-     ADD MESSAGE
-  ========================================================== */
-
-  function addMessage(
-    role,
-    text
-  ) {
-
-    if (!chatArea) return null;
-
-
-    const message =
-      document.createElement("div");
-
-
-    message.className =
-      `message ${role}`;
-
-
-    const avatar =
-      document.createElement("div");
-
-
-    avatar.className =
-      "avatar";
-
-
-    avatar.textContent =
-      role === "assistant"
-        ? "✦"
-        : "👤";
-
-
-    const wrap =
-      document.createElement("div");
-
-
-    wrap.className =
-      "bubble-wrap";
-
-
-    const bubble =
-      document.createElement("div");
-
-
-    bubble.className =
-      "bubble";
-
-
-    bubble.textContent =
-      text;
-
-
-    wrap.appendChild(
-      bubble
-    );
-
-
-    const actions =
-      document.createElement("div");
-
-
-    actions.className =
-      "message-actions";
-
-
-    if (
-      role === "assistant"
-    ) {
-
-      const speakBtn =
-        createActionButton(
-          "🔊",
-          "Read aloud"
-        );
-
-
-      speakBtn.addEventListener(
-        "click",
-        () => {
-
-          speakText(
-            text,
-            speakBtn
-          );
+          }
 
         }
-      );
 
 
-      const copyBtn =
-        createActionButton(
-          "📋",
-          "Copy"
-        );
+        /*
+          Escape
+          → stop voice
+          → stop speaking
+        */
 
+        if (
+          event.key ===
+            "Escape"
+        ) {
 
-      copyBtn.addEventListener(
-        "click",
-        async () => {
+          if (
+            isListening &&
+            recognition
+          ) {
 
-          await copyText(text);
+            try {
 
-          copyBtn.textContent = "✓";
+              recognition.stop();
 
+            } catch (error) {
 
-          setTimeout(() => {
+              console.log(error);
 
-            copyBtn.textContent = "📋";
-
-          }, 1200);
-
-        }
-      );
-
-
-      const regenerateBtn =
-        createActionButton(
-          "↻",
-          "Regenerate"
-        );
-
-
-      regenerateBtn.addEventListener(
-        "click",
-        () => {
-
-          regenerateLastAnswer();
-
-        }
-      );
-
-
-      actions.appendChild(
-        speakBtn
-      );
-
-
-      actions.appendChild(
-        copyBtn
-      );
-
-
-      actions.appendChild(
-        regenerateBtn
-      );
-
-    }
-
-
-    wrap.appendChild(
-      actions
-    );
-
-
-    message.appendChild(
-      avatar
-    );
-
-
-    message.appendChild(
-      wrap
-    );
-
-
-    chatArea.appendChild(
-      message
-    );
-
-
-    scrollToBottom();
-
-
-    return message;
-
-  }
-
-
-  /* =========================================================
-     ACTION BUTTON
-  ========================================================== */
-
-  function createActionButton(
-    icon,
-    title
-  ) {
-
-    const button =
-      document.createElement("button");
-
-
-    button.className =
-      "small-btn";
-
-
-    button.textContent =
-      icon;
-
-
-    button.title =
-      title;
-
-
-    button.setAttribute(
-      "aria-label",
-      title
-    );
-
-
-    return button;
-
-  }
-
-
-  /* =========================================================
-     TEXT TO SPEECH
-  ========================================================== */
-
-  function speakText(
-    text,
-    button
-  ) {
-
-    if (
-      !("speechSynthesis" in window)
-    ) {
-
-      showToast(
-        "Text-to-speech is not supported."
-      );
-
-      return;
-
-    }
-
-
-    if (
-      currentSpeakingButton === button
-    ) {
-
-      stopSpeaking();
-
-      return;
-
-    }
-
-
-    stopSpeaking();
-
-
-    const utterance =
-      new SpeechSynthesisUtterance(
-        text
-      );
-
-
-    const voices =
-      window.speechSynthesis.getVoices();
-
-
-    const preferredVoice =
-      voices.find(
-        voice => {
-
-          if (!voice.lang) {
-
-            return false;
+            }
 
           }
 
 
-          const lang =
-            voice.lang.toLowerCase();
-
-
-          return (
-            lang.startsWith("bn") ||
-            lang.startsWith("en")
-          );
+          stopSpeaking();
 
         }
-      );
-
-
-    if (preferredVoice) {
-
-      utterance.voice =
-        preferredVoice;
-
-    }
-
-
-    utterance.rate = 1;
-
-    utterance.pitch = 1;
-
-    utterance.volume = 1;
-
-
-    utterance.onstart = () => {
-
-      currentSpeakingButton =
-        button;
-
-
-      button.classList.add(
-        "speaking"
-      );
-
-
-      button.textContent =
-        "⏹";
-
-    };
-
-
-    utterance.onend = () => {
-
-      if (
-        currentSpeakingButton ===
-        button
-      ) {
-
-        currentSpeakingButton =
-          null;
-
-
-        button.classList.remove(
-          "speaking"
-        );
-
-
-        button.textContent =
-          "🔊";
 
       }
-
-    };
-
-
-    utterance.onerror = () => {
-
-      if (
-        currentSpeakingButton ===
-        button
-      ) {
-
-        currentSpeakingButton =
-          null;
-
-
-        button.classList.remove(
-          "speaking"
-        );
-
-
-        button.textContent =
-          "🔊";
-
-      }
-
-    };
-
-
-    window.speechSynthesis.speak(
-      utterance
     );
 
   }
 
 
   /* =========================================================
-     STOP SPEAKING
+     32 — LOCAL AI MEMORY FOUNDATION
   ========================================================== */
 
-  function stopSpeaking() {
+  function rememberLocally(
+    text,
+    category = "general"
+  ) {
 
     if (
-      "speechSynthesis" in window
-    ) {
-
-      window.speechSynthesis.cancel();
-
-    }
-
-
-    if (
-      currentSpeakingButton
-    ) {
-
-      currentSpeakingButton.classList.remove(
-        "speaking"
-      );
-
-
-      currentSpeakingButton.textContent =
-        "🔊";
-
-    }
-
-
-    currentSpeakingButton =
-      null;
-
-  }
-
-
-  /* =========================================================
-     COPY
-  ========================================================== */
-
-  async function copyText(text) {
-
-    try {
-
-      if (
-        navigator.clipboard
-      ) {
-
-        await navigator.clipboard.writeText(
-          text
-        );
-
-        showToast(
-          "Copied to clipboard"
-        );
-
-        return;
-
-      }
-
-
-      const textarea =
-        document.createElement("textarea");
-
-
-      textarea.value = text;
-
-      textarea.style.position =
-        "fixed";
-
-      textarea.style.opacity = "0";
-
-
-      document.body.appendChild(
-        textarea
-      );
-
-
-      textarea.select();
-
-      document.execCommand("copy");
-
-
-      textarea.remove();
-
-
-      showToast(
-        "Copied to clipboard"
-      );
-
-    } catch (error) {
-
-      console.error(error);
-
-      showToast(
-        "Copy failed"
-      );
-
-    }
-
-  }
-
-
-  /* =========================================================
-     TYPING
-  ========================================================== */
-
-  function addTyping() {
-
-    const id =
-      "typing-" +
-      Date.now();
-
-
-    const message =
-      document.createElement("div");
-
-
-    message.className =
-      "message assistant";
-
-
-    message.id =
-      id;
-
-
-    const avatar =
-      document.createElement("div");
-
-
-    avatar.className =
-      "avatar";
-
-
-    avatar.textContent =
-      "✦";
-
-
-    const wrap =
-      document.createElement("div");
-
-
-    wrap.className =
-      "bubble-wrap";
-
-
-    const typing =
-      document.createElement("div");
-
-
-    typing.className =
-      "bubble typing";
-
-
-    typing.innerHTML =
-      "<span></span><span></span><span></span>";
-
-
-    wrap.appendChild(
-      typing
-    );
-
-
-    message.appendChild(
-      avatar
-    );
-
-
-    message.appendChild(
-      wrap
-    );
-
-
-    chatArea.appendChild(
-      message
-    );
-
-
-    scrollToBottom();
-
-
-    return id;
-
-  }
-
-
-  function removeTyping(id) {
-
-    const element =
-      document.getElementById(id);
-
-
-    if (element) {
-
-      element.remove();
-
-    }
-
-  }
-
-
-  /* =========================================================
-     REGENERATE
-  ========================================================== */
-
-  async function regenerateLastAnswer() {
-
-    if (
-      conversation.length === 0
+      !text ||
+      typeof text !== "string"
     ) {
 
       return;
@@ -3250,196 +3559,307 @@
     }
 
 
-    let lastUserMessage = null;
+    const clean =
+      text.trim();
 
 
-    for (
-      let i = conversation.length - 1;
-      i >= 0;
-      i--
-    ) {
-
-      if (
-        conversation[i].role === "user"
-      ) {
-
-        lastUserMessage =
-          conversation[i].content;
-
-        break;
-
-      }
-
-    }
-
-
-    if (!lastUserMessage) {
+    if (!clean) {
 
       return;
 
     }
 
 
-    messageInput.value =
-      lastUserMessage;
+    /*
+      Prevent exact duplicates.
+    */
 
-
-    messageInput.dispatchEvent(
-      new Event("input")
-    );
-
-
-    const messages =
-      chatArea.querySelectorAll(
-        ".message.assistant"
+    const duplicate =
+      aiMemory.some(
+        item =>
+          item &&
+          item.text ===
+            clean
       );
 
 
-    if (messages.length) {
+    if (duplicate) {
 
-      messages[
-        messages.length - 1
-      ].remove();
+      return;
 
     }
 
+
+    aiMemory.push({
+
+      id:
+        createUniqueId(
+          "memory"
+        ),
+
+      text:
+        clean,
+
+      category,
+
+      createdAt:
+        new Date().toISOString()
+
+    });
+
+
+    /*
+      Keep memory lightweight.
+    */
 
     if (
-      conversation[
-        conversation.length - 1
-      ]?.role === "assistant"
+      aiMemory.length >
+      100
     ) {
 
-      conversation.pop();
+      aiMemory =
+        aiMemory.slice(
+          -100
+        );
 
     }
 
 
-    await sendMessage();
+    writeLocalStorage(
+      MEMORY_STORAGE_KEY,
+      aiMemory
+    );
+
+  }
+
+
+  function getLocalMemory() {
+
+    return [
+      ...aiMemory
+    ];
 
   }
 
 
   /* =========================================================
-     NEW CHAT
+     33 — ACTIVITY SYSTEM
   ========================================================== */
 
-  function startNewChat() {
+  function registerActivity(
+    type = "message"
+  ) {
 
-    stopSpeaking();
+    const today =
+      new Date()
+        .toISOString()
+        .slice(
+          0,
+          10
+        );
 
 
     if (
-      recognition &&
-      isListening
+      activityData.lastActiveDate !==
+      today
     ) {
 
-      try {
+      updateStreak(
+        today
+      );
 
-        recognition.stop();
+    }
 
-      } catch (error) {
 
-        console.log(error);
+    if (
+      type === "message"
+    ) {
+
+      activityData.totalMessages =
+        Number(
+          activityData.totalMessages ||
+          0
+        ) + 1;
+
+    }
+
+
+    if (
+      type === "ai"
+    ) {
+
+      activityData.totalAIReplies =
+        Number(
+          activityData.totalAIReplies ||
+          0
+        ) + 1;
+
+    }
+
+
+    saveActivityData();
+
+
+    updateActivityUI();
+
+  }
+
+
+  function updateStreak(
+    today
+  ) {
+
+    if (
+      !activityData.lastActiveDate
+    ) {
+
+      activityData.currentStreak =
+        1;
+
+      activityData.lastActiveDate =
+        today;
+
+
+      return;
+
+    }
+
+
+    const previous =
+      new Date(
+        activityData.lastActiveDate
+      );
+
+
+    const current =
+      new Date(
+        today
+      );
+
+
+    const difference =
+      Math.round(
+        (
+          current -
+          previous
+        ) /
+        (
+          1000 *
+          60 *
+          60 *
+          24
+        )
+      );
+
+
+    if (
+      difference === 1
+    ) {
+
+      activityData.currentStreak =
+        Number(
+          activityData.currentStreak ||
+          0
+        ) + 1;
+
+    }
+    else if (
+      difference > 1
+    ) {
+
+      activityData.currentStreak =
+        1;
+
+    }
+
+
+    activityData.lastActiveDate =
+      today;
+
+  }
+
+
+  function saveActivityData() {
+
+    writeLocalStorage(
+      ACTIVITY_STORAGE_KEY,
+      activityData
+    );
+
+  }
+
+
+  function updateActivityUI() {
+
+    /*
+      If the HTML already contains
+      any of these elements, update them.
+
+      New UI elements will be created
+      in PART 2.
+    */
+
+    const streakElements =
+      document.querySelectorAll(
+        "[data-emogigs-streak]"
+      );
+
+
+    streakElements.forEach(
+      element => {
+
+        element.textContent =
+          activityData.currentStreak ||
+          0;
 
       }
-
-    }
-
-
-    conversation = [];
-
-
-    localStorage.removeItem(
-      STORAGE_KEY
     );
 
 
-    chatArea.innerHTML = `
-
-      <div class="empty-chat" id="emptyChat">
-
-        <div class="empty-chat-icon">
-          ✦
-        </div>
-
-        <strong>
-          Emogigs AI is ready
-        </strong>
-
-        Ask anything, type a message,
-        or use your microphone.
-
-      </div>
-
-    `;
+    const messageElements =
+      document.querySelectorAll(
+        "[data-emogigs-messages]"
+      );
 
 
-    chatArea.classList.remove(
-      "visible"
-    );
+    messageElements.forEach(
+      element => {
 
+        element.textContent =
+          activityData.totalMessages ||
+          0;
 
-    if (hero) {
-
-      hero.style.display =
-        "block";
-
-    }
-
-
-    if (quickTools) {
-
-      quickTools.style.display =
-        "block";
-
-    }
-
-
-    if (modeRow) {
-
-      modeRow.style.display =
-        "flex";
-
-    }
-
-
-    if (messageInput) {
-
-      messageInput.value = "";
-
-      messageInput.style.height =
-        "auto";
-
-    }
-
-
-    showToast(
-      "New chat started"
+      }
     );
 
   }
 
 
   /* =========================================================
-     LOCAL STORAGE
+     34 — LIFE OS EVENT BUS
   ========================================================== */
 
-  function saveConversation() {
+  function emitLifeOSEvent(
+    name,
+    detail
+  ) {
 
     try {
 
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(
-          conversation.slice(-30)
+      document.dispatchEvent(
+        new CustomEvent(
+          `emogigs:${name}`,
+          {
+            detail:
+              detail || {}
+          }
         )
       );
 
     } catch (error) {
 
       console.log(
-        "Storage error:",
+        "Life OS event error:",
         error
       );
 
@@ -3448,143 +3868,46 @@
   }
 
 
-  function loadConversation() {
+  /* =========================================================
+     35 — UNIQUE ID GENERATOR
+  ========================================================== */
 
-    try {
+  function createUniqueId(
+    prefix = "id"
+  ) {
 
-      const saved =
-        localStorage.getItem(
-          STORAGE_KEY
-        );
+    return (
+      prefix +
+      "_" +
+      Date.now().toString(36) +
+      "_" +
+      Math.random()
+        .toString(36)
+        .substring(2, 9)
+    );
 
-
-      if (!saved) {
-
-        return;
-
-      }
-
-
-      conversation =
-        JSON.parse(saved);
-
-
-      if (
-        !Array.isArray(
-          conversation
-        ) ||
-        conversation.length === 0
-      ) {
-
-        conversation = [];
-
-        return;
-
-      }
+  }
 
 
-      if (hero) {
+  /* =========================================================
+     36 — TOAST SYSTEM
+  ========================================================== */
 
-        hero.style.display =
-          "none";
+  function showToast(
+    message
+  ) {
 
-      }
-
-
-      if (quickTools) {
-
-        quickTools.style.display =
-          "none";
-
-      }
-
-
-      if (chatArea) {
-
-        chatArea.classList.add(
-          "visible"
-        );
-
-      }
-
-
-      const empty =
-        document.getElementById(
-          "emptyChat"
-        );
-
-
-      if (empty) {
-
-        empty.remove();
-
-      }
-
-
-      conversation.forEach(item => {
-
-        if (
-          (
-            item.role === "user" ||
-            item.role === "assistant"
-          ) &&
-          typeof item.content === "string"
-        ) {
-
-          addMessage(
-            item.role,
-            item.content
-          );
-
-        }
-
-      });
-
-    } catch (error) {
+    if (!toast) {
 
       console.log(
-        "Could not load saved chat:",
-        error
+        "Emogigs Toast:",
+        message
       );
 
+
+      return;
+
     }
-
-  }
-
-
-  /* =========================================================
-     SCROLL
-  ========================================================== */
-
-  function scrollToBottom() {
-
-    setTimeout(() => {
-
-      window.scrollTo({
-
-        top:
-          document.body.scrollHeight,
-
-        behavior:
-          "smooth"
-
-      });
-
-    }, 50);
-
-  }
-
-
-  /* =========================================================
-     TOAST
-  ========================================================== */
-
-  let toastTimer;
-
-
-  function showToast(message) {
-
-    if (!toast) return;
 
 
     toast.textContent =
@@ -3602,35 +3925,53 @@
 
 
     toastTimer =
-      setTimeout(() => {
+      setTimeout(
+        () => {
 
-        toast.classList.remove(
-          "show"
-        );
+          toast.classList.remove(
+            "show"
+          );
 
-      }, 3000);
+        },
+        3000
+      );
 
   }
 
 
   /* =========================================================
-     SPEECH VOICES
-  ========================================================== */
+     PART 1 END
+     ─────────────────────────────────────────────────────────
 
-  if (
-    "speechSynthesis" in window &&
-    "onvoiceschanged" in window.speechSynthesis
-  ) {
+     DO NOT ADD `})();` HERE.
 
-    window.speechSynthesis.onvoiceschanged =
-      () => {
+     PART 2 will continue from this point.
 
-        window.speechSynthesis
-          .getVoices();
+     PART 2 will contain:
+     💬 Complete AI Chat Engine
+     🧠 Context + Memory Integration
+     ✨ Smart Suggestions
+     ⭐ Favorites
+     📊 Advanced Activity
+     🎯 Goals Foundation
+     ⚡ Focus Mode Foundation
+     🔎 Search Foundation
+     📤 Export Foundation
+     🔊 Complete TTS
+     📋 Copy
+     ↻ Regenerate
 
-      };
-
-  }
-
-
-})();
+     PART 3 will contain:
+     🎨 Advanced Life OS UI
+     ⚙️ Settings
+     🧠 Memory Manager
+     🎯 Goal Manager
+     📊 Dashboard
+     🔎 Search UI
+     ⭐ Favorites UI
+     📤 Export UI
+     ⚡ Focus Mode UI
+     📱 Mobile optimization
+     🛡️ Error handling
+     🚀 Final initialization
+     ========================================================= */
