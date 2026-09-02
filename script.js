@@ -998,3 +998,1202 @@
 
 
             <div class="emogigs-field">
+            <label for="emogigsName">
+              Your name
+            </label>
+
+
+            <input
+              type="text"
+              id="emogigsName"
+              name="name"
+              placeholder="Enter your name"
+              maxlength="40"
+              autocomplete="name"
+              required>
+
+          </div>
+
+
+          <div class="emogigs-field">
+
+            <label for="emogigsUsername">
+              Emogigs ID
+            </label>
+
+
+            <div
+              class="emogigs-username-wrapper">
+
+              <span>@</span>
+
+
+              <input
+                type="text"
+                id="emogigsUsername"
+                name="username"
+                placeholder="Choose your ID"
+                maxlength="20"
+                autocomplete="username"
+                required>
+
+            </div>
+
+
+            <small>
+              3–20 characters.
+              Letters, numbers and underscore.
+            </small>
+
+          </div>
+
+
+          <button
+            type="submit"
+            class="emogigs-create-id-btn"
+            id="emogigsCreateIdBtn">
+
+            Create Emogigs ID
+
+          </button>
+
+
+        </form>
+
+
+        <button
+          type="button"
+          id="emogigsContinueBtn"
+          class="emogigs-continue-btn"
+          style="display:none;">
+
+          Continue to Emogigs AI
+
+        </button>
+
+
+        <button
+          type="button"
+          id="emogigsDeleteAccountBtn"
+          class="emogigs-delete-btn"
+          style="display:none;">
+
+          Remove this ID from this device
+
+        </button>
+
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  document.body.appendChild(
+    modal
+  );
+
+
+  accountModalCreated =
+    true;
+
+
+  /*
+    Close button
+  */
+
+  const closeBtn =
+    modal.querySelector(
+      "#emogigsAccountClose"
+    );
+
+
+  if (closeBtn) {
+
+    closeBtn.addEventListener(
+      "click",
+      closeAccountModal
+    );
+
+  }
+
+
+  /*
+    Backdrop
+  */
+
+  const backdrop =
+    modal.querySelector(
+      "[data-close-account='true']"
+    );
+
+
+  if (backdrop) {
+
+    backdrop.addEventListener(
+      "click",
+      closeAccountModal
+    );
+
+  }
+
+
+  /*
+    Account form
+  */
+
+  const form =
+    modal.querySelector(
+      "#emogigsAccountForm"
+    );
+
+
+  if (form) {
+
+    form.addEventListener(
+      "submit",
+      event => {
+
+        event.preventDefault();
+
+        createEmogigsID();
+
+      }
+    );
+
+  }
+
+
+  /*
+    Continue
+  */
+
+  const continueBtn =
+    modal.querySelector(
+      "#emogigsContinueBtn"
+    );
+
+
+  if (continueBtn) {
+
+    continueBtn.addEventListener(
+      "click",
+      closeAccountModal
+    );
+
+  }
+
+
+  /*
+    Remove ID
+  */
+
+  const deleteBtn =
+    modal.querySelector(
+      "#emogigsDeleteAccountBtn"
+    );
+
+
+  if (deleteBtn) {
+
+    deleteBtn.addEventListener(
+      "click",
+      removeEmogigsID
+    );
+
+  }
+
+
+  /*
+    Username formatting.
+  */
+
+  const usernameInput =
+    modal.querySelector(
+      "#emogigsUsername"
+    );
+
+
+  if (usernameInput) {
+
+    usernameInput.addEventListener(
+      "input",
+      () => {
+
+        usernameInput.value =
+          usernameInput.value
+            .replace(/\s+/g, "")
+            .replace(
+              /[^a-zA-Z0-9_]/g,
+              ""
+            )
+            .slice(0, 20);
+
+      }
+    );
+
+  }
+
+
+  /*
+    Escape key.
+  */
+
+  if (
+    !modal.dataset.escapeBound
+  ) {
+
+    modal.dataset.escapeBound =
+      "true";
+
+
+    document.addEventListener(
+      "keydown",
+      event => {
+
+        if (
+          event.key === "Escape" &&
+          modal.classList.contains(
+            "show"
+          )
+        ) {
+
+          closeAccountModal();
+
+        }
+
+      }
+    );
+
+  }
+
+
+  /*
+    Inject account CSS.
+  */
+
+  injectAccountModalStyles();
+
+
+  return modal;
+
+}
+
+
+/* =========================================================
+   15 — UPDATE ACCOUNT MODAL
+========================================================== */
+
+function updateAccountModal() {
+
+  const account =
+    getEmogigsAccount();
+
+
+  const title =
+    document.getElementById(
+      "emogigsAccountTitle"
+    );
+
+
+  const subtitle =
+    document.querySelector(
+      ".emogigs-account-subtitle"
+    );
+
+
+  const form =
+    document.getElementById(
+      "emogigsAccountForm"
+    );
+
+
+  const existing =
+    document.getElementById(
+      "emogigsExistingAccount"
+    );
+
+
+  const continueBtn =
+    document.getElementById(
+      "emogigsContinueBtn"
+    );
+
+
+  const deleteBtn =
+    document.getElementById(
+      "emogigsDeleteAccountBtn"
+    );
+
+
+  if (account) {
+
+    if (title) {
+
+      title.textContent =
+        "Your Emogigs ID";
+
+    }
+
+
+    if (subtitle) {
+
+      subtitle.textContent =
+        "Your Emogigs ID is saved on this device.";
+
+    }
+
+
+    if (form) {
+
+      form.style.display =
+        "none";
+
+    }
+
+
+    if (existing) {
+
+      existing.style.display =
+        "block";
+
+
+      existing.innerHTML = `
+
+        <div
+          class="emogigs-profile-card">
+
+
+          <div
+            class="emogigs-profile-avatar">
+
+            ${escapeHTML(
+              getInitials(
+                account.name
+              )
+            )}
+
+          </div>
+
+
+          <div
+            class="emogigs-profile-info">
+
+            <strong>
+
+              ${escapeHTML(
+                account.name
+              )}
+
+            </strong>
+
+
+            <span>
+
+              @${escapeHTML(
+                account.username
+              )}
+
+            </span>
+
+          </div>
+
+
+        </div>
+
+
+        <div
+          class="emogigs-id-success">
+
+          ✓ Emogigs ID is active
+
+        </div>
+
+
+        <div
+          class="emogigs-account-local-note">
+
+          🔒 Your ID is currently stored
+          on this device.
+
+        </div>
+
+      `;
+
+    }
+
+
+    if (continueBtn) {
+
+      continueBtn.style.display =
+        "block";
+
+    }
+
+
+    if (deleteBtn) {
+
+      deleteBtn.style.display =
+        "block";
+
+    }
+
+  } else {
+
+    if (title) {
+
+      title.textContent =
+        "Create Emogigs ID";
+
+    }
+
+
+    if (subtitle) {
+
+      subtitle.textContent =
+        "Create your free Emogigs ID to personalize your AI Life OS experience.";
+
+    }
+
+
+    if (form) {
+
+      form.style.display =
+        "block";
+
+    }
+
+
+    if (existing) {
+
+      existing.style.display =
+        "none";
+
+    }
+
+
+    if (continueBtn) {
+
+      continueBtn.style.display =
+        "none";
+
+    }
+
+
+    if (deleteBtn) {
+
+      deleteBtn.style.display =
+        "none";
+
+    }
+
+  }
+
+}
+
+
+/* =========================================================
+   16 — CREATE EMOGIGS ID
+========================================================== */
+
+function createEmogigsID() {
+
+  const nameInput =
+    document.getElementById(
+      "emogigsName"
+    );
+
+
+  const usernameInput =
+    document.getElementById(
+      "emogigsUsername"
+    );
+
+
+  if (
+    !nameInput ||
+    !usernameInput
+  ) {
+
+    return;
+
+  }
+
+
+  const name =
+    nameInput.value.trim();
+
+
+  const username =
+    usernameInput.value
+      .trim()
+      .toLowerCase();
+
+
+  if (
+    name.length < 2
+  ) {
+
+    showToast(
+      "Please enter your name."
+    );
+
+
+    nameInput.focus();
+
+
+    return;
+
+  }
+
+
+  if (
+    !/^[a-zA-Z0-9_]{3,20}$/.test(
+      username
+    )
+  ) {
+
+    showToast(
+      "Emogigs ID must be 3–20 characters."
+    );
+
+
+    usernameInput.focus();
+
+
+    return;
+
+  }
+
+
+  const account = {
+
+    name,
+
+    username,
+
+    createdAt:
+      new Date().toISOString(),
+
+    version:
+      2
+
+  };
+
+
+  const saved =
+    writeLocalStorage(
+      ACCOUNT_STORAGE_KEY,
+      account
+    );
+
+
+  if (!saved) {
+
+    showToast(
+      "Could not save Emogigs ID on this device."
+    );
+
+
+    return;
+
+  }
+
+
+  /*
+    Create first memory entry.
+  */
+
+  rememberLocally(
+    `User's name is ${name}.`,
+    "profile"
+  );
+
+
+  updateAccountModal();
+
+  updateAccountButton();
+
+
+  showToast(
+    `Welcome to Emogigs, ${name}! ✨`
+  );
+
+
+  emitLifeOSEvent(
+    "account_created",
+    {
+
+      username
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   17 — GET EMOGIGS ACCOUNT
+========================================================== */
+
+function getEmogigsAccount() {
+
+  try {
+
+    const saved =
+      localStorage.getItem(
+        ACCOUNT_STORAGE_KEY
+      );
+
+
+    if (!saved) {
+
+      return null;
+
+    }
+
+
+    const account =
+      JSON.parse(saved);
+
+
+    if (
+      !account ||
+      typeof account !== "object"
+    ) {
+
+      return null;
+
+    }
+
+
+    if (
+      !account.name ||
+      !account.username
+    ) {
+
+      return null;
+
+    }
+
+
+    return account;
+
+  } catch (error) {
+
+    console.warn(
+      "Could not read Emogigs ID:",
+      error
+    );
+
+
+    return null;
+
+  }
+
+}
+
+
+/* =========================================================
+   18 — REMOVE EMOGIGS ID
+========================================================== */
+
+function removeEmogigsID() {
+
+  const confirmed =
+    window.confirm(
+      "Remove your Emogigs ID from this device?"
+    );
+
+
+  if (!confirmed) {
+
+    return;
+
+  }
+
+
+  try {
+
+    localStorage.removeItem(
+      ACCOUNT_STORAGE_KEY
+    );
+
+  } catch (error) {
+
+    console.log(error);
+
+  }
+
+
+  updateAccountModal();
+
+  updateAccountButton();
+
+
+  showToast(
+    "Emogigs ID removed from this device."
+  );
+
+
+  emitLifeOSEvent(
+    "account_removed",
+    {}
+  );
+
+}
+
+
+/* =========================================================
+   19 — UPDATE ACCOUNT BUTTON
+========================================================== */
+
+function updateAccountButton() {
+
+  const account =
+    getEmogigsAccount();
+
+
+  const buttons =
+    document.querySelectorAll(
+      [
+        "#accountBtn",
+        "#accountButton",
+        ".account-btn",
+        ".account-button",
+        "[data-action='account']",
+        "[data-account]"
+      ].join(",")
+    );
+
+
+  buttons.forEach(
+    button => {
+
+      if (!account) {
+
+        button.removeAttribute(
+          "data-emogigs-user"
+        );
+
+        button.removeAttribute(
+          "title"
+        );
+
+        return;
+
+      }
+
+
+      button.setAttribute(
+        "data-emogigs-user",
+        account.username
+      );
+
+
+      button.setAttribute(
+        "title",
+        `Emogigs ID: @${account.username}`
+      );
+
+
+      button.setAttribute(
+        "aria-label",
+        `Emogigs account @${account.username}`
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   20 — INITIAL ACCOUNT STATE
+========================================================== */
+
+function initializeAccountState() {
+
+  const account =
+    getEmogigsAccount();
+
+
+  if (account) {
+
+    updateAccountButton();
+
+  }
+
+}
+
+
+/* =========================================================
+   21 — CLOSE ACCOUNT MODAL
+========================================================== */
+
+function closeAccountModal() {
+
+  const modal =
+    document.getElementById(
+      "emogigsAccountModal"
+    );
+
+
+  if (!modal) {
+
+    return;
+
+  }
+
+
+  modal.classList.remove(
+    "show"
+  );
+
+
+  modal.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+
+  document.body.classList.remove(
+    "emogigs-modal-open"
+  );
+
+}
+
+
+/* =========================================================
+   22 — GET INITIALS
+========================================================== */
+
+function getInitials(name) {
+
+  const words =
+    String(name)
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+
+
+  if (!words.length) {
+
+    return "E";
+
+  }
+
+
+  if (
+    words.length === 1
+  ) {
+
+    return words[0]
+      .substring(0, 2)
+      .toUpperCase();
+
+  }
+
+
+  return (
+    words[0][0] +
+    words[words.length - 1][0]
+  ).toUpperCase();
+
+}
+
+
+/* =========================================================
+   23 — ESCAPE HTML
+========================================================== */
+
+function escapeHTML(value) {
+
+  return String(value)
+
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+
+    .replace(
+      /</g,
+      "&lt;"
+    )
+
+    .replace(
+      />/g,
+      "&gt;"
+    )
+
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+
+}
+
+
+/* =========================================================
+   24 — ACCOUNT MODAL CSS
+========================================================== */
+
+function injectAccountModalStyles() {
+
+  if (
+    document.getElementById(
+      "emogigsAccountModalStyles"
+    )
+  ) {
+
+    return;
+
+  }
+
+
+  const style =
+    document.createElement(
+      "style"
+    );
+
+
+  style.id =
+    "emogigsAccountModalStyles";
+
+
+  style.textContent = `
+
+    body.emogigs-modal-open {
+      overflow: hidden;
+    }
+
+
+    .emogigs-account-modal {
+
+      position: fixed;
+
+      inset: 0;
+
+      z-index: 99999;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      padding: 18px;
+
+      opacity: 0;
+
+      visibility: hidden;
+
+      transition:
+        opacity .22s ease,
+        visibility .22s ease;
+
+    }
+
+
+    .emogigs-account-modal.show {
+
+      opacity: 1;
+
+      visibility: visible;
+
+    }
+
+
+    .emogigs-account-backdrop {
+
+      position: absolute;
+
+      inset: 0;
+
+      background:
+        rgba(0,0,0,.66);
+
+      backdrop-filter:
+        blur(9px);
+
+      -webkit-backdrop-filter:
+        blur(9px);
+
+    }
+
+
+    .emogigs-account-dialog {
+
+      position: relative;
+
+      z-index: 2;
+
+      width: min(
+        100%,
+        430px
+      );
+
+      max-height: 90vh;
+
+      overflow-y: auto;
+
+      background:
+        linear-gradient(
+          145deg,
+          #17172a,
+          #0c0c16
+        );
+
+      border:
+        1px solid
+        rgba(
+          255,
+          255,
+          255,
+          .12
+        );
+
+      border-radius: 26px;
+
+      padding:
+        30px 22px 22px;
+
+      box-shadow:
+        0 30px 90px
+        rgba(
+          0,
+          0,
+          0,
+          .52
+        );
+
+      transform:
+        translateY(20px)
+        scale(.96);
+
+      transition:
+        transform .25s ease;
+
+    }
+
+
+    .emogigs-account-modal.show
+    .emogigs-account-dialog {
+
+      transform:
+        translateY(0)
+        scale(1);
+
+    }
+
+
+    .emogigs-account-close {
+
+      position: absolute;
+
+      top: 10px;
+
+      right: 12px;
+
+      width: 38px;
+
+      height: 38px;
+
+      border: 0;
+
+      border-radius: 50%;
+
+      background:
+        rgba(
+          255,
+          255,
+          255,
+          .08
+        );
+
+      color: white;
+
+      font-size: 25px;
+
+      cursor: pointer;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+    }
+
+
+    .emogigs-account-icon {
+
+      width: 64px;
+
+      height: 64px;
+
+      margin:
+        0 auto 13px;
+
+      border-radius: 20px;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      font-size: 31px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #7c5cff,
+          #b36cff
+        );
+
+      color: white;
+
+      box-shadow:
+        0 12px 34px
+        rgba(
+          124,
+          92,
+          255,
+          .30
+        );
+
+    }
+
+
+    .emogigs-account-content {
+
+      text-align: center;
+
+    }
+
+
+    .emogigs-account-badge {
+
+      display: inline-flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      padding:
+        5px 9px;
+
+      margin-bottom: 8px;
+
+      border-radius: 999px;
+
+      background:
+        rgba(
+          124,
