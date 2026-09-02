@@ -6870,3 +6870,1563 @@ function injectAccountModalStyles() {
     );
 
   }
+  /* =========================================================
+     60 — CHAT HISTORY HELPERS
+  ========================================================== */
+
+  function getConversationTitle() {
+
+    const firstUserMessage =
+      conversation.find(
+        item =>
+          item &&
+          item.role === "user"
+      );
+
+
+    if (
+      !firstUserMessage ||
+      !firstUserMessage.content
+    ) {
+
+      return "New Chat";
+
+    }
+
+
+    const title =
+      stripHTML(
+        firstUserMessage.content
+      )
+        .replace(
+          /\s+/g,
+          " "
+        )
+        .trim();
+
+
+    if (
+      title.length <= 45
+    ) {
+
+      return title;
+
+    }
+
+
+    return (
+      title.substring(
+        0,
+        45
+      ).trim() +
+      "…"
+    );
+
+  }
+
+
+  /* =========================================================
+     61 — CHAT HISTORY OBJECT
+  ========================================================== */
+
+  function buildConversationRecord() {
+
+    return {
+
+      id:
+        currentConversationId ||
+        createUniqueId(
+          "chat"
+        ),
+
+      title:
+        getConversationTitle(),
+
+      mode:
+        currentMode,
+
+      messages:
+        conversation.slice(
+          -100
+        ),
+
+      createdAt:
+        conversation[0] &&
+        conversation[0].timestamp
+          ? conversation[0].timestamp
+          : new Date().toISOString(),
+
+      updatedAt:
+        new Date().toISOString()
+
+    };
+
+  }
+
+
+  /* =========================================================
+     62 — CHAT HISTORY STORAGE
+  ========================================================== */
+
+  function getSavedChats() {
+
+    try {
+
+      const saved =
+        localStorage.getItem(
+          "emogigs_chat_history_v2"
+        );
+
+
+      if (!saved) {
+
+        return [];
+
+      }
+
+
+      const parsed =
+        JSON.parse(
+          saved
+        );
+
+
+      return Array.isArray(
+        parsed
+      )
+        ? parsed
+        : [];
+
+    } catch (error) {
+
+      console.warn(
+        "Could not load chat history:",
+        error
+      );
+
+
+      return [];
+
+    }
+
+  }
+
+
+  function saveChatToHistory() {
+
+    if (
+      !conversation.length
+    ) {
+
+      return;
+
+    }
+
+
+    const chats =
+      getSavedChats();
+
+
+    const record =
+      buildConversationRecord();
+
+
+    const existingIndex =
+      chats.findIndex(
+        chat =>
+          chat &&
+          chat.id ===
+            record.id
+      );
+
+
+    if (
+      existingIndex >= 0
+    ) {
+
+      chats[
+        existingIndex
+      ] = record;
+
+    } else {
+
+      chats.unshift(
+        record
+      );
+
+    }
+
+
+    /*
+      Keep local history manageable.
+    */
+
+    const limited =
+      chats.slice(
+        0,
+        50
+      );
+
+
+    writeLocalStorage(
+      "emogigs_chat_history_v2",
+      limited
+    );
+
+  }
+
+
+  /* =========================================================
+     63 — DELETE SAVED CHAT
+  ========================================================== */
+
+  function deleteSavedChat(
+    chatId
+  ) {
+
+    if (!chatId) {
+
+      return false;
+
+    }
+
+
+    const chats =
+      getSavedChats();
+
+
+    const filtered =
+      chats.filter(
+        chat =>
+          chat &&
+          chat.id !==
+            chatId
+      );
+
+
+    writeLocalStorage(
+      "emogigs_chat_history_v2",
+      filtered
+    );
+
+
+    return true;
+
+  }
+
+
+  /* =========================================================
+     64 — LOAD SAVED CHAT
+  ========================================================== */
+
+  function loadSavedChat(
+    chatId
+  ) {
+
+    const chats =
+      getSavedChats();
+
+
+    const chat =
+      chats.find(
+        item =>
+          item &&
+          item.id ===
+            chatId
+      );
+
+
+    if (
+      !chat ||
+      !Array.isArray(
+        chat.messages
+      )
+    ) {
+
+      showToast(
+        "Chat could not be found."
+      );
+
+
+      return false;
+
+    }
+
+
+    conversation =
+      chat.messages
+        .filter(
+          item =>
+            item &&
+            (
+              item.role === "user" ||
+              item.role === "assistant"
+            ) &&
+            typeof item.content ===
+              "string"
+        )
+        .slice(
+          -100
+        );
+
+
+    currentConversationId =
+      chat.id;
+
+
+    if (
+      chat.mode
+    ) {
+
+      currentMode =
+        chat.mode;
+
+
+      updateModeState();
+
+    }
+
+
+    if (chatArea) {
+
+      chatArea.innerHTML =
+        "";
+
+    }
+
+
+    conversation.forEach(
+      item => {
+
+        addMessage(
+          item.role,
+          item.content
+        );
+
+      }
+    );
+
+
+    saveConversation();
+
+
+    showToast(
+      "Chat restored ✓"
+    );
+
+
+    emitLifeOSEvent(
+      "chat_loaded",
+      {
+        chatId
+      }
+    );
+
+
+    return true;
+
+  }
+
+
+  /* =========================================================
+     65 — DELETE CURRENT CHAT
+  ========================================================== */
+
+  function clearCurrentChat() {
+
+    conversation =
+      [];
+
+
+    currentConversationId =
+      createUniqueId(
+        "chat"
+      );
+
+
+    if (chatArea) {
+
+      chatArea.innerHTML =
+        "";
+
+    }
+
+
+    try {
+
+      localStorage.removeItem(
+        STORAGE_KEY
+      );
+
+    } catch (error) {
+
+      console.log(
+        error
+      );
+
+    }
+
+
+    showToast(
+      "Current chat cleared."
+    );
+
+  }
+
+
+  /* =========================================================
+     66 — SEARCH CHAT HISTORY
+  ========================================================== */
+
+  function searchChatHistory(
+    query
+  ) {
+
+    const cleanQuery =
+      String(
+        query || ""
+      )
+        .trim()
+        .toLowerCase();
+
+
+    const chats =
+      getSavedChats();
+
+
+    if (!cleanQuery) {
+
+      return chats;
+
+    }
+
+
+    return chats.filter(
+      chat => {
+
+        const title =
+          String(
+            chat.title || ""
+          )
+            .toLowerCase();
+
+
+        const messages =
+          Array.isArray(
+            chat.messages
+          )
+            ? chat.messages
+                .map(
+                  item =>
+                    String(
+                      item.content ||
+                      ""
+                    )
+                )
+                .join(" ")
+                .toLowerCase()
+            : "";
+
+
+        return (
+          title.includes(
+            cleanQuery
+          ) ||
+          messages.includes(
+            cleanQuery
+          )
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =========================================================
+     67 — GOALS SYSTEM
+  ========================================================== */
+
+  function createGoal(
+    title,
+    description = "",
+    targetDate = null
+  ) {
+
+    const cleanTitle =
+      String(
+        title || ""
+      )
+        .trim();
+
+
+    if (!cleanTitle) {
+
+      return null;
+
+    }
+
+
+    const goal = {
+
+      id:
+        createUniqueId(
+          "goal"
+        ),
+
+      title:
+        cleanTitle,
+
+      description:
+        String(
+          description || ""
+        ).trim(),
+
+      targetDate:
+        targetDate || null,
+
+      completed:
+        false,
+
+      progress:
+        0,
+
+      createdAt:
+        new Date().toISOString(),
+
+      updatedAt:
+        new Date().toISOString()
+
+    };
+
+
+    userGoals.push(
+      goal
+    );
+
+
+    if (
+      userGoals.length >
+      100
+    ) {
+
+      userGoals =
+        userGoals.slice(
+          -100
+        );
+
+    }
+
+
+    writeLocalStorage(
+      GOALS_STORAGE_KEY,
+      userGoals
+    );
+
+
+    emitLifeOSEvent(
+      "goal_created",
+      {
+        goal
+      }
+    );
+
+
+    return goal;
+
+  }
+
+
+  /* =========================================================
+     68 — UPDATE GOAL
+  ========================================================== */
+
+  function updateGoal(
+    goalId,
+    updates = {}
+  ) {
+
+    const goal =
+      userGoals.find(
+        item =>
+          item &&
+          item.id ===
+            goalId
+      );
+
+
+    if (!goal) {
+
+      return false;
+
+    }
+
+
+    Object.assign(
+      goal,
+      updates,
+      {
+        updatedAt:
+          new Date().toISOString()
+      }
+    );
+
+
+    if (
+      goal.completed
+    ) {
+
+      goal.progress =
+        100;
+
+    }
+
+
+    goal.progress =
+      Math.max(
+        0,
+        Math.min(
+          100,
+          Number(
+            goal.progress || 0
+          )
+        )
+      );
+
+
+    writeLocalStorage(
+      GOALS_STORAGE_KEY,
+      userGoals
+    );
+
+
+    emitLifeOSEvent(
+      "goal_updated",
+      {
+        goal
+      }
+    );
+
+
+    return true;
+
+  }
+
+
+  /* =========================================================
+     69 — COMPLETE GOAL
+  ========================================================== */
+
+  function completeGoal(
+    goalId
+  ) {
+
+    return updateGoal(
+      goalId,
+      {
+        completed:
+          true,
+
+        progress:
+          100
+      }
+    );
+
+  }
+
+
+  /* =========================================================
+     70 — DELETE GOAL
+  ========================================================== */
+
+  function deleteGoal(
+    goalId
+  ) {
+
+    const before =
+      userGoals.length;
+
+
+    userGoals =
+      userGoals.filter(
+        goal =>
+          goal &&
+          goal.id !==
+            goalId
+      );
+
+
+    if (
+      userGoals.length ===
+      before
+    ) {
+
+      return false;
+
+    }
+
+
+    writeLocalStorage(
+      GOALS_STORAGE_KEY,
+      userGoals
+    );
+
+
+    emitLifeOSEvent(
+      "goal_deleted",
+      {
+        goalId
+      }
+    );
+
+
+    return true;
+
+  }
+
+
+  /* =========================================================
+     71 — GET GOALS
+  ========================================================== */
+
+  function getGoals(
+    includeCompleted = true
+  ) {
+
+    if (
+      includeCompleted
+    ) {
+
+      return [
+        ...userGoals
+      ];
+
+    }
+
+
+    return userGoals.filter(
+      goal =>
+        goal &&
+        !goal.completed
+    );
+
+  }
+
+
+  /* =========================================================
+     72 — MEMORY DETECTION
+  ========================================================== */
+
+  function detectUserMemory(
+    text
+  ) {
+
+    if (
+      !text ||
+      typeof text !== "string"
+    ) {
+
+      return;
+
+    }
+
+
+    const clean =
+      text.trim();
+
+
+    if (
+      clean.length <
+      5
+    ) {
+
+      return;
+
+    }
+
+
+    /*
+      We only store simple,
+      user-provided preference/profile
+      signals locally.
+
+      This is a foundation, not a claim
+      that the AI understands everything
+      about the user.
+    */
+
+
+    const memoryPatterns = [
+
+      {
+        regex:
+          /\bmy name is\s+([a-zA-Z][a-zA-Z\s'-]{1,30})/i,
+
+        category:
+          "profile",
+
+        build:
+          match =>
+            `User's name is ${match[1].trim()}.`
+
+      },
+
+
+      {
+        regex:
+          /আমার নাম\s+([^\n।,!]{2,30})/i,
+
+        category:
+          "profile",
+
+        build:
+          match =>
+            `ব্যবহারকারীর নাম ${match[1].trim()}।`
+
+      },
+
+
+      {
+        regex:
+          /\bi (?:like|love|prefer)\s+(.{2,80})$/i,
+
+        category:
+          "preference",
+
+        build:
+          match =>
+            `User likes or prefers ${match[1].trim()}.`
+
+      },
+
+
+      {
+        regex:
+          /আমি\s+(.{2,80})\s+(?:পছন্দ করি|ভালোবাসি)/i,
+
+        category:
+          "preference",
+
+        build:
+          match =>
+            `ব্যবহারকারী ${match[1].trim()} পছন্দ করেন।`
+
+      }
+
+    ];
+
+
+    for (
+      const pattern of
+      memoryPatterns
+    ) {
+
+      const match =
+        clean.match(
+          pattern.regex
+        );
+
+
+      if (
+        match &&
+        typeof pattern.build ===
+          "function"
+      ) {
+
+        rememberLocally(
+          pattern.build(
+            match
+          ),
+          pattern.category
+        );
+
+
+        break;
+
+      }
+
+    }
+
+  }
+
+
+  /* =========================================================
+     73 — GET MEMORY CONTEXT
+  ========================================================== */
+
+  function buildMemoryContext() {
+
+    const memories =
+      getLocalMemory()
+        .slice(
+          -20
+        );
+
+
+    if (
+      !memories.length
+    ) {
+
+      return "";
+
+    }
+
+
+    return memories
+      .map(
+        item =>
+          `- ${item.text}`
+      )
+      .join(
+        "\n"
+      );
+
+  }
+
+
+  /* =========================================================
+     74 — SETTINGS
+  ========================================================== */
+
+  function updateSetting(
+    key,
+    value
+  ) {
+
+    if (
+      !Object.prototype.hasOwnProperty.call(
+        settings,
+        key
+      )
+    ) {
+
+      return false;
+
+    }
+
+
+    settings[key] =
+      value;
+
+
+    writeLocalStorage(
+      SETTINGS_STORAGE_KEY,
+      settings
+    );
+
+
+    emitLifeOSEvent(
+      "setting_changed",
+      {
+        key,
+        value
+      }
+    );
+
+
+    return true;
+
+  }
+
+
+  function getSetting(
+    key
+  ) {
+
+    return settings[key];
+
+  }
+
+
+  /* =========================================================
+     75 — FOCUS MODE
+  ========================================================== */
+
+  function toggleFocusMode(
+    force = null
+  ) {
+
+    if (
+      typeof force ===
+      "boolean"
+    ) {
+
+      focusMode =
+        force;
+
+    } else {
+
+      focusMode =
+        !focusMode;
+
+    }
+
+
+    document.body.classList.toggle(
+      "emogigs-focus-mode",
+      focusMode
+    );
+
+
+    const focusButtons =
+      document.querySelectorAll(
+        "[data-focus-toggle]"
+      );
+
+
+    focusButtons.forEach(
+      button => {
+
+        button.classList.toggle(
+          "active",
+          focusMode
+        );
+
+      }
+    );
+
+
+    showToast(
+      focusMode
+        ? "Focus mode enabled 🎯"
+        : "Focus mode disabled"
+    );
+
+
+    emitLifeOSEvent(
+      "focus_mode_changed",
+      {
+        enabled:
+          focusMode
+      }
+    );
+
+
+    return focusMode;
+
+  }
+
+
+  /* =========================================================
+     76 — MOBILE TOUCH FEEDBACK
+  ========================================================== */
+
+  function setupTouchFeedback() {
+
+    document.addEventListener(
+      "touchstart",
+      event => {
+
+        const target =
+          event.target.closest(
+            "button, .quick-card, .mode-chip, a"
+          );
+
+
+        if (!target) {
+
+          return;
+
+        }
+
+
+        target.classList.add(
+          "emogigs-touch-active"
+        );
+
+
+        setTimeout(
+          () => {
+
+            target.classList.remove(
+              "emogigs-touch-active"
+            );
+
+          },
+          160
+        );
+
+      },
+      {
+        passive:
+          true
+      }
+    );
+
+  }
+
+
+  /* =========================================================
+     77 — PERSONALIZED HERO
+  ========================================================== */
+
+  function updatePersonalizedHero() {
+
+    const account =
+      getEmogigsAccount();
+
+
+    if (!account) {
+
+      return;
+
+    }
+
+
+    const possibleGreeting =
+      document.querySelector(
+        "[data-emogigs-greeting]"
+      );
+
+
+    if (
+      possibleGreeting
+    ) {
+
+      possibleGreeting.textContent =
+        `Hello, ${account.name}`;
+
+    }
+
+
+    const possibleName =
+      document.querySelector(
+        "[data-emogigs-user-name]"
+      );
+
+
+    if (
+      possibleName
+    ) {
+
+      possibleName.textContent =
+        account.name;
+
+    }
+
+  }
+
+
+  /* =========================================================
+     78 — CHAT EXPORT
+  ========================================================== */
+
+  function exportConversation() {
+
+    if (
+      !conversation.length
+    ) {
+
+      showToast(
+        "There is no conversation to export."
+      );
+
+
+      return;
+
+    }
+
+
+    const lines = [];
+
+
+    lines.push(
+      "EMOGIGS AI"
+    );
+
+
+    lines.push(
+      `Mode: ${currentMode}`
+    );
+
+
+    lines.push(
+      `Exported: ${new Date().toLocaleString()}`
+    );
+
+
+    lines.push(
+      ""
+    );
+
+
+    conversation.forEach(
+      item => {
+
+        const role =
+          item.role === "user"
+            ? "You"
+            : "Emogigs AI";
+
+
+        lines.push(
+          `${role}:`
+        );
+
+
+        lines.push(
+          stripHTML(
+            item.content
+          )
+        );
+
+
+        lines.push(
+          ""
+        );
+
+      }
+    );
+
+
+    const content =
+      lines.join(
+        "\n"
+      );
+
+
+    const blob =
+      new Blob(
+        [content],
+        {
+          type:
+            "text/plain;charset=utf-8"
+        }
+      );
+
+
+    const url =
+      URL.createObjectURL(
+        blob
+      );
+
+
+    const link =
+      document.createElement(
+        "a"
+      );
+
+
+    link.href =
+      url;
+
+
+    link.download =
+      `emogigs-chat-${new Date()
+        .toISOString()
+        .slice(
+          0,
+          10
+        )}.txt`;
+
+
+    document.body.appendChild(
+      link
+    );
+
+
+    link.click();
+
+
+    link.remove();
+
+
+    setTimeout(
+      () => {
+
+        URL.revokeObjectURL(
+          url
+        );
+
+      },
+      1000
+    );
+
+
+    showToast(
+      "Conversation exported ✓"
+    );
+
+
+    emitLifeOSEvent(
+      "conversation_exported",
+      {}
+    );
+
+  }
+
+
+  /* =========================================================
+     79 — EXPORT BUTTONS
+  ========================================================== */
+
+  function setupExportButtons() {
+
+    const buttons =
+      document.querySelectorAll(
+        [
+          "#exportChatBtn",
+          "[data-export-chat]",
+          "[data-action='export-chat']"
+        ].join(",")
+      );
+
+
+    buttons.forEach(
+      button => {
+
+        if (
+          button.dataset.emogigsExportBound ===
+          "true"
+        ) {
+
+          return;
+
+        }
+
+
+        button.dataset.emogigsExportBound =
+          "true";
+
+
+        button.addEventListener(
+          "click",
+          event => {
+
+            event.preventDefault();
+
+            exportConversation();
+
+          }
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =========================================================
+     80 — SETTINGS BUTTONS
+  ========================================================== */
+
+  function setupFocusButtons() {
+
+    const buttons =
+      document.querySelectorAll(
+        "[data-focus-toggle]"
+      );
+
+
+    buttons.forEach(
+      button => {
+
+        if (
+          button.dataset.emogigsFocusBound ===
+          "true"
+        ) {
+
+          return;
+
+        }
+
+
+        button.dataset.emogigsFocusBound =
+          "true";
+
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            toggleFocusMode();
+
+          }
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =========================================================
+     81 — LIFE OS INITIALIZATION
+  ========================================================== */
+
+  function initializeLifeOS() {
+
+    setupTouchFeedback();
+
+    setupExportButtons();
+
+    setupFocusButtons();
+
+    updatePersonalizedHero();
+
+    updateAccountButton();
+
+    updateActivityUI();
+
+
+    /*
+      Save current conversation to
+      the searchable local history.
+    */
+
+    if (
+      conversation.length
+    ) {
+
+      saveChatToHistory();
+
+    }
+
+
+    console.log(
+      "🧠 Emogigs AI Life OS systems ready."
+    );
+
+  }
+
+
+  /* =========================================================
+     82 — INITIALIZATION HOOK
+  ========================================================== */
+
+  if (
+    document.readyState ===
+    "loading"
+  ) {
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      initializeLifeOS,
+      {
+        once:
+          true
+      }
+    );
+
+  } else {
+
+    initializeLifeOS();
+
+  }
+
+
+  /* =========================================================
+     83 — SAVE HISTORY WHEN PAGE CLOSES
+  ========================================================== */
+
+  window.addEventListener(
+    "beforeunload",
+    () => {
+
+      if (
+        conversation.length &&
+        settings.autoSave
+      ) {
+
+        saveConversation();
+
+        saveChatToHistory();
+
+      }
+
+
+      releaseMicrophone();
+
+    }
+  );
+
+
+  /* =========================================================
+     84 — VISIBILITY CHANGE
+  ========================================================== */
+
+  document.addEventListener(
+    "visibilitychange",
+    () => {
+
+      if (
+        document.hidden
+      ) {
+
+        if (
+          conversation.length &&
+          settings.autoSave
+        ) {
+
+          saveConversation();
+
+          saveChatToHistory();
+
+        }
+
+      }
+
+    }
+  );
+
+
+  /* =========================================================
+     85 — EXPOSE SAFE PUBLIC API
+  ========================================================== */
+
+  window.EmogigsAI = {
+
+    sendMessage,
+
+    sendMessageAdvanced,
+
+    startNewChat,
+
+    clearCurrentChat,
+
+    regenerateLastResponse,
+
+    exportConversation,
+
+    speakText,
+
+    stopSpeaking,
+
+    toggleVoiceInput,
+
+    createGoal,
+
+    updateGoal,
+
+    completeGoal,
+
+    deleteGoal,
+
+    getGoals,
+
+    getLocalMemory,
+
+    rememberLocally,
+
+    toggleFocusMode,
+
+    searchChatHistory,
+
+    loadSavedChat,
+
+    deleteSavedChat,
+
+    getEmogigsAccount,
+
+    openAccountModal,
+
+    closeAccountModal
+
+  };
+
+
+  console.log(
+    "🌟 EmogigsAI public API ready."
+  );
+
+})();
