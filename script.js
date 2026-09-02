@@ -3899,3 +3899,2974 @@ function injectAccountModalStyles() {
       );
 
   }
+  /* =========================================================
+     37 — SPEAKING / TEXT-TO-SPEECH
+  ========================================================== */
+
+  function speakText(text, button = null) {
+
+    if (
+      !text ||
+      typeof window === "undefined" ||
+      !("speechSynthesis" in window)
+    ) {
+
+      showToast(
+        "Read aloud is not supported on this browser."
+      );
+
+      return;
+
+    }
+
+
+    /*
+      If something is already speaking,
+      stop it first.
+    */
+
+    if (
+      window.speechSynthesis.speaking
+    ) {
+
+      window.speechSynthesis.cancel();
+
+
+      if (
+        currentSpeakingButton
+      ) {
+
+        currentSpeakingButton.classList.remove(
+          "speaking"
+        );
+
+        currentSpeakingButton =
+          null;
+
+      }
+
+
+      /*
+        If the same button was pressed
+        while speaking, treat it as stop.
+      */
+
+      if (
+        button &&
+        button ===
+          currentSpeakingButton
+      ) {
+
+        return;
+
+      }
+
+    }
+
+
+    const cleanText =
+      stripHTML(
+        String(text)
+      ).trim();
+
+
+    if (!cleanText) {
+
+      return;
+
+    }
+
+
+    const utterance =
+      new SpeechSynthesisUtterance(
+        cleanText
+      );
+
+
+    /*
+      Prefer Bangla when the text contains
+      Bengali characters.
+    */
+
+    const hasBangla =
+      /[\u0980-\u09FF]/.test(
+        cleanText
+      );
+
+
+    utterance.lang =
+      hasBangla
+        ? "bn-BD"
+        : "en-US";
+
+
+    utterance.rate =
+      0.95;
+
+
+    utterance.pitch =
+      1;
+
+
+    utterance.volume =
+      1;
+
+
+    const voices =
+      window.speechSynthesis.getVoices();
+
+
+    if (voices.length) {
+
+      const preferred =
+        voices.find(
+          voice =>
+            hasBangla &&
+            (
+              voice.lang
+                .toLowerCase()
+                .startsWith("bn")
+            )
+        ) ||
+        voices.find(
+          voice =>
+            !hasBangla &&
+            voice.lang
+              .toLowerCase()
+              .startsWith("en")
+        );
+
+
+      if (preferred) {
+
+        utterance.voice =
+          preferred;
+
+      }
+
+    }
+
+
+    if (button) {
+
+      button.classList.add(
+        "speaking"
+      );
+
+
+      currentSpeakingButton =
+        button;
+
+    }
+
+
+    utterance.onend =
+      () => {
+
+        if (
+          button
+        ) {
+
+          button.classList.remove(
+            "speaking"
+          );
+
+        }
+
+
+        if (
+          currentSpeakingButton ===
+          button
+        ) {
+
+          currentSpeakingButton =
+            null;
+
+        }
+
+      };
+
+
+    utterance.onerror =
+      event => {
+
+        console.warn(
+          "Speech synthesis error:",
+          event
+        );
+
+
+        if (
+          button
+        ) {
+
+          button.classList.remove(
+            "speaking"
+          );
+
+        }
+
+
+        if (
+          currentSpeakingButton ===
+          button
+        ) {
+
+          currentSpeakingButton =
+            null;
+
+        }
+
+      };
+
+
+    window.speechSynthesis.speak(
+      utterance
+    );
+
+  }
+
+
+  /* =========================================================
+     38 — STOP SPEAKING
+  ========================================================== */
+
+  function stopSpeaking() {
+
+    if (
+      "speechSynthesis" in window
+    ) {
+
+      window.speechSynthesis.cancel();
+
+    }
+
+
+    if (
+      currentSpeakingButton
+    ) {
+
+      currentSpeakingButton.classList.remove(
+        "speaking"
+      );
+
+
+      currentSpeakingButton =
+        null;
+
+    }
+
+  }
+
+
+  /* =========================================================
+     39 — STRIP HTML
+  ========================================================== */
+
+  function stripHTML(
+    html
+  ) {
+
+    const temporary =
+      document.createElement(
+        "div"
+      );
+
+
+    temporary.innerHTML =
+      html;
+
+
+    return (
+      temporary.textContent ||
+      temporary.innerText ||
+      ""
+    );
+
+  }
+
+
+  /* =========================================================
+     40 — MARKDOWN → SAFE HTML
+  ========================================================== */
+
+  function renderMarkdown(
+    text
+  ) {
+
+    if (
+      text === null ||
+      text === undefined
+    ) {
+
+      return "";
+
+    }
+
+
+    let source =
+      String(text);
+
+
+    /*
+      Protect HTML by escaping first.
+    */
+
+    source =
+      escapeHTML(
+        source
+      );
+
+
+    /*
+      Code blocks.
+    */
+
+    const codeBlocks = [];
+
+
+    source =
+      source.replace(
+        /```([\s\S]*?)```/g,
+        (
+          match,
+          code
+        ) => {
+
+          const index =
+            codeBlocks.length;
+
+
+          codeBlocks.push(
+            code
+              .replace(
+                /^\n+/,
+                ""
+              )
+              .replace(
+                /\n+$/,
+                ""
+              )
+          );
+
+
+          return `___EMOGIGS_CODE_${index}___`;
+
+        }
+      );
+
+
+    /*
+      Inline code.
+    */
+
+    source =
+      source.replace(
+        /`([^`]+)`/g,
+        "<code>$1</code>"
+      );
+
+
+    /*
+      Bold.
+    */
+
+    source =
+      source.replace(
+        /\*\*([^*]+)\*\*/g,
+        "<strong>$1</strong>"
+      );
+
+
+    /*
+      Italic.
+    */
+
+    source =
+      source.replace(
+        /(^|[^*])\*([^*]+)\*/g,
+        "$1<em>$2</em>"
+      );
+
+
+    /*
+      Markdown links.
+
+      Only safe http/https links
+      are allowed.
+    */
+
+    source =
+      source.replace(
+        /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+        (
+          match,
+          label,
+          url
+        ) => {
+
+          return `
+            <a
+              href="${escapeAttribute(url)}"
+              target="_blank"
+              rel="noopener noreferrer">
+              ${label}
+            </a>
+          `;
+
+        }
+      );
+
+
+    /*
+      Headings.
+    */
+
+    source =
+      source.replace(
+        /^### (.+)$/gm,
+        "<h4>$1</h4>"
+      );
+
+
+    source =
+      source.replace(
+        /^## (.+)$/gm,
+        "<h3>$1</h3>"
+      );
+
+
+    source =
+      source.replace(
+        /^# (.+)$/gm,
+        "<h2>$1</h2>"
+      );
+
+
+    /*
+      Unordered lists.
+    */
+
+    source =
+      source.replace(
+        /^(?:[-*]) (.+)$/gm,
+        "<li>$1</li>"
+      );
+
+
+    source =
+      source.replace(
+        /(<li>[\s\S]*?<\/li>)(?=\s*(?:<li>|$))/g,
+        "$1"
+      );
+
+
+    /*
+      Numbered lists.
+    */
+
+    source =
+      source.replace(
+        /^\d+\.\s+(.+)$/gm,
+        "<li>$1</li>"
+      );
+
+
+    /*
+      Line breaks.
+
+      Don't add <br> directly after block
+      elements.
+    */
+
+    source =
+      source.replace(
+        /\n{2,}/g,
+        "</p><p>"
+      );
+
+
+    source =
+      source.replace(
+        /\n/g,
+        "<br>"
+      );
+
+
+    /*
+      Restore code blocks.
+    */
+
+    codeBlocks.forEach(
+      (
+        code,
+        index
+      ) => {
+
+        const safeCode =
+          escapeHTML(
+            code
+          );
+
+
+        const html =
+          `
+            <div class="emogigs-code-wrap">
+
+              <button
+                type="button"
+                class="emogigs-code-copy"
+                data-code-copy="${index}">
+
+                Copy
+
+              </button>
+
+              <pre><code>${safeCode}</code></pre>
+
+            </div>
+          `;
+
+
+        source =
+          source.replace(
+            `___EMOGIGS_CODE_${index}___`,
+            html
+          );
+
+      }
+    );
+
+
+    /*
+      Normalize paragraphs.
+    */
+
+    source =
+      `<p>${source}</p>`;
+
+
+    source =
+      source.replace(
+        /<p>\s*<\/p>/g,
+        ""
+      );
+
+
+    source =
+      source.replace(
+        /<p>\s*(<h[234]>)/g,
+        "$1"
+      );
+
+
+    source =
+      source.replace(
+        /(<\/h[234]>)\s*<\/p>/g,
+        "$1"
+      );
+
+
+    return source;
+
+  }
+
+
+  /* =========================================================
+     41 — ATTRIBUTE ESCAPE
+  ========================================================== */
+
+  function escapeAttribute(
+    value
+  ) {
+
+    return String(value)
+
+      .replace(
+        /&/g,
+        "&amp;"
+      )
+
+      .replace(
+        /"/g,
+        "&quot;"
+      )
+
+      .replace(
+        /</g,
+        "&lt;"
+      )
+
+      .replace(
+        />/g,
+        "&gt;"
+      );
+
+  }
+
+
+  /* =========================================================
+     42 — AI RESPONSE NORMALIZER
+  ========================================================== */
+
+  function normalizeAIResponse(
+    data
+  ) {
+
+    if (
+      data === null ||
+      data === undefined
+    ) {
+
+      return "";
+
+    }
+
+
+    /*
+      Plain string response.
+    */
+
+    if (
+      typeof data ===
+      "string"
+    ) {
+
+      return data.trim();
+
+    }
+
+
+    /*
+      Common backend response formats.
+    */
+
+    const candidates = [
+
+      data.reply,
+
+      data.response,
+
+      data.message,
+
+      data.content,
+
+      data.text,
+
+      data.output_text
+
+    ];
+
+
+    for (
+      const candidate of
+      candidates
+    ) {
+
+      if (
+        typeof candidate ===
+        "string" &&
+        candidate.trim()
+      ) {
+
+        return candidate.trim();
+
+      }
+
+    }
+
+
+    /*
+      OpenAI/Groq-style output.
+    */
+
+    if (
+      Array.isArray(
+        data.output
+      )
+    ) {
+
+      const parts = [];
+
+
+      data.output.forEach(
+        item => {
+
+          if (
+            !item
+          ) {
+
+            return;
+
+          }
+
+
+          if (
+            typeof item.text ===
+            "string"
+          ) {
+
+            parts.push(
+              item.text
+            );
+
+          }
+
+
+          if (
+            Array.isArray(
+              item.content
+            )
+          ) {
+
+            item.content.forEach(
+              content => {
+
+                if (
+                  content &&
+                  typeof content.text ===
+                    "string"
+                ) {
+
+                  parts.push(
+                    content.text
+                  );
+
+                }
+
+              }
+            );
+
+          }
+
+        }
+      );
+
+
+      if (
+        parts.length
+      ) {
+
+        return parts.join(
+          "\n"
+        ).trim();
+
+      }
+
+    }
+
+
+    /*
+      Chat-completions style response.
+    */
+
+    if (
+      data.choices &&
+      Array.isArray(
+        data.choices
+      )
+    ) {
+
+      const choice =
+        data.choices[0];
+
+
+      if (
+        choice &&
+        choice.message
+      ) {
+
+        if (
+          typeof choice.message.content ===
+          "string"
+        ) {
+
+          return choice.message.content.trim();
+
+        }
+
+
+        if (
+          Array.isArray(
+            choice.message.content
+          )
+        ) {
+
+          return choice.message.content
+            .map(
+              part =>
+                part &&
+                typeof part.text ===
+                  "string"
+                  ? part.text
+                  : ""
+            )
+            .join("")
+            .trim();
+
+        }
+
+      }
+
+    }
+
+
+    /*
+      Final fallback.
+
+      Avoid showing [object Object].
+    */
+
+    return "";
+
+  }
+
+
+  /* =========================================================
+     43 — FRIENDLY AI ERROR
+  ========================================================== */
+
+  function getFriendlyAIError(
+    error,
+    status = null
+  ) {
+
+    if (
+      !isOnline
+    ) {
+
+      return (
+        "You're offline right now. " +
+        "Please reconnect to the internet and try again."
+      );
+
+    }
+
+
+    if (
+      status === 401 ||
+      status === 403
+    ) {
+
+      return (
+        "The AI service authorization needs attention. " +
+        "Please check the server configuration."
+      );
+
+    }
+
+
+    if (
+      status === 429
+    ) {
+
+      return (
+        "Emogigs AI is receiving too many requests right now. " +
+        "Please wait a moment and try again."
+      );
+
+    }
+
+
+    if (
+      status >= 500
+    ) {
+
+      return (
+        "The Emogigs AI server is temporarily unavailable. " +
+        "Please try again in a moment."
+      );
+
+    }
+
+
+    if (
+      error &&
+      error.name ===
+        "AbortError"
+    ) {
+
+      return (
+        "The request took too long. " +
+        "Please try again."
+      );
+
+    }
+
+
+    return (
+      "Sorry, I couldn't connect to Emogigs AI right now. " +
+      "Please try again."
+    );
+
+  }
+
+
+  /* =========================================================
+     44 — REQUEST WITH RETRY
+  ========================================================== */
+
+  async function requestWithRetry(
+    url,
+    options = {},
+    maxRetries = 2
+  ) {
+
+    let lastError =
+      null;
+
+
+    for (
+      let attempt = 0;
+      attempt <= maxRetries;
+      attempt++
+    ) {
+
+      try {
+
+        const controller =
+          new AbortController();
+
+
+        const timeout =
+          setTimeout(
+            () => {
+
+              controller.abort();
+
+            },
+            60000
+          );
+
+
+        const requestOptions =
+          {
+            ...options,
+
+            signal:
+              controller.signal
+
+          };
+
+
+        const response =
+          await fetch(
+            url,
+            requestOptions
+          );
+
+
+        clearTimeout(
+          timeout
+        );
+
+
+        /*
+          Don't retry client-side errors.
+        */
+
+        if (
+          response.ok ||
+          (
+            response.status >= 400 &&
+            response.status < 500 &&
+            response.status !== 429
+          )
+        ) {
+
+          return response;
+
+        }
+
+
+        /*
+          Retry server / rate-limit errors.
+        */
+
+        lastError =
+          new Error(
+            `HTTP ${response.status}`
+          );
+
+
+        if (
+          attempt <
+          maxRetries
+        ) {
+
+          const delay =
+            Math.min(
+              1000 *
+                Math.pow(
+                  2,
+                  attempt
+                ),
+              5000
+            );
+
+
+          await wait(
+            delay
+          );
+
+        }
+
+      } catch (error) {
+
+        lastError =
+          error;
+
+
+        if (
+          attempt <
+          maxRetries
+        ) {
+
+          await wait(
+            Math.min(
+              1000 *
+                Math.pow(
+                  2,
+                  attempt
+                ),
+              5000
+            )
+          );
+
+        }
+
+      }
+
+    }
+
+
+    throw (
+      lastError ||
+      new Error(
+        "REQUEST_FAILED"
+      )
+    );
+
+  }
+
+
+  /* =========================================================
+     45 — WAIT
+  ========================================================== */
+
+  function wait(
+    milliseconds
+  ) {
+
+    return new Promise(
+      resolve => {
+
+        setTimeout(
+          resolve,
+          milliseconds
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =========================================================
+     46 — SEND MESSAGE
+  ========================================================== */
+
+  async function sendMessage() {
+
+    if (
+      isSendingMessage
+    ) {
+
+      return;
+
+    }
+
+
+    if (!messageInput) {
+
+      return;
+
+    }
+
+
+    const text =
+      messageInput.value.trim();
+
+
+    if (!text) {
+
+      return;
+
+    }
+
+
+    if (
+      !isOnline
+    ) {
+
+      showToast(
+        "You are offline."
+      );
+
+
+      return;
+
+    }
+
+
+    isSendingMessage =
+      true;
+
+
+    /*
+      Clear composer.
+    */
+
+    messageInput.value =
+      "";
+
+
+    messageInput.style.height =
+      "auto";
+
+
+    /*
+      Register user activity.
+    */
+
+    registerActivity(
+      "message"
+    );
+
+
+    /*
+      Show user's message.
+    */
+
+    addMessage(
+      "user",
+      text
+    );
+
+
+    /*
+      Store conversation item.
+    */
+
+    conversation.push({
+
+      role:
+        "user",
+
+      content:
+        text,
+
+      timestamp:
+        new Date().toISOString()
+
+    });
+
+
+    saveConversation();
+
+
+    /*
+      Typing indicator.
+    */
+
+    const typingId =
+      addTypingIndicator();
+
+
+    try {
+
+      /*
+        Build conversation history.
+
+        Keep the payload reasonably small
+        for mobile performance.
+      */
+
+      const history =
+        conversation
+          .slice(-30)
+          .map(
+            item => ({
+              role:
+                item.role,
+              content:
+                item.content
+            })
+          );
+
+
+      /*
+        Local memory context.
+      */
+
+      const memory =
+        getLocalMemory()
+          .slice(-20);
+
+
+      const account =
+        getEmogigsAccount();
+
+
+      const userContext = {
+
+        account:
+          account
+            ? {
+                name:
+                  account.name,
+
+                username:
+                  account.username
+              }
+            : null,
+
+        mode:
+          currentMode,
+
+        memory,
+
+        goals:
+          userGoals.slice(
+            -10
+          )
+
+      };
+
+
+      const payload = {
+
+        message:
+          text,
+
+        prompt:
+          text,
+
+        mode:
+          currentMode,
+
+        history,
+
+        conversation:
+          history,
+
+        userContext
+
+      };
+
+
+      console.log(
+        "🤖 Emogigs AI request:",
+        {
+          mode:
+            currentMode,
+          historyLength:
+            history.length
+        }
+      );
+
+
+      const response =
+        await requestWithRetry(
+          API_URL,
+          {
+
+            method:
+              "POST",
+
+            headers: {
+
+              "Content-Type":
+                "application/json"
+
+            },
+
+            body:
+              JSON.stringify(
+                payload
+              )
+
+          }
+        );
+
+
+      /*
+        Remove typing indicator
+        before processing response.
+      */
+
+      removeTypingIndicator(
+        typingId
+      );
+
+
+      let data =
+        null;
+
+
+      try {
+
+        data =
+          await response.json();
+
+      } catch (jsonError) {
+
+        console.warn(
+          "AI response JSON parse error:",
+          jsonError
+        );
+
+      }
+
+
+      if (
+        !response.ok
+      ) {
+
+        const serverMessage =
+          data &&
+          (
+            data.error ||
+            data.message
+          );
+
+
+        throw Object.assign(
+          new Error(
+            serverMessage ||
+            `HTTP ${response.status}`
+          ),
+          {
+            status:
+              response.status
+          }
+        );
+
+      }
+
+
+      const aiText =
+        normalizeAIResponse(
+          data
+        );
+
+
+      if (!aiText) {
+
+        throw new Error(
+          "EMPTY_AI_RESPONSE"
+        );
+
+      }
+
+
+      /*
+        Display assistant reply.
+      */
+
+      addMessage(
+        "assistant",
+        aiText
+      );
+
+
+      conversation.push({
+
+        role:
+          "assistant",
+
+        content:
+          aiText,
+
+        timestamp:
+          new Date().toISOString()
+
+      });
+
+
+      saveConversation();
+
+
+      registerActivity(
+        "ai"
+      );
+
+
+      /*
+        Basic memory detection.
+      */
+
+      detectUserMemory(
+        text
+      );
+
+
+      /*
+        If this is the first user message,
+        count the chat.
+      */
+
+      if (
+        conversation.filter(
+          item =>
+            item.role ===
+            "user"
+        ).length === 1
+      ) {
+
+        activityData.totalChats =
+          Number(
+            activityData.totalChats ||
+            0
+          ) + 1;
+
+
+        saveActivityData();
+
+      }
+
+
+      emitLifeOSEvent(
+        "ai_reply",
+        {
+
+          mode:
+            currentMode,
+
+          text:
+            aiText
+
+        }
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        "❌ Emogigs AI request failed:",
+        error
+      );
+
+
+      removeTypingIndicator(
+        typingId
+      );
+
+
+      const status =
+        error &&
+        error.status
+          ? error.status
+          : null;
+
+
+      const friendly =
+        getFriendlyAIError(
+          error,
+          status
+        );
+
+
+      addMessage(
+        "assistant",
+        friendly,
+        {
+          isError:
+            true
+        }
+      );
+
+
+      /*
+        Restore user's message in the
+        composer only when useful.
+
+        This makes mobile retry easier.
+      */
+
+      if (
+        messageInput &&
+        !messageInput.value
+      ) {
+
+        messageInput.value =
+          text;
+
+
+        messageInput.dispatchEvent(
+          new Event("input")
+        );
+
+      }
+
+    } finally {
+
+      isSendingMessage =
+        false;
+
+    }
+
+  }
+
+
+  /* =========================================================
+     47 — ADVANCED SEND ALIAS
+  ========================================================== */
+
+  async function sendMessageAdvanced() {
+
+    return sendMessage();
+
+  }
+
+
+  /* =========================================================
+     48 — ADD MESSAGE
+  ========================================================== */
+
+  function addMessage(
+    role,
+    text,
+    options = {}
+  ) {
+
+    if (!chatArea) {
+
+      console.warn(
+        "Chat area not found."
+      );
+
+
+      return null;
+
+    }
+
+
+    const message =
+      document.createElement(
+        "div"
+      );
+
+
+    message.className =
+      `message ${role}`;
+
+
+    if (
+      options.isError
+    ) {
+
+      message.classList.add(
+        "error-message"
+      );
+
+    }
+
+
+    const messageInner =
+      document.createElement(
+        "div"
+      );
+
+
+    messageInner.className =
+      "message-inner";
+
+
+    const avatar =
+      document.createElement(
+        "div"
+      );
+
+
+    avatar.className =
+      "message-avatar";
+
+
+    avatar.textContent =
+      role === "user"
+        ? "You"
+        : "✦";
+
+
+    const bubble =
+      document.createElement(
+        "div"
+      );
+
+
+    bubble.className =
+      "message-bubble";
+
+
+    /*
+      User messages are kept plain.
+
+      Assistant messages support
+      lightweight Markdown.
+    */
+
+    if (
+      role === "assistant"
+    ) {
+
+      bubble.innerHTML =
+        renderMarkdown(
+          text
+        );
+
+    } else {
+
+      bubble.textContent =
+        text;
+
+    }
+
+
+    messageInner.appendChild(
+      avatar
+    );
+
+
+    messageInner.appendChild(
+      bubble
+    );
+
+
+    message.appendChild(
+      messageInner
+    );
+
+
+    /*
+      Assistant actions.
+    */
+
+    if (
+      role === "assistant"
+    ) {
+
+      const actions =
+        createMessageActions(
+          text
+        );
+
+
+      message.appendChild(
+        actions
+      );
+
+    }
+
+
+    chatArea.appendChild(
+      message
+    );
+
+
+    /*
+      Code copy buttons.
+    */
+
+    bindCodeCopyButtons(
+      message
+    );
+
+
+    /*
+      Smooth scroll.
+    */
+
+    requestAnimationFrame(
+      () => {
+
+        chatArea.scrollTo(
+          {
+            top:
+              chatArea.scrollHeight,
+
+            behavior:
+              "smooth"
+          }
+        );
+
+      }
+    );
+
+
+    return message;
+
+  }
+
+
+  /* =========================================================
+     49 — MESSAGE ACTIONS
+  ========================================================== */
+
+  function createMessageActions(
+    text
+  ) {
+
+    const actions =
+      document.createElement(
+        "div"
+      );
+
+
+    actions.className =
+      "message-actions";
+
+
+    /*
+      Copy
+    */
+
+    const copyBtn =
+      createActionButton(
+        "Copy",
+        "📋"
+      );
+
+
+    copyBtn.addEventListener(
+      "click",
+      async () => {
+
+        const success =
+          await copyText(
+            text
+          );
+
+
+        if (success) {
+
+          showToast(
+            "Copied to clipboard ✓"
+          );
+
+        } else {
+
+          showToast(
+            "Could not copy text."
+          );
+
+        }
+
+      }
+    );
+
+
+    /*
+      Read aloud
+    */
+
+    const speakBtn =
+      createActionButton(
+        "Read aloud",
+        "🔊"
+      );
+
+
+    speakBtn.addEventListener(
+      "click",
+      () => {
+
+        speakText(
+          text,
+          speakBtn
+        );
+
+      }
+    );
+
+
+    /*
+      Regenerate
+    */
+
+    const regenerateBtn =
+      createActionButton(
+        "Regenerate",
+        "↻"
+      );
+
+
+    regenerateBtn.addEventListener(
+      "click",
+      () => {
+
+        regenerateLastResponse();
+
+      }
+    );
+
+
+    /*
+      Favorite
+    */
+
+    const favoriteBtn =
+      createActionButton(
+        "Favorite",
+        "☆"
+      );
+
+
+    favoriteBtn.addEventListener(
+      "click",
+      () => {
+
+        toggleFavorite(
+          text,
+          favoriteBtn
+        );
+
+      }
+    );
+
+
+    actions.appendChild(
+      copyBtn
+    );
+
+
+    actions.appendChild(
+      speakBtn
+    );
+
+
+    actions.appendChild(
+      regenerateBtn
+    );
+
+
+    actions.appendChild(
+      favoriteBtn
+    );
+
+
+    return actions;
+
+  }
+
+
+  /* =========================================================
+     50 — CREATE ACTION BUTTON
+  ========================================================== */
+
+  function createActionButton(
+    label,
+    icon
+  ) {
+
+    const button =
+      document.createElement(
+        "button"
+      );
+
+
+    button.type =
+      "button";
+
+
+    button.className =
+      "message-action-btn";
+
+
+    button.setAttribute(
+      "aria-label",
+      label
+    );
+
+
+    button.setAttribute(
+      "title",
+      label
+    );
+
+
+    button.innerHTML =
+      `<span>${icon}</span>`;
+
+
+    return button;
+
+  }
+
+
+  /* =========================================================
+     51 — COPY TEXT
+  ========================================================== */
+
+  async function copyText(
+    text
+  ) {
+
+    const cleanText =
+      stripHTML(
+        String(text)
+      );
+
+
+    try {
+
+      if (
+        navigator.clipboard &&
+        navigator.clipboard.writeText
+      ) {
+
+        await navigator.clipboard.writeText(
+          cleanText
+        );
+
+
+        return true;
+
+      }
+
+    } catch (error) {
+
+      console.warn(
+        "Clipboard API failed:",
+        error
+      );
+
+    }
+
+
+    /*
+      Fallback for older mobile browsers.
+    */
+
+    try {
+
+      const textarea =
+        document.createElement(
+          "textarea"
+        );
+
+
+      textarea.value =
+        cleanText;
+
+
+      textarea.style.position =
+        "fixed";
+
+
+      textarea.style.left =
+        "-9999px";
+
+
+      textarea.style.top =
+        "0";
+
+
+      document.body.appendChild(
+        textarea
+      );
+
+
+      textarea.focus();
+
+      textarea.select();
+
+
+      const result =
+        document.execCommand(
+          "copy"
+        );
+
+
+      textarea.remove();
+
+
+      return result;
+
+    } catch (error) {
+
+      console.warn(
+        "Clipboard fallback failed:",
+        error
+      );
+
+
+      return false;
+
+    }
+
+  }
+
+
+  /* =========================================================
+     52 — CODE COPY BUTTONS
+  ========================================================== */
+
+  function bindCodeCopyButtons(
+    container
+  ) {
+
+    if (!container) {
+
+      return;
+
+    }
+
+
+    const buttons =
+      container.querySelectorAll(
+        ".emogigs-code-copy"
+      );
+
+
+    buttons.forEach(
+      button => {
+
+        if (
+          button.dataset.bound ===
+          "true"
+        ) {
+
+          return;
+
+        }
+
+
+        button.dataset.bound =
+          "true";
+
+
+        button.addEventListener(
+          "click",
+          async () => {
+
+            const wrap =
+              button.closest(
+                ".emogigs-code-wrap"
+              );
+
+
+            const code =
+              wrap &&
+              wrap.querySelector(
+                "pre code"
+              );
+
+
+            if (!code) {
+
+              return;
+
+            }
+
+
+            const success =
+              await copyText(
+                code.textContent
+              );
+
+
+            if (success) {
+
+              button.textContent =
+                "Copied ✓";
+
+
+              setTimeout(
+                () => {
+
+                  button.textContent =
+                    "Copy";
+
+                },
+                1500
+              );
+
+            }
+
+          }
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =========================================================
+     53 — TYPING INDICATOR
+  ========================================================== */
+
+  function addTypingIndicator() {
+
+    if (!chatArea) {
+
+      return null;
+
+    }
+
+
+    const id =
+      createUniqueId(
+        "typing"
+      );
+
+
+    const element =
+      document.createElement(
+        "div"
+      );
+
+
+    element.id =
+      id;
+
+
+    element.className =
+      "message assistant typing-message";
+
+
+    element.innerHTML = `
+
+      <div class="message-inner">
+
+        <div class="message-avatar">
+          ✦
+        </div>
+
+
+        <div class="message-bubble typing-bubble">
+
+          <span></span>
+          <span></span>
+          <span></span>
+
+        </div>
+
+      </div>
+
+    `;
+
+
+    chatArea.appendChild(
+      element
+    );
+
+
+    chatArea.scrollTo(
+      {
+        top:
+          chatArea.scrollHeight,
+
+        behavior:
+          "smooth"
+      }
+    );
+
+
+    return id;
+
+  }
+
+
+  /* =========================================================
+     54 — REMOVE TYPING INDICATOR
+  ========================================================== */
+
+  function removeTypingIndicator(
+    id
+  ) {
+
+    if (!id) {
+
+      return;
+
+    }
+
+
+    const element =
+      document.getElementById(
+        id
+      );
+
+
+    if (element) {
+
+      element.remove();
+
+    }
+
+  }
+
+
+  /* =========================================================
+     55 — REGENERATE LAST RESPONSE
+  ========================================================== */
+
+  async function regenerateLastResponse() {
+
+    if (
+      isSendingMessage
+    ) {
+
+      return;
+
+    }
+
+
+    /*
+      Find the last user message.
+    */
+
+    let lastUserIndex =
+      -1;
+
+
+    for (
+      let i =
+        conversation.length - 1;
+
+      i >= 0;
+
+      i--
+    ) {
+
+      if (
+        conversation[i] &&
+        conversation[i].role ===
+          "user"
+      ) {
+
+        lastUserIndex =
+          i;
+
+
+        break;
+
+      }
+
+    }
+
+
+    if (
+      lastUserIndex ===
+      -1
+    ) {
+
+      showToast(
+        "There is no message to regenerate."
+      );
+
+
+      return;
+
+    }
+
+
+    const lastUserMessage =
+      conversation[
+        lastUserIndex
+      ];
+
+
+    /*
+      Remove the last assistant response
+      from local conversation.
+    */
+
+    while (
+      conversation.length >
+      lastUserIndex + 1
+    ) {
+
+      conversation.pop();
+
+    }
+
+
+    saveConversation();
+
+
+    /*
+      Re-send without duplicating the
+      user message visually.
+
+      Temporarily place the text in
+      composer and call the normal sender.
+    */
+
+    if (!messageInput) {
+
+      return;
+
+    }
+
+
+    messageInput.value =
+      lastUserMessage.content;
+
+
+    messageInput.dispatchEvent(
+      new Event("input")
+    );
+
+
+    /*
+      Remove the latest assistant bubble
+      from the UI if it exists.
+
+      We only remove the last assistant
+      message, preserving the conversation.
+    */
+
+    if (chatArea) {
+
+      const assistantMessages =
+        chatArea.querySelectorAll(
+          ".message.assistant:not(.typing-message)"
+        );
+
+
+      const lastAssistant =
+        assistantMessages[
+          assistantMessages.length - 1
+        ];
+
+
+      if (lastAssistant) {
+
+        lastAssistant.remove();
+
+      }
+
+    }
+
+
+    /*
+      The normal send function will add
+      the user message again, so remove
+      the duplicate user item from the
+      conversation after it is rendered.
+    */
+
+    const originalAddMessage =
+      addMessage;
+
+
+    /*
+      sendMessage() intentionally handles
+      the standard user flow.
+
+      Recreate the request directly here
+      to avoid duplicating history.
+    */
+
+    isSendingMessage =
+      true;
+
+
+    const typingId =
+      addTypingIndicator();
+
+
+    try {
+
+      const history =
+        conversation
+          .slice(-30)
+          .map(
+            item => ({
+              role:
+                item.role,
+
+              content:
+                item.content
+
+            })
+          );
+
+
+      const account =
+        getEmogigsAccount();
+
+
+      const payload = {
+
+        message:
+          lastUserMessage.content,
+
+        prompt:
+          lastUserMessage.content,
+
+        mode:
+          currentMode,
+
+        history,
+
+        conversation:
+          history,
+
+        userContext: {
+
+          account:
+            account
+              ? {
+                  name:
+                    account.name,
+
+                  username:
+                    account.username
+                }
+              : null,
+
+          mode:
+            currentMode,
+
+          memory:
+            getLocalMemory().slice(
+              -20
+            ),
+
+          goals:
+            userGoals.slice(
+              -10
+            )
+
+        }
+
+      };
+
+
+      const response =
+        await requestWithRetry(
+          API_URL,
+          {
+
+            method:
+              "POST",
+
+            headers: {
+
+              "Content-Type":
+                "application/json"
+
+            },
+
+            body:
+              JSON.stringify(
+                payload
+              )
+
+          }
+        );
+
+
+      removeTypingIndicator(
+        typingId
+      );
+
+
+      let data =
+        null;
+
+
+      try {
+
+        data =
+          await response.json();
+
+      } catch (error) {
+
+        console.warn(
+          error
+        );
+
+      }
+
+
+      if (
+        !response.ok
+      ) {
+
+        const err =
+          new Error(
+            (
+              data &&
+              (
+                data.error ||
+                data.message
+              )
+            ) ||
+            `HTTP ${response.status}`
+          );
+
+
+        err.status =
+          response.status;
+
+
+        throw err;
+
+      }
+
+
+      const aiText =
+        normalizeAIResponse(
+          data
+        );
+
+
+      if (!aiText) {
+
+        throw new Error(
+          "EMPTY_AI_RESPONSE"
+        );
+
+      }
+
+
+      addMessage(
+        "assistant",
+        aiText
+      );
+
+
+      conversation.push({
+
+        role:
+          "assistant",
+
+        content:
+          aiText,
+
+        timestamp:
+          new Date().toISOString()
+
+      });
+
+
+      saveConversation();
+
+
+      registerActivity(
+        "ai"
+      );
+
+
+    } catch (error) {
+
+      removeTypingIndicator(
+        typingId
+      );
+
+
+      addMessage(
+        "assistant",
+        getFriendlyAIError(
+          error,
+          error.status || null
+        ),
+        {
+          isError:
+            true
+        }
+      );
+
+    } finally {
+
+      isSendingMessage =
+        false;
+
+    }
+
+  }
+
+
+  /* =========================================================
+     56 — FAVORITES
+  ========================================================== */
+
+  function toggleFavorite(
+    text,
+    button = null
+  ) {
+
+    const cleanText =
+      stripHTML(
+        String(text)
+      ).trim();
+
+
+    if (!cleanText) {
+
+      return;
+
+    }
+
+
+    const existingIndex =
+      favorites.findIndex(
+        item =>
+          item &&
+          item.text ===
+            cleanText
+      );
+
+
+    if (
+      existingIndex >= 0
+    ) {
+
+      favorites.splice(
+        existingIndex,
+        1
+      );
+
+
+      if (button) {
+
+        button.classList.remove(
+          "active"
+        );
+
+
+        button.innerHTML =
+          "<span>☆</span>";
+
+      }
+
+
+      showToast(
+        "Removed from favorites."
+      );
+
+    } else {
+
+      favorites.push({
+
+        id:
+          createUniqueId(
+            "favorite"
+          ),
+
+        text:
+          cleanText,
+
+        createdAt:
+          new Date().toISOString()
+
+      });
+
+
+      if (button) {
+
+        button.classList.add(
+          "active"
+        );
+
+
+        button.innerHTML =
+          "<span>★</span>";
+
+      }
+
+
+      showToast(
+        "Saved to favorites ⭐"
+      );
+
+    }
+
+
+    writeLocalStorage(
+      FAVORITES_STORAGE_KEY,
+      favorites
+    );
+
+
+    emitLifeOSEvent(
+      "favorite_changed",
+      {
+
+        text:
+          cleanText,
+
+        active:
+          existingIndex < 0
+
+      }
+    );
+
+  }
+
+
+  /* =========================================================
+     57 — SAVE CONVERSATION
+  ========================================================== */
+
+  function saveConversation() {
+
+    if (
+      !settings.autoSave
+    ) {
+
+      return;
+
+    }
+
+
+    const data = {
+
+      id:
+        currentConversationId ||
+        createUniqueId(
+          "chat"
+        ),
+
+      updatedAt:
+        new Date().toISOString(),
+
+      messages:
+        conversation.slice(
+          -100
+        )
+
+    };
+
+
+    currentConversationId =
+      data.id;
+
+
+    try {
+
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(
+          data
+        )
+      );
+
+    } catch (error) {
+
+      console.warn(
+        "Could not save conversation:",
+        error
+      );
+
+    }
+
+  }
+
+
+  /* =========================================================
+     58 — LOAD CONVERSATION
+  ========================================================== */
+
+  function loadConversation() {
+
+    if (!chatArea) {
+
+      return;
+
+    }
+
+
+    try {
+
+      const saved =
+        localStorage.getItem(
+          STORAGE_KEY
+        );
+
+
+      if (!saved) {
+
+        return;
+
+      }
+
+
+      const data =
+        JSON.parse(
+          saved
+        );
+
+
+      if (
+        !data ||
+        !Array.isArray(
+          data.messages
+        )
+      ) {
+
+        return;
+
+      }
+
+
+      currentConversationId =
+        data.id ||
+        createUniqueId(
+          "chat"
+        );
+
+
+      conversation =
+        data.messages
+          .filter(
+            item =>
+              item &&
+              (
+                item.role ===
+                  "user" ||
+                item.role ===
+                  "assistant"
+              ) &&
+              typeof item.content ===
+                "string"
+          )
+          .slice(
+            -100
+          );
+
+
+      /*
+        Restore the UI.
+      */
+
+      conversation.forEach(
+        item => {
+
+          addMessage(
+            item.role,
+            item.content
+          );
+
+        }
+      );
+
+
+      console.log(
+        `💾 Restored ${conversation.length} messages.`
+      );
+
+    } catch (error) {
+
+      console.warn(
+        "Could not load conversation:",
+        error
+      );
+
+    }
+
+  }
+
+
+  /* =========================================================
+     59 — NEW CHAT
+  ========================================================== */
+
+  function startNewChat() {
+
+    if (
+      isSendingMessage
+    ) {
+
+      showToast(
+        "Please wait for the current response."
+      );
+
+
+      return;
+
+    }
+
+
+    const hasMessages =
+      conversation.length > 0;
+
+
+    if (hasMessages) {
+
+      const confirmed =
+        window.confirm(
+          "Start a new chat?"
+        );
+
+
+      if (!confirmed) {
+
+        return;
+
+      }
+
+    }
+
+
+    conversation =
+      [];
+
+
+    currentConversationId =
+      createUniqueId(
+        "chat"
+      );
+
+
+    try {
+
+      localStorage.removeItem(
+        STORAGE_KEY
+      );
+
+    } catch (error) {
+
+      console.log(
+        error
+      );
+
+    }
+
+
+    if (chatArea) {
+
+      chatArea.innerHTML =
+        "";
+
+    }
+
+
+    if (messageInput) {
+
+      messageInput.value =
+        "";
+
+
+      messageInput.style.height =
+        "auto";
+
+    }
+
+
+    showToast(
+      "New chat started ✨"
+    );
+
+
+    emitLifeOSEvent(
+      "new_chat",
+      {}
+    );
+
+  }
