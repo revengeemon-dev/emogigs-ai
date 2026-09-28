@@ -5568,7 +5568,28 @@ function injectAccountModalStyles() {
 
     }
 
+    // Show the conversation area when a message is added.
+    chatArea.classList.add("visible");
 
+    // Remove the welcome message once the conversation begins.
+    const emptyChat = document.getElementById("emptyChat");
+
+    if (emptyChat) {
+      emptyChat.remove();
+    }
+
+    // Switch from the dashboard to the conversation view.
+    if (hero) {
+      hero.style.display = "none";
+    }
+
+    if (modeRow) {
+      modeRow.style.display = "none";
+    }
+
+    if (quickTools) {
+      quickTools.style.display = "none";
+    }
     chatArea.appendChild(
       message
     );
