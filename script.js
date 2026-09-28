@@ -6864,7 +6864,19 @@ function injectAccountModalStyles() {
 
       chatArea.innerHTML =
         "";
+    chatArea.classList.remove("visible");
 
+    if (hero) {
+      hero.style.display = "";
+    }
+
+    if (modeRow) {
+      modeRow.style.display = "";
+    }
+
+    if (quickTools) {
+      quickTools.style.display = "";
+    }
     }
 
 
